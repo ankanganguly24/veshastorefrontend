@@ -111,7 +111,7 @@ export default function AuthLayout({ children }) {
       </div>
 
       {/* Right Form Section */}
-      <div className="w-full lg:w-1/2 xl:w-2/5 flex items-center justify-center p-8">
+      <div className="w-full lg:w-1/2 xl:w-2/5 flex items-center justify-center p-8 lg:ml-0">
         <div className="w-full max-w-md">
           <div className="bg-card rounded-2xl shadow-xl border border-border p-8 max-h-[90vh] overflow-y-auto">
             <div className="text-center mb-8">
