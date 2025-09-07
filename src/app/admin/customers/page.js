@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Filter, MoreHorizontal, Eye, Mail, Phone, MapPin, Calendar } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Eye, Mail, MoreHorizontal, Calendar, Phone, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { SearchAndFilters } from "@/components/common/search-and-filters";
+import { StatusBadge } from "@/components/common/status-badge";
+import { PageHeader } from "@/components/common/page-header";
+import { DataTable } from "@/components/common/data-table";
+import { TableActions } from "@/components/common/table-actions";
 
 const customers = [
 	{
@@ -78,40 +81,118 @@ const statusFilters = [
 	{ label: "Inactive", value: "inactive" },
 ];
 
-function getStatusColor(status) {
-	switch (status) {
-		case "active":
-			return "text-green-600 bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800";
-		case "vip":
-			return "text-purple-600 bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800";
-		case "new":
-			return "text-blue-600 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800";
-		case "inactive":
-			return "text-gray-600 bg-gray-50 border-gray-200 dark:bg-gray-900/20 dark:border-gray-800";
-		default:
-			return "text-gray-600 bg-gray-50 border-gray-200 dark:bg-gray-900/20 dark:border-gray-800";
-	}
-}
-
 export default function CustomersPage() {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [statusFilter, setStatusFilter] = useState("all");
 
-	const filteredCustomers = customers.filter((customer) => {
-		const matchesSearch =
-			customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			customer.email.toLowerCase().includes(searchTerm.toLowerCase());
-		const matchesStatus = statusFilter === "all" || customer.status === statusFilter;
-		return matchesSearch && matchesStatus;
-	});
+	const filteredCustomers = useMemo(() => {
+		return customers.filter((customer) => {
+			const matchesSearch =
+				customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				customer.email.toLowerCase().includes(searchTerm.toLowerCase());
+			const matchesStatus = statusFilter === "all" || customer.status === statusFilter;
+			return matchesSearch && matchesStatus;
+		});
+	}, [searchTerm, statusFilter]);
+
+	const columns = useMemo(
+		() => [
+			{
+				accessorKey: "name",
+				header: "Customer",
+				cell: ({ row }) => {
+					const customer = row.original;
+					return (
+						<div className="flex items-center space-x-3">
+							<div className="w-10 h-10 bg-gradient-to-r from-primary to-purple-600 rounded-full flex items-center justify-center">
+								<span className="text-primary-foreground font-medium text-sm">
+									{customer.name.split(" ").map((n) => n[0]).join("")}
+								</span>
+							</div>
+							<div>
+								<p className="font-medium text-foreground">{customer.name}</p>
+								<p className="text-sm text-muted-foreground">Joined {customer.joinDate}</p>
+							</div>
+						</div>
+					);
+				},
+			},
+			{
+				id: "contact",
+				header: "Contact",
+				cell: ({ row }) => {
+					const customer = row.original;
+					return (
+						<div>
+							<div className="flex items-center space-x-2 mb-1">
+								<Mail className="h-3 w-3 text-muted-foreground" />
+								<span className="text-sm text-foreground">{customer.email}</span>
+							</div>
+							<div className="flex items-center space-x-2">
+								<Phone className="h-3 w-3 text-muted-foreground" />
+								<span className="text-sm text-foreground">{customer.phone}</span>
+							</div>
+						</div>
+					);
+				},
+			},
+			{
+				accessorKey: "location",
+				header: "Location",
+				cell: ({ getValue }) => (
+					<div className="flex items-center space-x-2">
+						<MapPin className="h-3 w-3 text-muted-foreground" />
+						<span className="text-foreground">{getValue()}</span>
+					</div>
+				),
+			},
+			{
+				id: "orders",
+				header: "Orders",
+				cell: ({ row }) => {
+					const customer = row.original;
+					return (
+						<div>
+							<p className="font-medium text-foreground">{customer.totalOrders}</p>
+							<p className="text-sm text-muted-foreground">Last: {customer.lastOrder}</p>
+						</div>
+					);
+				},
+			},
+			{
+				accessorKey: "totalSpent",
+				header: "Total Spent",
+				cell: ({ getValue }) => <span className="font-medium">{getValue()}</span>,
+			},
+			{
+				accessorKey: "status",
+				header: "Status",
+				cell: ({ getValue }) => <StatusBadge status={getValue()} />,
+			},
+			{
+				id: "actions",
+				header: "Actions",
+				cell: ({ row }) => {
+					const customer = row.original;
+					return (
+						<TableActions
+							onView={() => console.log("View", customer.id)}
+							onEdit={() => console.log("Email", customer.id)}
+						/>
+					);
+				},
+			},
+		],
+		[]
+	);
 
 	return (
 		<div className="space-y-6">
 			{/* Header */}
-			<div>
-				<h1 className="text-3xl font-bold text-foreground">Customers</h1>
-				<p className="text-muted-foreground">Manage your customer relationships</p>
-			</div>
+			<PageHeader
+				title="Customers"
+				description="Manage your customer relationships"
+			/>
 
 			{/* Stats Cards */}
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -160,123 +241,22 @@ export default function CustomersPage() {
 			{/* Filters */}
 			<Card>
 				<CardContent className="p-6">
-					<div className="flex flex-col lg:flex-row gap-4">
-						<div className="relative flex-1">
-							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-							<Input
-								placeholder="Search customers..."
-								value={searchTerm}
-								onChange={(e) => setSearchTerm(e.target.value)}
-								className="pl-10"
-							/>
-						</div>
-						<div className="flex gap-2 overflow-x-auto">
-							{statusFilters.map((filter) => (
-								<Button
-									key={filter.value}
-									variant={statusFilter === filter.value ? "default" : "outline"}
-									size="sm"
-									onClick={() => setStatusFilter(filter.value)}
-									className="whitespace-nowrap"
-								>
-									{filter.label}
-								</Button>
-							))}
-						</div>
-					</div>
+					<SearchAndFilters
+						searchValue={searchTerm}
+						onSearchChange={(e) => setSearchTerm(e.target.value)}
+						searchPlaceholder="Search customers..."
+						filters={statusFilters}
+						activeFilter={statusFilter}
+						onFilterChange={setStatusFilter}
+					/>
 				</CardContent>
 			</Card>
 
-			{/* Customers Table */}
-			<Card>
-				<CardHeader>
-					<CardTitle>All Customers ({filteredCustomers.length})</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<div className="overflow-x-auto">
-						<table className="w-full">
-							<thead>
-								<tr className="border-b border-border">
-									<th className="text-left py-3 px-2 font-medium text-muted-foreground">Customer</th>
-									<th className="text-left py-3 px-2 font-medium text-muted-foreground">Contact</th>
-									<th className="text-left py-3 px-2 font-medium text-muted-foreground">Location</th>
-									<th className="text-left py-3 px-2 font-medium text-muted-foreground">Orders</th>
-									<th className="text-left py-3 px-2 font-medium text-muted-foreground">Total Spent</th>
-									<th className="text-left py-3 px-2 font-medium text-muted-foreground">Status</th>
-									<th className="text-right py-3 px-2 font-medium text-muted-foreground">Actions</th>
-								</tr>
-							</thead>
-							<tbody>
-								{filteredCustomers.map((customer) => (
-									<tr key={customer.id} className="border-b border-border hover:bg-accent/50">
-										<td className="py-4 px-2">
-											<div className="flex items-center space-x-3">
-												<div className="w-10 h-10 bg-gradient-to-r from-primary to-purple-600 rounded-full flex items-center justify-center">
-													<span className="text-primary-foreground font-medium text-sm">
-														{customer.name.split(" ").map((n) => n[0]).join("")}
-													</span>
-												</div>
-												<div>
-													<p className="font-medium text-foreground">{customer.name}</p>
-													<p className="text-sm text-muted-foreground">Joined {customer.joinDate}</p>
-												</div>
-											</div>
-										</td>
-										<td className="py-4 px-2">
-											<div>
-												<div className="flex items-center space-x-2 mb-1">
-													<Mail className="h-3 w-3 text-muted-foreground" />
-													<span className="text-sm text-foreground">{customer.email}</span>
-												</div>
-												<div className="flex items-center space-x-2">
-													<Phone className="h-3 w-3 text-muted-foreground" />
-													<span className="text-sm text-foreground">{customer.phone}</span>
-												</div>
-											</div>
-										</td>
-										<td className="py-4 px-2">
-											<div className="flex items-center space-x-2">
-												<MapPin className="h-3 w-3 text-muted-foreground" />
-												<span className="text-foreground">{customer.location}</span>
-											</div>
-										</td>
-										<td className="py-4 px-2">
-											<div>
-												<p className="font-medium text-foreground">{customer.totalOrders}</p>
-												<p className="text-sm text-muted-foreground">Last: {customer.lastOrder}</p>
-											</div>
-										</td>
-										<td className="py-4 px-2 font-medium text-foreground">{customer.totalSpent}</td>
-										<td className="py-4 px-2">
-											<span
-												className={cn(
-													"px-2 py-1 rounded-full text-xs font-medium border capitalize",
-													getStatusColor(customer.status)
-												)}
-											>
-												{customer.status}
-											</span>
-										</td>
-										<td className="py-4 px-2">
-											<div className="flex items-center justify-end space-x-2">
-												<Button variant="ghost" size="icon">
-													<Eye className="h-4 w-4" />
-												</Button>
-												<Button variant="ghost" size="icon">
-													<Mail className="h-4 w-4" />
-												</Button>
-												<Button variant="ghost" size="icon">
-													<MoreHorizontal className="h-4 w-4" />
-												</Button>
-											</div>
-										</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					</div>
-				</CardContent>
-			</Card>
+			<DataTable
+				data={filteredCustomers}
+				columns={columns}
+				title="All Customers"
+			/>
 		</div>
 	);
 }

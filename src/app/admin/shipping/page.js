@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Search, Edit, Trash2, Truck, Package, Clock, MapPin } from "lucide-react";
+import { Plus, Edit, Trash2, Truck, Package, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { SearchInput } from "@/components/common/search-input";
+import { StatusBadge } from "@/components/common/status-badge";
+import { PageHeader } from "@/components/common/page-header";
 
 const shippingMethods = [
 	{
@@ -92,17 +93,6 @@ const shippingStats = [
 	},
 ];
 
-function getStatusColor(status) {
-	switch (status) {
-		case "active":
-			return "text-green-600 bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800";
-		case "inactive":
-			return "text-gray-600 bg-gray-50 border-gray-200 dark:bg-gray-900/20 dark:border-gray-800";
-		default:
-			return "text-gray-600 bg-gray-50 border-gray-200 dark:bg-gray-900/20 dark:border-gray-800";
-	}
-}
-
 export default function ShippingPage() {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [showAddForm, setShowAddForm] = useState(false);
@@ -115,16 +105,15 @@ export default function ShippingPage() {
 	return (
 		<div className="space-y-6">
 			{/* Header */}
-			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-				<div>
-					<h1 className="text-3xl font-bold text-foreground">Shipping Methods</h1>
-					<p className="text-muted-foreground">Manage shipping options and rates</p>
-				</div>
+			<PageHeader 
+				title="Shipping Methods"
+				description="Manage shipping options and rates"
+			>
 				<Button onClick={() => setShowAddForm(true)}>
 					<Plus className="h-4 w-4 mr-2" />
 					Add Method
 				</Button>
-			</div>
+			</PageHeader>
 
 			{/* Stats Grid */}
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -143,19 +132,11 @@ export default function ShippingPage() {
 			</div>
 
 			{/* Search */}
-			<Card>
-				<CardContent className="p-6">
-					<div className="relative">
-						<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-						<Input
-							placeholder="Search shipping methods..."
-							value={searchTerm}
-							onChange={(e) => setSearchTerm(e.target.value)}
-							className="pl-10"
-						/>
-					</div>
-				</CardContent>
-			</Card>
+			<SearchInput
+				placeholder="Search shipping methods..."
+				value={searchTerm}
+				onChange={(e) => setSearchTerm(e.target.value)}
+			/>
 
 			{/* Shipping Methods Grid */}
 			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -167,12 +148,7 @@ export default function ShippingPage() {
 									<CardTitle className="text-lg">{method.name}</CardTitle>
 									<p className="text-muted-foreground text-sm">{method.description}</p>
 								</div>
-								<span className={cn(
-									"px-2 py-1 rounded-full text-xs font-medium border capitalize",
-									getStatusColor(method.status)
-								)}>
-									{method.status}
-								</span>
+								<StatusBadge status={method.status} />
 							</div>
 						</CardHeader>
 						<CardContent className="space-y-4">
