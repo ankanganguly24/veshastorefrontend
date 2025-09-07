@@ -111,9 +111,9 @@ export default function AuthLayout({ children }) {
       </div>
 
       {/* Right Form Section */}
-      <div className="w-full lg:w-1/2 xl:w-2/5 flex items-center justify-center p-8 lg:ml-0">
-        <div className="w-full max-w-md">
-          <div className="bg-card rounded-2xl shadow-xl border border-border p-8 max-h-[90vh] overflow-y-auto">
+      <div className="w-full lg:w-1/2 xl:w-2/5 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+        <div className="w-full max-w-md mx-auto">
+          <div className="bg-card rounded-2xl shadow-xl border border-border p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
             <div className="text-center mb-8">
               <div className="mx-auto w-16 h-16 bg-gradient-to-r from-primary to-purple-600 dark:from-primary dark:to-purple-700 rounded-2xl flex items-center justify-center mb-4">
                 <svg
