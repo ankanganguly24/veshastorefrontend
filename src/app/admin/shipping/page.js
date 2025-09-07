@@ -131,12 +131,14 @@ export default function ShippingPage() {
 				))}
 			</div>
 
-			{/* Search */}
-			<SearchInput
-				placeholder="Search shipping methods..."
-				value={searchTerm}
-				onChange={(e) => setSearchTerm(e.target.value)}
-			/>
+			{/* Search without card wrapper */}
+			<div className="bg-card border border-border rounded-lg p-6">
+				<SearchInput
+					placeholder="Search shipping methods..."
+					value={searchTerm}
+					onChange={(e) => setSearchTerm(e.target.value)}
+				/>
+			</div>
 
 			{/* Shipping Methods Grid */}
 			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

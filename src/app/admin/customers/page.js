@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { Eye, Mail, MoreHorizontal, Calendar, Phone, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SearchAndFilters } from "@/components/common/search-and-filters";
+import { SearchFilterBar } from "@/components/common/search-filter-bar";
 import { StatusBadge } from "@/components/common/status-badge";
 import { PageHeader } from "@/components/common/page-header";
 import { DataTable } from "@/components/common/data-table";
@@ -238,20 +238,17 @@ export default function CustomersPage() {
 				</Card>
 			</div>
 
-			{/* Filters */}
-			<Card>
-				<CardContent className="p-6">
-					<SearchAndFilters
-						searchValue={searchTerm}
-						onSearchChange={(e) => setSearchTerm(e.target.value)}
-						searchPlaceholder="Search customers..."
-						filters={statusFilters}
-						activeFilter={statusFilter}
-						onFilterChange={setStatusFilter}
-					/>
-				</CardContent>
-			</Card>
+			{/* Search and Filter Bar */}
+			<SearchFilterBar
+				searchValue={searchTerm}
+				onSearchChange={(e) => setSearchTerm(e.target.value)}
+				searchPlaceholder="Search customers..."
+				filters={statusFilters}
+				activeFilter={statusFilter}
+				onFilterChange={setStatusFilter}
+			/>
 
+			{/* Data Table */}
 			<DataTable
 				data={filteredCustomers}
 				columns={columns}

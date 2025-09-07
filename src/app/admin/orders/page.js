@@ -3,12 +3,11 @@
 import { useState, useMemo } from "react";
 import { Eye, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { SearchAndFilters } from "@/components/common/search-and-filters";
+import { SearchFilterBar } from "@/components/common/search-filter-bar";
 import { StatusBadge } from "@/components/common/status-badge";
 import { PageHeader } from "@/components/common/page-header";
 import { DataTable } from "@/components/common/data-table";
-import { TableActions, TableMoreActions } from "@/components/common/table-actions";
+import { TableMoreActions } from "@/components/common/table-actions";
 
 const orders = [
 	{
@@ -172,18 +171,14 @@ export default function OrdersPage() {
 			/>
 
 			{/* Filters */}
-			<Card>
-				<CardContent className="p-6">
-					<SearchAndFilters
-						searchValue={searchTerm}
-						onSearchChange={(e) => setSearchTerm(e.target.value)}
-						searchPlaceholder="Search orders..."
-						filters={statusFilters}
-						activeFilter={statusFilter}
-						onFilterChange={setStatusFilter}
-					/>
-				</CardContent>
-			</Card>
+			<SearchFilterBar
+				searchValue={searchTerm}
+				onSearchChange={(e) => setSearchTerm(e.target.value)}
+				searchPlaceholder="Search orders..."
+				filters={statusFilters}
+				activeFilter={statusFilter}
+				onFilterChange={setStatusFilter}
+			/>
 
 			{/* Orders Table */}
 			<DataTable
