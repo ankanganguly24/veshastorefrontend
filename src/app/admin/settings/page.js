@@ -5,12 +5,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { 
-  Settings, 
   Store, 
   Mail, 
   Shield, 
   CreditCard, 
-  Bell, 
   User,
   Save,
   Eye,
@@ -32,7 +30,6 @@ import { cn } from "@/lib/utils";
 
 const settingsTabs = [
   { id: "general", label: "General", icon: Store },
-  { id: "notifications", label: "Notifications", icon: Bell },
   { id: "security", label: "Security", icon: Shield },
   { id: "payment", label: "Payment", icon: CreditCard },
   { id: "email", label: "Email", icon: Mail },
@@ -212,63 +209,6 @@ export default function SettingsPage() {
     </Form>
   );
 
-  const renderNotificationSettings = () => (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium mb-4">Email Notifications</h3>
-        <div className="space-y-4">
-          <div className="flex items-center space-x-3">
-            <Checkbox id="order-notifications" defaultChecked />
-            <label htmlFor="order-notifications" className="text-sm font-medium">
-              New order notifications
-            </label>
-          </div>
-          <div className="flex items-center space-x-3">
-            <Checkbox id="customer-notifications" defaultChecked />
-            <label htmlFor="customer-notifications" className="text-sm font-medium">
-              New customer registrations
-            </label>
-          </div>
-          <div className="flex items-center space-x-3">
-            <Checkbox id="low-stock" defaultChecked />
-            <label htmlFor="low-stock" className="text-sm font-medium">
-              Low stock alerts
-            </label>
-          </div>
-          <div className="flex items-center space-x-3">
-            <Checkbox id="marketing" />
-            <label htmlFor="marketing" className="text-sm font-medium">
-              Marketing updates
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-lg font-medium mb-4">Push Notifications</h3>
-        <div className="space-y-4">
-          <div className="flex items-center space-x-3">
-            <Checkbox id="push-orders" defaultChecked />
-            <label htmlFor="push-orders" className="text-sm font-medium">
-              Order status updates
-            </label>
-          </div>
-          <div className="flex items-center space-x-3">
-            <Checkbox id="push-promotions" />
-            <label htmlFor="push-promotions" className="text-sm font-medium">
-              Promotional offers
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <Button>
-        <Save className="h-4 w-4 mr-2" />
-        Save Notification Settings
-      </Button>
-    </div>
-  );
-
   const renderSecuritySettings = () => (
     <Form {...securityForm}>
       <form onSubmit={securityForm.handleSubmit(onSecuritySubmit)} className="space-y-6">
@@ -386,8 +326,6 @@ export default function SettingsPage() {
     switch (activeTab) {
       case "general":
         return renderGeneralSettings();
-      case "notifications":
-        return renderNotificationSettings();
       case "security":
         return renderSecuritySettings();
       case "payment":
@@ -409,7 +347,7 @@ export default function SettingsPage() {
 
       <div className="grid gap-6 lg:grid-cols-4">
         {/* Sidebar Navigation */}
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-1 p-2">
           <CardContent className="p-4">
             <nav className="space-y-2">
               {settingsTabs.map((tab) => (

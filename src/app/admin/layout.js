@@ -11,9 +11,9 @@ import {
   Settings, 
   Menu, 
   X,
-  Bell,
   Search,
-  User
+  User,
+  Truck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,7 @@ const navigation = [
   { name: "Products", href: "/admin/products", icon: Package },
   { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { name: "Customers", href: "/admin/customers", icon: Users },
+  { name: "Shipping", href: "/admin/shipping", icon: Truck },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
@@ -131,11 +132,6 @@ export default function AdminLayout({ children }) {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
-            </Button>
-            
             <div className="w-8 h-8 bg-gradient-to-r from-primary to-purple-600 rounded-full flex items-center justify-center cursor-pointer">
               <User className="h-4 w-4 text-primary-foreground" />
             </div>
