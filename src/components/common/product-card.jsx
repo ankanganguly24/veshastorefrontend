@@ -411,7 +411,7 @@ const ProductCard = memo(({ product, className = "" }) => {
             className={`w-full py-2.5 px-4 rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-105 ${
               isInCart 
                 ? 'bg-green-600 hover:bg-green-700 text-white' 
-                : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white group-hover:from-purple-700 group-hover:to-blue-700'
+                : 'bg-gradient-to-r from-blue-500 to-blue-900 text-white group-hover:from-purple-700 group-hover:to-blue-700'
             }`}
             onClick={handleAddToCart}
             onMouseDown={(e) => e.stopPropagation()}
