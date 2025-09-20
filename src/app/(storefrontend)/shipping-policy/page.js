@@ -158,7 +158,7 @@ export default function ShippingPolicyPage() {
               </h3>
               
               <p className="text-gray-700 leading-relaxed mb-6">
-                We deliver across India to ensure everyone can enjoy Rinaura Fashion's premium clothing collection.
+                We deliver across India to ensure everyone can enjoy Rinaura Fashion&apos;s premium clothing collection.
               </p>
               
               <div className="grid md:grid-cols-2 gap-6">

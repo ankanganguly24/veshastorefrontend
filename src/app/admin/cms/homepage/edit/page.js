@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, Save, Upload, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -198,9 +199,11 @@ export default function EditHomepage() {
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {heroImages.map((image) => (
                           <div key={image.id} className="relative group">
-                            <img
+                            <Image
                               src={image.url}
                               alt={image.alt}
+                              width={200}
+                              height={128}
                               className="w-full h-32 object-cover rounded-lg border border-border"
                             />
                             <Button

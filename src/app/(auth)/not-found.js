@@ -14,7 +14,7 @@ export default function AuthNotFound() {
           Page Not Found
         </h3>
         <p className="text-muted-foreground text-sm leading-relaxed">
-          The authentication page you're looking for doesn't exist or has been moved.
+          The authentication page you&apos;re looking for doesn&apos;t exist or has been moved.
         </p>
       </div>
 

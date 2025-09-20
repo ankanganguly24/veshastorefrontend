@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function StoreFrontendHome() {
   const collections = [
     {
@@ -44,12 +46,12 @@ export default function StoreFrontendHome() {
               Your premium fashion destination where style meets elegance
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="/category/nawabi-exclusive" className="bg-white text-purple-600 px-8 py-4 rounded-full font-semibold hover:bg-purple-50 transition-all transform hover:scale-105 shadow-lg">
+              <Link href="/category/nawabi-exclusive" className="bg-white text-purple-600 px-8 py-4 rounded-full font-semibold hover:bg-purple-50 transition-all transform hover:scale-105 shadow-lg">
                 Shop Nawabi Exclusive
-              </a>
-              <a href="/category/ethnic-wear" className="bg-purple-700/50 backdrop-blur-sm text-white px-8 py-4 rounded-full font-semibold hover:bg-purple-700/70 transition-all transform hover:scale-105 border border-white/20">
+              </Link>
+              <Link href="/category/ethnic-wear" className="bg-purple-700/50 backdrop-blur-sm text-white px-8 py-4 rounded-full font-semibold hover:bg-purple-700/70 transition-all transform hover:scale-105 border border-white/20">
                 Explore Ethnic Wear
-              </a>
+              </Link>
             </div>
           </div>
         </div>

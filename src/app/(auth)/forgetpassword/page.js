@@ -54,7 +54,7 @@ export default function ForgetPassword() {
             Check Your Email
           </h3>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            We've sent a password reset link to{" "}
+            We&apos;ve sent a password reset link to{" "}
             <span className="font-medium text-foreground">
               {form.getValues("email")}
             </span>
@@ -63,7 +63,7 @@ export default function ForgetPassword() {
 
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
           <p className="text-blue-800 dark:text-blue-200 text-sm">
-            <strong>Didn't receive the email?</strong>
+            <strong>Didn&apos;t receive the email?</strong>
             <br />
             Check your spam folder or try again in a few minutes.
           </p>
@@ -95,7 +95,7 @@ export default function ForgetPassword() {
           Forgot Password?
         </h3>
         <p className="text-muted-foreground text-sm">
-          Enter your email address and we'll send you a link to reset your password.
+          Enter your email address and we&apos;ll send you a link to reset your password.
         </p>
       </div>
 

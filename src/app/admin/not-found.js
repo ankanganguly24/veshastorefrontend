@@ -16,7 +16,7 @@ export default function AdminNotFound() {
               Page Not Found
             </h1>
             <p className="text-muted-foreground leading-relaxed">
-              The admin page you're looking for doesn't exist or may have been moved. Let's get you back on track.
+              The admin page you&apos;re looking for doesn&apos;t exist or may have been moved. Let&apos;s get you back on track.
             </p>
           </div>
 

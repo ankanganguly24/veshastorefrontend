@@ -100,7 +100,7 @@ export default function OurStoryPage() {
               <div className="space-y-6">
                 <div className="border-l-4 border-emerald-400 pl-6">
                   <h4 className="font-semibold text-gray-900 mb-2">Foundation Principles</h4>
-                  <p className="text-gray-700">We started with the belief that fashion should be inclusive, accessible, and sustainable. Every decision was made with our customers' needs and desires at the forefront.</p>
+                  <p className="text-gray-700">We started with the belief that fashion should be inclusive, accessible, and sustainable. Every decision was made with our customers&apos; needs and desires at the forefront.</p>
                 </div>
                 
                 <div className="border-l-4 border-teal-400 pl-6">
@@ -136,7 +136,7 @@ export default function OurStoryPage() {
                       <Heart className="w-5 h-5 text-emerald-600 mr-2" />
                       <h4 className="font-semibold text-gray-900">Customer First</h4>
                     </div>
-                    <p className="text-gray-700 text-sm">Every design decision is made with our customers' comfort, style preferences, and lifestyle needs in mind.</p>
+                    <p className="text-gray-700 text-sm">Every design decision is made with our customers&apos; comfort, style preferences, and lifestyle needs in mind.</p>
                   </div>
                   
                   <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl p-6">
@@ -249,7 +249,7 @@ export default function OurStoryPage() {
               
               <div className="space-y-6">
                 <p className="text-emerald-100 text-lg">
-                  As we continue to grow, our commitment to our customers and our values remains unwavering. We're excited to be part of your fashion journey and to continue bringing you the latest trends and timeless classics.
+                  As we continue to grow, our commitment to our customers and our values remains unwavering. We&apos;re excited to be part of your fashion journey and to continue bringing you the latest trends and timeless classics.
                 </p>
                 
                 <div className="grid md:grid-cols-2 gap-6">
@@ -286,7 +286,7 @@ export default function OurStoryPage() {
                 Share Our Journey
               </h3>
               <p className="text-emerald-100 mb-4">
-                We'd love to hear from you and share more about our story. Connect with us today!
+                We&apos;d love to hear from you and share more about our story. Connect with us today!
               </p>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center">

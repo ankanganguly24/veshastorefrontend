@@ -16,7 +16,7 @@ export default function MeetTheFounderPage() {
               Meet The Founder
             </h1>
             <p className="text-xl text-rose-100 max-w-2xl mx-auto">
-              The visionary behind Rinaura Fashion's journey to revolutionize fashion industry.
+              The visionary behind Rinaura Fashion&apos;s journey to revolutionize fashion industry.
             </p>
           </div>
         </div>
@@ -170,7 +170,7 @@ export default function MeetTheFounderPage() {
                     <h4 className="font-semibold text-gray-900">Core Philosophy</h4>
                   </div>
                   <blockquote className="text-gray-700 italic text-lg">
-                    "Fashion should be inclusive, sustainable, and accessible to all. Every piece we create is designed with love, care, and attention to detail, ensuring that our customers feel confident and beautiful every day."
+                    &quot;Fashion should be inclusive, sustainable, and accessible to all. Every piece we create is designed with love, care, and attention to detail, ensuring that our customers feel confident and beautiful every day.&quot;
                   </blockquote>
                 </div>
 
@@ -224,7 +224,7 @@ export default function MeetTheFounderPage() {
                 Connect With Our Founder
               </h3>
               <p className="text-rose-100 mb-4">
-                Want to know more about our journey or share your thoughts? We'd love to hear from you.
+                Want to know more about our journey or share your thoughts? We&apos;d love to hear from you.
               </p>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center">

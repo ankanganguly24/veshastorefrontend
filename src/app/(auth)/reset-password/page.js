@@ -28,7 +28,7 @@ const resetPasswordSchema = z.object({
     ),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
+  message: "Passwords don&apos;t match",
   path: ["confirmPassword"],
 });
 
@@ -79,7 +79,7 @@ export default function ResetPassword() {
           <p className="text-green-800 dark:text-green-200 text-sm">
             <strong>Security Tip:</strong>
             <br />
-            Make sure to keep your new password secure and don't share it with anyone.
+            Make sure to keep your new password secure and don&apos;t share it with anyone.
           </p>
         </div>
 

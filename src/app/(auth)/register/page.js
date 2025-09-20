@@ -38,7 +38,7 @@ const registerSchema = z
       .refine((val) => val === true, "You must accept the terms and conditions"),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
+    message: "Passwords don&apos;t match",
     path: ["confirmPassword"],
   });
 

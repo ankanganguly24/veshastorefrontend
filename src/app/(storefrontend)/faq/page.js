@@ -31,7 +31,7 @@ export default function FAQPage() {
         },
         {
           question: "How can I track my order?",
-          answer: "Once your order is shipped, you'll receive a tracking number via email and SMS. You can use this number to track your package on our website or the courier's website."
+          answer: "Once your order is shipped, you&apos;ll receive a tracking number via email and SMS. You can use this number to track your package on our website or the courier&apos;s website."
         }
       ]
     },
@@ -111,7 +111,7 @@ export default function FAQPage() {
         <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl border border-white/50 p-8 mb-12">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Rinaura Fashion Private Limited</h2>
-            <p className="text-gray-600">We're here to help with all your questions</p>
+            <p className="text-gray-600">We&apos;re here to help with all your questions</p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-6">
@@ -201,7 +201,7 @@ export default function FAQPage() {
                 </div>
                 <h3 className="text-2xl font-bold mb-4">Still have questions?</h3>
                 <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-                  If you can't find the answer you're looking for, our customer support team is here to help you with personalized assistance.
+                  If you can&apos;t find the answer you&apos;re looking for, our customer support team is here to help you with personalized assistance.
                 </p>
                 <div className="grid md:grid-cols-2 gap-4">
                   <a 
@@ -262,7 +262,7 @@ export default function FAQPage() {
                   How to track my order?
                 </button>
                 <button className="w-full text-left text-sm text-blue-600 hover:text-blue-500 transition-colors">
-                  What's your return policy?
+                  What&apos;s your return policy?
                 </button>
                 <button className="w-full text-left text-sm text-blue-600 hover:text-blue-500 transition-colors">
                   Size guide information

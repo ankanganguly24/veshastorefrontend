@@ -44,7 +44,7 @@ export default function TermsAndConditions() {
                 Acceptance of Terms
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                By accessing and using Vesha's website and services, you accept and agree to be bound by the terms and provision of this agreement. These Terms and Conditions constitute a legally binding agreement between you and Vesha.
+                By accessing and using Vesha&apos;s website and services, you accept and agree to be bound by the terms and provision of this agreement. These Terms and Conditions constitute a legally binding agreement between you and Vesha.
               </p>
               <p className="text-gray-700 leading-relaxed">
                 If you do not agree to abide by the above, please do not use this service. We reserve the right to change these terms at any time, and your continued use of the site will signify your acceptance of any adjustment to these terms.
@@ -60,7 +60,7 @@ export default function TermsAndConditions() {
                 Use License
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                Permission is granted to temporarily access and use Vesha's services for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
+                Permission is granted to temporarily access and use Vesha&apos;s services for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
               </p>
               <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
                 <li>Modify or copy the materials</li>
@@ -132,7 +132,7 @@ export default function TermsAndConditions() {
                 Limitation of Liability
               </h2>
               <p className="text-gray-700 leading-relaxed">
-                In no event shall Vesha or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on Vesha's website, even if Vesha or an authorized representative has been notified orally or in writing of the possibility of such damage.
+                In no event shall Vesha or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on Vesha&apos;s website, even if Vesha or an authorized representative has been notified orally or in writing of the possibility of such damage.
               </p>
             </div>
 

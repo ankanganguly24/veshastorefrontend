@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { User, Edit, Package, Settings, LogOut, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -49,7 +50,7 @@ export default function ProfilePage() {
                 <div className="relative inline-block mb-4">
                   <div className="w-24 h-24 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center text-white text-2xl font-bold">
                     {user.avatar ? (
-                      <img src={user.avatar} alt="Profile" className="w-full h-full rounded-full object-cover" />
+                      <Image src={user.avatar} alt="Profile" width={96} height={96} className="w-full h-full rounded-full object-cover" />
                     ) : (
                       user.name.split(' ').map(n => n[0]).join('')
                     )}

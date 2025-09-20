@@ -281,4 +281,5 @@ export const WishlistService = {
   }
 };
 
-export default { CartService, WishlistService };
+const services = { CartService, WishlistService };
+export default services;

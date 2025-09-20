@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function StorePage() {
   return (
     <div className="container mx-auto px-4 py-8">
@@ -13,14 +15,14 @@ export default function StorePage() {
       {/* Hero Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         <div className="bg-secondary/50 rounded-lg p-6 hover:bg-secondary/70 transition-colors">
-          <h3 className="text-xl font-semibold mb-2">Women's Collection</h3>
-          <p className="text-muted-foreground mb-4">Discover the latest trends in women's fashion</p>
+          <h3 className="text-xl font-semibold mb-2">Women&apos;s Collection</h3>
+          <p className="text-muted-foreground mb-4">Discover the latest trends in women&apos;s fashion</p>
           <div className="h-32 bg-muted rounded-md"></div>
         </div>
         
         <div className="bg-secondary/50 rounded-lg p-6 hover:bg-secondary/70 transition-colors">
-          <h3 className="text-xl font-semibold mb-2">Men's Collection</h3>
-          <p className="text-muted-foreground mb-4">Stylish and comfortable men's wear</p>
+          <h3 className="text-xl font-semibold mb-2">Men&apos;s Collection</h3>
+          <p className="text-muted-foreground mb-4">Stylish and comfortable men&apos;s wear</p>
           <div className="h-32 bg-muted rounded-md"></div>
         </div>
         
@@ -53,12 +55,12 @@ export default function StorePage() {
           Explore our complete collection and find your perfect style
         </p>
         <div className="space-x-4">
-          <a href="/category/women" className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-md hover:bg-primary/90 transition-colors">
+          <Link href="/category/women" className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-md hover:bg-primary/90 transition-colors">
             Shop Women
-          </a>
-          <a href="/category/men" className="inline-block bg-secondary text-secondary-foreground px-6 py-3 rounded-md hover:bg-secondary/80 transition-colors">
+          </Link>
+          <Link href="/category/men" className="inline-block bg-secondary text-secondary-foreground px-6 py-3 rounded-md hover:bg-secondary/80 transition-colors">
             Shop Men
-          </a>
+          </Link>
         </div>
       </div>
     </div>

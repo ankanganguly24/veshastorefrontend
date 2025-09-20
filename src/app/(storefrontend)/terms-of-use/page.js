@@ -324,7 +324,7 @@ export default function TermsOfUsePage() {
                 <div>
                   <h4 className="text-sm font-medium text-green-700 mb-2 flex items-center">
                     <CheckCircle className="w-4 h-4 mr-1" />
-                    Do's
+                    Do&apos;s
                   </h4>
                   <ul className="text-xs text-gray-600 space-y-1">
                     <li>• Keep account info updated</li>
@@ -336,7 +336,7 @@ export default function TermsOfUsePage() {
                 <div>
                   <h4 className="text-sm font-medium text-red-700 mb-2 flex items-center">
                     <XCircle className="w-4 h-4 mr-1" />
-                    Don'ts
+                    Don&apos;ts
                   </h4>
                   <ul className="text-xs text-gray-600 space-y-1">
                     <li>• Share account credentials</li>

@@ -97,7 +97,7 @@ export default function TermsOfServicePage() {
                   <h4 className="font-semibold text-gray-900">Important Agreement</h4>
                 </div>
                 <p className="text-gray-700">
-                  By accessing and using Rinaura Fashion Private Limited's website and services, you accept and agree to be bound by these terms of service. If you do not agree to these terms, please do not use our services.
+                  By accessing and using Rinaura Fashion Private Limited&apos;s website and services, you accept and agree to be bound by these terms of service. If you do not agree to these terms, please do not use our services.
                 </p>
               </div>
 
@@ -227,7 +227,7 @@ export default function TermsOfServicePage() {
                   <h4 className="font-semibold text-gray-900">Disclaimer</h4>
                 </div>
                 <p className="text-gray-700">
-                  The materials on our website are provided on an 'as is' basis. Rinaura Fashion Private Limited makes no warranties, expressed or implied, and disclaims all other warranties including warranties of merchantability and fitness for a particular purpose.
+                  The materials on our website are provided on an &apos;as is&apos; basis. Rinaura Fashion Private Limited makes no warranties, expressed or implied, and disclaims all other warranties including warranties of merchantability and fitness for a particular purpose.
                 </p>
               </div>
 

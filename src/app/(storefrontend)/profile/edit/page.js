@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, Camera, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,7 +80,7 @@ export default function EditProfilePage() {
                   <div className="relative inline-block mb-4">
                     <div className="w-32 h-32 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center text-white text-3xl font-bold overflow-hidden">
                       {avatar ? (
-                        <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
+                        <Image src={avatar} alt="Profile" width={128} height={128} className="w-full h-full object-cover" />
                       ) : (
                         (formData.firstName[0] + formData.lastName[0]).toUpperCase()
                       )}

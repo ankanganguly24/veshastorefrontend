@@ -151,7 +151,7 @@ export default function ReturnExchangePolicyPage() {
                   <h4 className="font-semibold text-gray-900">Exchange Terms</h4>
                 </div>
                 <p className="text-gray-700">
-                  Exchanges are subject to product availability. If the desired size or color is not available, we'll process a full refund instead.
+                  Exchanges are subject to product availability. If the desired size or color is not available, we&apos;ll process a full refund instead.
                 </p>
               </div>
             </div>
@@ -202,7 +202,7 @@ export default function ReturnExchangePolicyPage() {
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-2">Processing</h4>
-                    <p className="text-gray-700">Once we receive your return, we'll process your refund or exchange within 5-7 business days.</p>
+                    <p className="text-gray-700">Once we receive your return, we&apos;ll process your refund or exchange within 5-7 business days.</p>
                   </div>
                 </div>
               </div>

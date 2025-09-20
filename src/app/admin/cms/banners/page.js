@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Plus, Edit, Trash2, Eye, Upload, X, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -109,9 +110,11 @@ export default function BannersPage() {
         {banners.map((banner) => (
           <Card key={banner.id} className="overflow-hidden">
             <div className="relative h-48 bg-gray-100">
-              <img
+              <Image
                 src={banner.image}
                 alt={banner.title}
+                width={400}
+                height={192}
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   e.target.src = "/images/placeholder-banner.jpg";

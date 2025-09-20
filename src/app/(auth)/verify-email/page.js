@@ -104,7 +104,7 @@ export default function VerifyEmail() {
           Verification Failed
         </h3>
         <p className="text-muted-foreground text-sm leading-relaxed">
-          We couldn't verify your email. The link may be expired or invalid.
+          We couldn&apos;t verify your email. The link may be expired or invalid.
         </p>
       </div>
 
