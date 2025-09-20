@@ -63,7 +63,7 @@ export default function ProfilePage() {
                 <p className="text-gray-500 text-xs">Member since {user.joinDate}</p>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-3 ">
                 <Link href="/profile/edit">
                   <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white">
                     <Edit className="w-4 h-4 mr-2" />
@@ -72,7 +72,7 @@ export default function ProfilePage() {
                 </Link>
                 
                 <Link href="/orders">
-                  <Button variant="outline" className="w-full border-purple-200 hover:bg-purple-50">
+                  <Button variant="outline" className="w-full border-purple-200 hover:bg-purple-50 my-4">
                     <Package className="w-4 h-4 mr-2" />
                     My Orders
                   </Button>
