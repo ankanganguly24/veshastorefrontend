@@ -11,10 +11,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`font-sans bg-background text-foreground antialiased min-h-screen flex flex-col`}
+        className={`font-sans bg-background text-foreground antialiased min-h-screen`}
       >
           <Providers>
-          <main className="flex-1 flex flex-col">{children}</main>
+          {children}
           <Toaster richColors position="top-center" />
         </Providers>
       </body>
