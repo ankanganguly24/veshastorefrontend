@@ -1,5 +1,5 @@
 import "@/app/globals.css";
-import Providers from "@/components/provider/providers";
+import AppProviders from "@/providers/app-providers";
 import { Toaster } from "sonner";
 import { Inter } from 'next/font/google';
 
@@ -10,20 +10,17 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "Vesha",
-  description: "Best ecommerce platform for everything you need",
+  title: process.env.NEXT_PUBLIC_APP_NAME || 'Vesha',
+  description: process.env.NEXT_PUBLIC_APP_DESCRIPTION || 'Your ultimate destination for premium shopping experience',
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${inter.variable} font-sans bg-background text-foreground antialiased min-h-screen`}
-      >
-          <Providers>
+    <html lang="en">
+      <body className={inter.className}>
+        <AppProviders>
           {children}
-          <Toaster richColors position="top-center" />
-        </Providers>
+        </AppProviders>
       </body>
     </html>
   );

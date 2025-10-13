@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { useRegister } from "@/hooks/auth/use-auth";
 
 const registerSchema = z
   .object({
@@ -38,14 +39,14 @@ const registerSchema = z
       .refine((val) => val === true, "You must accept the terms and conditions"),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don&apos;t match",
+    message: "Passwords don't match",
     path: ["confirmPassword"],
   });
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const registerMutation = useRegister();
 
   const form = useForm({
     resolver: zodResolver(registerSchema),
@@ -61,12 +62,13 @@ export default function Register() {
   });
 
   const onSubmit = async (data) => {
-    setIsLoading(true);
-    // Mock API call
-    setTimeout(() => {
-      console.log("Register data:", data);
-      setIsLoading(false);
-    }, 2000);
+    registerMutation.mutate({
+      first_name: data.firstName,
+      last_name: data.lastName,
+      email: data.email,
+      phone: data.phone,
+      password: data.password,
+    });
   };
 
   return (
@@ -284,10 +286,10 @@ export default function Register() {
           {/* Submit Button */}
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={registerMutation.isPending}
             className="w-full h-12 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
           >
-            {isLoading ? (
+            {registerMutation.isPending ? (
               <div className="flex items-center">
                 <svg
                   className="animate-spin -ml-1 mr-3 h-5 w-5"

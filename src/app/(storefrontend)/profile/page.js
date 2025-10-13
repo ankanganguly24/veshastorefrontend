@@ -1,22 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { User, Edit, Package, Settings, LogOut, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import useAuthStore from "@/stores/auth-store";
+import { useLogout } from "@/hooks/auth/use-auth";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
-  const [user, setUser] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+91 98765 43210",
-    avatar: null,
-    joinDate: "March 2024",
-    totalOrders: 12,
-    totalSpent: 45680
-  });
+  const { user, isAuthenticated, getFullName, getUserInitials } = useAuthStore();
+  const logoutMutation = useLogout();
+  const router = useRouter();
+
+  // Handle authentication redirect in useEffect
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, user, router]);
+
+  // Show loading or return null while redirecting
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const recentOrders = [
     { id: "ORD001", date: "2024-09-15", status: "Delivered", amount: 2299, items: 2 },
@@ -29,6 +45,18 @@ export default function ProfilePage() {
     "In Transit": "bg-blue-100 text-blue-800", 
     "Processing": "bg-orange-100 text-orange-800",
     "Cancelled": "bg-red-100 text-red-800"
+  };
+
+  const formatJoinDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long' 
+    });
+  };
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
   };
 
   return (
@@ -49,19 +77,15 @@ export default function ProfilePage() {
               <div className="text-center mb-6">
                 <div className="relative inline-block mb-4">
                   <div className="w-24 h-24 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                    {user.avatar ? (
-                      <Image src={user.avatar} alt="Profile" width={96} height={96} className="w-full h-full rounded-full object-cover" />
-                    ) : (
-                      user.name.split(' ').map(n => n[0]).join('')
-                    )}
+                    {getUserInitials()}
                   </div>
                   <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors">
                     <Camera className="w-4 h-4 text-gray-600" />
                   </button>
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">{user.name}</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-1">{getFullName()}</h2>
                 <p className="text-gray-600 text-sm mb-2">{user.email}</p>
-                <p className="text-gray-500 text-xs">Member since {user.joinDate}</p>
+                <p className="text-gray-500 text-xs">Member since {formatJoinDate(user.created_at)}</p>
               </div>
 
               <div className="space-y-3 ">
@@ -84,9 +108,14 @@ export default function ProfilePage() {
                   Settings
                 </Button>
                 
-                <Button variant="outline" className="w-full border-red-200 hover:bg-red-50 text-red-600 hover:text-red-700">
+                <Button 
+                  variant="outline" 
+                  className="w-full border-red-200 hover:bg-red-50 text-red-600 hover:text-red-700"
+                  onClick={handleLogout}
+                  disabled={logoutMutation.isPending}
+                >
                   <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
+                  {logoutMutation.isPending ? 'Signing out...' : 'Sign Out'}
                 </Button>
               </div>
             </Card>
@@ -101,7 +130,7 @@ export default function ProfilePage() {
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Package className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">{user.totalOrders}</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">0</h3>
                   <p className="text-gray-600 text-sm">Total Orders</p>
                 </div>
               </Card>
@@ -111,7 +140,7 @@ export default function ProfilePage() {
                   <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
                     <span className="text-white font-bold">₹</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">₹{user.totalSpent.toLocaleString()}</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">₹0</h3>
                   <p className="text-gray-600 text-sm">Total Spent</p>
                 </div>
               </Card>
@@ -121,8 +150,10 @@ export default function ProfilePage() {
                   <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
                     <User className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">VIP</h3>
-                  <p className="text-gray-600 text-sm">Member Status</p>
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    {user.is_email_verified ? 'Verified' : 'New'}
+                  </h3>
+                  <p className="text-gray-600 text-sm">Account Status</p>
                 </div>
               </Card>
             </div>
@@ -138,26 +169,14 @@ export default function ProfilePage() {
                 </Link>
               </div>
               
-              <div className="space-y-4">
-                {recentOrders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-blue-400 rounded-lg flex items-center justify-center">
-                        <Package className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-gray-900">Order {order.id}</p>
-                        <p className="text-sm text-gray-600">{order.date} • {order.items} items</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-gray-900">₹{order.amount.toLocaleString()}</p>
-                      <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${statusColors[order.status]}`}>
-                        {order.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+              <div className="text-center py-8">
+                <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">No orders yet</p>
+                <Link href="/products">
+                  <Button className="mt-4 bg-gradient-to-r from-purple-600 to-blue-600">
+                    Start Shopping
+                  </Button>
+                </Link>
               </div>
             </Card>
 
@@ -167,19 +186,33 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                  <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{user.name}</p>
+                  <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{getFullName()}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                  <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{user.email}</p>
+                  <p className="text-gray-900 bg-gray-50 p-3 rounded-lg flex items-center">
+                    {user.email}
+                    {user.is_email_verified && (
+                      <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                        Verified
+                      </span>
+                    )}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                  <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{user.phone}</p>
+                  <p className="text-gray-900 bg-gray-50 p-3 rounded-lg flex items-center">
+                    {user.phone}
+                    {user.is_phone_verified && (
+                      <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                        Verified
+                      </span>
+                    )}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Member Since</label>
-                  <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{user.joinDate}</p>
+                  <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{formatJoinDate(user.created_at)}</p>
                 </div>
               </div>
             </Card>

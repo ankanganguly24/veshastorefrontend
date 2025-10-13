@@ -17,6 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useLogin } from "@/hooks/auth/use-auth";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -26,7 +27,7 @@ const loginSchema = z.object({
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const loginMutation = useLogin();
 
   const form = useForm({
     resolver: zodResolver(loginSchema),
@@ -38,12 +39,10 @@ export default function Login() {
   });
 
   const onSubmit = async (data) => {
-    setIsLoading(true);
-    // Mock API call
-    setTimeout(() => {
-      console.log("Login data:", data);
-      setIsLoading(false);
-    }, 2000);
+    loginMutation.mutate({
+      email: data.email,
+      password: data.password,
+    });
   };
 
   return (
@@ -147,10 +146,10 @@ export default function Login() {
           {/* Submit Button */}
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={loginMutation.isPending}
             className="w-full h-12 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
           >
-            {isLoading ? (
+            {loginMutation.isPending ? (
               <div className="flex items-center">
                 <svg
                   className="animate-spin -ml-1 mr-3 h-5 w-5"
