@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/common/search-input";
@@ -130,18 +131,23 @@ export default function StoreNavbar() {
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-purple-100 shadow-lg">
       <div className="container mx-auto px-4 lg:px-6">
         {/* Main Navigation */}
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <div className="flex-shrink-0">
+          <div>
             <Link href="/" className="flex items-center cursor-pointer">
-              <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Vesha
-              </span>
+              <Image
+                src="/veshalogo.png"
+                alt="Vesha"
+                width={100}
+                height={100}
+                className="h-20 w-auto object-contain md:h-32 lg:h-32"
+                priority
+              />
             </Link>
           </div>
 
           {/* Desktop Categories Navigation */}
-          <div className="hidden lg:flex flex-1 justify-center">
+          <div className="hidden lg:flex flex-1 justify-center ml-8">
             <NavigationMenu viewport={false}>
               <NavigationMenuList>
                 {categories.map((category) => (

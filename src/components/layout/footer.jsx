@@ -1,37 +1,26 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
   Facebook, 
   Instagram, 
-  Twitter, 
-  Youtube, 
   Mail, 
   Phone, 
   MapPin,
   Heart,
   Send
 } from "lucide-react";
-import Link from "next/link";
 
 const footerLinks = {
   company: [
     { name: "About Us", href: "/about" },
     { name: "Our Story", href: "/our-story" },
     { name: "Meet the Founder", href: "/meet-the-founder" },
-    { name: "Careers", href: "/careers" },
-    { name: "Press", href: "/press" },
     { name: "Blog", href: "/blog" }
-  ],
-  collections: [
-    { name: "Nawabi Exclusive", href: "/category/nawabi-exclusive" },
-    { name: "Festive Wear", href: "/category/festive-wear" },
-    { name: "New Arrivals", href: "/category/new-arrivals" },
-    { name: "Spark & Style", href: "/category/spark-style" },
-    { name: "Retro Bellá", href: "/collection/retro-bella" },
-    { name: "Moonlit Dream", href: "/collection/moonlit-dream" }
   ],
   customerCare: [
     { name: "Contact Us", href: "/contact" },
@@ -61,20 +50,8 @@ const socialLinks = [
   { 
     name: "Instagram", 
     icon: Instagram, 
-    href: "https://instagram.com/vesha", 
+    href: "https://www.instagram.com/vesha_official_?igsh=czhnZDB5NnB0OXV0", 
     color: "hover:text-pink-600" 
-  },
-  { 
-    name: "Twitter", 
-    icon: Twitter, 
-    href: "https://twitter.com/vesha", 
-    color: "hover:text-blue-400" 
-  },
-  { 
-    name: "YouTube", 
-    icon: Youtube, 
-    href: "https://youtube.com/vesha", 
-    color: "hover:text-red-600" 
   }
 ];
 
@@ -133,11 +110,20 @@ export default function Footer() {
 
       {/* Main Footer Content */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Brand Section */}
           <div className="lg:col-span-2">
             <div className="mb-6">
-              <h2 className="text-3xl font-bold mb-4">Vesha</h2>
+              <Link href="/" className="flex items-center mb-4">
+                <Image
+                  src="/veshalogo.png"
+                  alt="Vesha"
+                  width={100}
+                  height={100}
+                  className="h-32 w-auto object-contain filter brightness-0 invert"
+                  priority
+                />
+              </Link>
               <p className="text-gray-300 leading-relaxed mb-6">
                 Crafting timeless elegance through contemporary fashion. From traditional heritage wear to modern chic, Vesha brings you curated collections that celebrate every woman's unique style.
               </p>
@@ -147,17 +133,17 @@ export default function Footer() {
             <div className="space-y-3 mb-6">
               <div className="flex items-center space-x-3">
                 <Phone className="w-4 h-4 text-blue-400" />
-                <span className="text-gray-300">+91 98765 43210</span>
+                <span className="text-gray-300">+91 93517 74585</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Mail className="w-4 h-4 text-blue-400" />
-                <span className="text-gray-300">hello@vesha.com</span>
+                <span className="text-gray-300">rinauraindia@gmail.com</span>
               </div>
               <div className="flex items-start space-x-3">
                 <MapPin className="w-4 h-4 text-blue-400 mt-1" />
                 <span className="text-gray-300">
-                  123 Fashion Street,<br />
-                  Mumbai, Maharashtra 400001
+                  Rinaura Fashion Private Limited<br />
+                  Mumbai, Maharashtra
                 </span>
               </div>
             </div>
@@ -187,23 +173,6 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-6">Company</h4>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
-                <li key={link.name}>
-                  <Link 
-                    href={link.href}
-                    className="text-gray-300 hover:text-white transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Collections Links */}
-          <div>
-            <h4 className="text-lg font-semibold mb-6">Collections</h4>
-            <ul className="space-y-3">
-              {footerLinks.collections.map((link) => (
                 <li key={link.name}>
                   <Link 
                     href={link.href}
@@ -258,7 +227,7 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="flex items-center space-x-4 mb-4 md:mb-0">
               <p className="text-gray-400 text-sm">
-                © 2025 Vesha. All rights reserved.
+                © 2025 Rinaura Fashion Private Limited. All rights reserved.
               </p>
               <div className="hidden md:flex items-center space-x-1 text-gray-400 text-sm">
                 <span>Made with</span>
