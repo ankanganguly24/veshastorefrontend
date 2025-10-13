@@ -147,7 +147,7 @@ export default function Login() {
           <Button
             type="submit"
             disabled={loginMutation.isPending}
-            className="w-full h-12 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
+            className="w-full h-12 bg-primary hover:bg-primary/90 text-white"
           >
             {loginMutation.isPending ? (
               <div className="flex items-center">

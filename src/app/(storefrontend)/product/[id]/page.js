@@ -180,7 +180,7 @@ export default function ProductPage({ params }) {
   const product = productsBySlug[id] || products[parseInt(id)] || products[1];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-primary/10">
       <div className="container mx-auto px-4 py-8">
         {/* Main Product Section - 2 Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">

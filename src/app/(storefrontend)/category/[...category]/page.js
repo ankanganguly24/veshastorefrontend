@@ -13,11 +13,11 @@ export default function CategoryPage({ params }) {
   const categoryPath = Array.isArray(category) ? category.join('/') : category || '';
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-primary/10">
       <div className="container mx-auto px-4 py-12">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 capitalize bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 capitalize text-primary">
             {categoryName}
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -28,8 +28,8 @@ export default function CategoryPage({ params }) {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Filters Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-purple-100 sticky top-24">
-              <h3 className="font-bold text-lg mb-6 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-primary/10 sticky top-24">
+              <h3 className="font-bold text-lg mb-6 text-primary">
                 Filters
               </h3>
               
@@ -38,19 +38,19 @@ export default function CategoryPage({ params }) {
                 <h4 className="font-semibold mb-3 text-gray-800">Price Range</h4>
                 <div className="space-y-2">
                   <label className="flex items-center space-x-2 cursor-pointer">
-                    <input type="checkbox" className="rounded border-purple-300 text-purple-600 focus:ring-purple-500" />
+                    <input type="checkbox" className="rounded border-primary/30 text-primary focus:ring-primary/50" />
                     <span className="text-sm text-gray-600">Under ₹1,000</span>
                   </label>
                   <label className="flex items-center space-x-2 cursor-pointer">
-                    <input type="checkbox" className="rounded border-purple-300 text-purple-600 focus:ring-purple-500" />
+                    <input type="checkbox" className="rounded border-primary/30 text-primary focus:ring-primary/50" />
                     <span className="text-sm text-gray-600">₹1,000 - ₹2,500</span>
                   </label>
                   <label className="flex items-center space-x-2 cursor-pointer">
-                    <input type="checkbox" className="rounded border-purple-300 text-purple-600 focus:ring-purple-500" />
+                    <input type="checkbox" className="rounded border-primary/30 text-primary focus:ring-primary/50" />
                     <span className="text-sm text-gray-600">₹2,500 - ₹5,000</span>
                   </label>
                   <label className="flex items-center space-x-2 cursor-pointer">
-                    <input type="checkbox" className="rounded border-purple-300 text-purple-600 focus:ring-purple-500" />
+                    <input type="checkbox" className="rounded border-primary/30 text-primary focus:ring-primary/50" />
                     <span className="text-sm text-gray-600">Above ₹5,000</span>
                   </label>
                 </div>
@@ -99,7 +99,7 @@ export default function CategoryPage({ params }) {
           {/* Products Grid */}
           <div className="lg:col-span-3">
             {/* Sort and View Options */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-purple-100">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-primary/10">
               <div className="text-sm text-gray-600 mb-2 sm:mb-0">
                 Showing <span className="font-semibold">1-12</span> of <span className="font-semibold">48</span> products
               </div>
@@ -269,8 +269,8 @@ export default function CategoryPage({ params }) {
 
             {/* Pagination */}
             <div className="flex justify-center mt-12">
-              <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-xl p-2 shadow-lg border border-purple-100">
-                <button className="px-3 py-2 text-sm text-gray-500 hover:text-purple-600 transition-colors">
+              <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-xl p-2 shadow-lg border border-primary/10">
+                <button className="px-3 py-2 text-sm text-gray-500 hover:text-primary transition-colors">
                   Previous
                 </button>
                 {[1, 2, 3, 4].map((page) => (
@@ -278,14 +278,14 @@ export default function CategoryPage({ params }) {
                     key={page}
                     className={`px-3 py-2 text-sm rounded-lg transition-colors ${
                       page === 1 
-                        ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white' 
-                        : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50'
+                        ? 'bg-primary text-white' 
+                        : 'text-gray-600 hover:text-primary hover:bg-primary/5'
                     }`}
                   >
                     {page}
                   </button>
                 ))}
-                <button className="px-3 py-2 text-sm text-gray-500 hover:text-purple-600 transition-colors">
+                <button className="px-3 py-2 text-sm text-gray-500 hover:text-primary transition-colors">
                   Next
                 </button>
               </div>

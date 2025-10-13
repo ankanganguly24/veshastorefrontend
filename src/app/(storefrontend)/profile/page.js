@@ -60,11 +60,11 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-primary/10">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
+          <h1 className="text-4xl font-bold text-primary mb-2">
             My Profile
           </h1>
           <p className="text-gray-600">Manage your account and track your orders</p>
@@ -73,10 +73,10 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile Card */}
           <div className="lg:col-span-1">
-            <Card className="p-6 bg-white/80 backdrop-blur-sm border-purple-100 shadow-lg">
+            <Card className="p-6 bg-white/80 backdrop-blur-sm border-primary/10 shadow-lg">
               <div className="text-center mb-6">
                 <div className="relative inline-block mb-4">
-                  <div className="w-24 h-24 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                  <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white text-2xl font-bold">
                     {getUserInitials()}
                   </div>
                   <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors">
@@ -90,14 +90,14 @@ export default function ProfilePage() {
 
               <div className="space-y-3 ">
                 <Link href="/profile/edit">
-                  <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white">
+                  <Button className="w-full bg-primary hover:bg-primary/90 text-white">
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Profile
                   </Button>
                 </Link>
                 
                 <Link href="/orders">
-                  <Button variant="outline" className="w-full border-purple-200 hover:bg-purple-50 my-4">
+                  <Button variant="outline" className="w-full border-primary/20 hover:bg-primary/5 my-4">
                     <Package className="w-4 h-4 mr-2" />
                     My Orders
                   </Button>
@@ -125,19 +125,19 @@ export default function ProfilePage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="p-6 bg-white/80 backdrop-blur-sm border-purple-100 shadow-lg">
+              <Card className="p-6 bg-white/80 backdrop-blur-sm border-primary/10 shadow-lg">
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-3">
                     <Package className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">0</h3>
+                  <h3 className="text-2xl font-bold text-primary">0</h3>
                   <p className="text-gray-600 text-sm">Total Orders</p>
                 </div>
               </Card>
               
-              <Card className="p-6 bg-white/80 backdrop-blur-sm border-purple-100 shadow-lg">
+              <Card className="p-6 bg-white/80 backdrop-blur-sm border-primary/10 shadow-lg">
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-3">
                     <span className="text-white font-bold">₹</span>
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900">₹0</h3>
@@ -145,9 +145,9 @@ export default function ProfilePage() {
                 </div>
               </Card>
               
-              <Card className="p-6 bg-white/80 backdrop-blur-sm border-purple-100 shadow-lg">
+              <Card className="p-6 bg-white/80 backdrop-blur-sm border-primary/10 shadow-lg">
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-3">
                     <User className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900">
@@ -159,11 +159,11 @@ export default function ProfilePage() {
             </div>
 
             {/* Recent Orders */}
-            <Card className="p-6 bg-white/80 backdrop-blur-sm border-purple-100 shadow-lg">
+            <Card className="p-6 bg-white/80 backdrop-blur-sm border-primary/10 shadow-lg">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold text-gray-900">Recent Orders</h3>
                 <Link href="/orders">
-                  <Button variant="outline" size="sm" className="border-purple-200 hover:bg-purple-50">
+                  <Button variant="outline" size="sm" className="border-primary/20 hover:bg-primary/5">
                     View All
                   </Button>
                 </Link>
@@ -173,7 +173,7 @@ export default function ProfilePage() {
                 <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-500">No orders yet</p>
                 <Link href="/products">
-                  <Button className="mt-4 bg-gradient-to-r from-purple-600 to-blue-600">
+                  <Button className="mt-4 bg-primary hover:bg-primary/90">
                     Start Shopping
                   </Button>
                 </Link>
@@ -181,7 +181,7 @@ export default function ProfilePage() {
             </Card>
 
             {/* Account Information */}
-            <Card className="p-6 bg-white/80 backdrop-blur-sm border-purple-100 shadow-lg">
+            <Card className="p-6 bg-white/80 backdrop-blur-sm border-primary/10 shadow-lg">
               <h3 className="text-xl font-bold text-gray-900 mb-6">Account Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>

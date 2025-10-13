@@ -33,7 +33,7 @@ const OptimizedImage = memo(({ src, alt, className, currentIndex, isActive }) =>
 
   if (hasError) {
     return (
-      <div className={`w-full h-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center ${className}`}>
+      <div className={`w-full h-full bg-gradient-to-br from-primary/40 to-primary/70 flex items-center justify-center ${className}`}>
         <span className="text-white text-sm">Image unavailable</span>
       </div>
     );
@@ -270,7 +270,7 @@ const ProductCard = memo(({ product, className = "" }) => {
   return (
     <Link href={productLink} className="block">
       <Card 
-        className={`group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-purple-100 cursor-pointer ${className}`}
+        className={`group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-primary/10 cursor-pointer ${className}`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -297,7 +297,7 @@ const ProductCard = memo(({ product, className = "" }) => {
                       onMouseDown={(e) => e.stopPropagation()}
                       onMouseUp={(e) => e.stopPropagation()}
                     >
-                      <ChevronLeft className="w-4 h-4 text-gray-700" />
+                      <ChevronLeft className="w-4 h-4 text-primary" />
                     </Button>
                     <Button
                       variant="ghost"
@@ -307,7 +307,7 @@ const ProductCard = memo(({ product, className = "" }) => {
                       onMouseDown={(e) => e.stopPropagation()}
                       onMouseUp={(e) => e.stopPropagation()}
                     >
-                      <ChevronRight className="w-4 h-4 text-gray-700" />
+                      <ChevronRight className="w-4 h-4 text-primary" />
                     </Button>
                   </>
                 )}
@@ -342,7 +342,7 @@ const ProductCard = memo(({ product, className = "" }) => {
                 )}
               </div>
             ) : (
-              <div className={`w-full h-full bg-gradient-to-br ${gradient}`} />
+              <div className={`w-full h-full bg-gradient-to-br from-primary/40 to-primary/60`} />
             )}
             
             {/* Overlay - less opaque to not interfere with buttons */}
@@ -386,14 +386,14 @@ const ProductCard = memo(({ product, className = "" }) => {
         </div>
         
         <CardContent className="p-5">
-          <h4 className="font-bold text-lg mb-2 text-gray-900 group-hover:text-purple-600 transition-colors">
+          <h4 className="font-bold text-lg mb-2 text-gray-900 group-hover:text-primary transition-colors">
             {name}
           </h4>
           <p className="text-sm text-gray-600 mb-3">Premium quality • Latest design • Free shipping</p>
           
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
-              <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              <span className="text-2xl font-bold text-primary">
                 ₹{price}
               </span>
               {originalPrice && originalPrice > price && (
@@ -411,7 +411,7 @@ const ProductCard = memo(({ product, className = "" }) => {
             className={`w-full py-2.5 px-4 rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-105 ${
               isInCart 
                 ? 'bg-green-600 hover:bg-green-700 text-white' 
-                : 'bg-gradient-to-r from-blue-500 to-blue-900 text-white group-hover:from-purple-700 group-hover:to-blue-700'
+                : 'bg-primary hover:bg-primary/90 text-white'
             }`}
             onClick={handleAddToCart}
             onMouseDown={(e) => e.stopPropagation()}

@@ -94,7 +94,7 @@ const Toast = ({ toast, onDismiss }) => {
       case 'error':
         return 'bg-red-50 border-red-200 text-red-800';
       case 'info':
-        return 'bg-blue-50 border-blue-200 text-blue-800';
+        return 'bg-primary/10 border-primary/20 text-primary';
       default:
         return 'bg-gray-50 border-gray-200 text-gray-800';
     }
@@ -123,7 +123,7 @@ const Toast = ({ toast, onDismiss }) => {
         <div className="ml-4 flex-shrink-0 flex">
           <button
             onClick={() => onDismiss(toast.id)}
-            className="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+            className="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/50"
           >
             <X className="w-5 h-5" />
           </button>

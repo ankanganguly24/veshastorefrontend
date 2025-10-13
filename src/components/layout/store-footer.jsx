@@ -17,14 +17,14 @@ export default function StoreFooter() {
   };
 
   return (
-    <footer className="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white mt-auto">
+    <footer className="bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-white mt-auto">
       <div className="container mx-auto px-4 lg:px-6">
         {/* Main Footer Content */}
         <div className="py-12 lg:py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
             {/* Get in Touch Section */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <h3 className="text-lg font-semibold text-white">
                 Get in Touch
               </h3>
               <div className="space-y-3">
@@ -57,7 +57,7 @@ export default function StoreFooter() {
 
             {/* Information Links */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+              <h3 className="text-lg font-semibold text-white">
                 Information
               </h3>
               <nav className="space-y-2">
@@ -81,7 +81,7 @@ export default function StoreFooter() {
 
             {/* Discover Links */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+              <h3 className="text-lg font-semibold text-white">
                 Discover
               </h3>
               <nav className="space-y-2">
@@ -99,12 +99,13 @@ export default function StoreFooter() {
 
             {/* Newsletter Signup */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
+              <h3 className="text-lg font-semibold text-white">
                 Sign Up and Save
               </h3>
               <p className="text-sm text-gray-300">
                 Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.
               </p>
+              
               <form onSubmit={handleNewsletterSubmit} className="space-y-3">
                 <Input
                   type="email"
@@ -112,9 +113,9 @@ export default function StoreFooter() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-pink-400 focus:ring-pink-400/20"
+                  className="w-full bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-white focus:ring-white/20"
                 />
-                <Button type="submit" className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-semibold transform hover:scale-105 transition-all duration-200">
+                <Button type="submit" className="w-full bg-white text-primary hover:bg-white/90 font-semibold transform hover:scale-105 transition-all duration-200">
                   Subscribe
                 </Button>
               </form>
@@ -126,12 +127,12 @@ export default function StoreFooter() {
                   Stay connected with us on social media for the latest updates, offers, and more!
                 </p>
                 <div className="flex space-x-3">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 hover:text-blue-300 transition-all duration-200 hover:scale-110" asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/20 hover:bg-white/30 text-white hover:text-white/90 transition-all duration-200 hover:scale-110" asChild>
                     <a href="#" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
                       <Facebook className="h-4 w-4" />
                     </a>
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 bg-pink-600/20 hover:bg-pink-600/40 text-pink-400 hover:text-pink-300 transition-all duration-200 hover:scale-110" asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/20 hover:bg-white/30 text-white hover:text-white/90 transition-all duration-200 hover:scale-110" asChild>
                     <a href="#" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
                       <Instagram className="h-4 w-4" />
                     </a>
@@ -156,16 +157,16 @@ export default function StoreFooter() {
         <div className="border-t border-white/10 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-sm text-gray-300">
-              © {new Date().getFullYear()} <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-semibold">Vesha</span> - Rinaura Fashion Private Limited. All rights reserved.
+              © {new Date().getFullYear()} Rinaura Fashion Private Limited. All rights reserved.
             </div>
             <div className="flex items-center space-x-6">
-              <Link href="/privacy" className="text-sm text-gray-300 hover:text-purple-400 transition-colors">
+              <Link href="/privacy" className="text-sm text-gray-300 hover:text-white transition-colors">
                 Privacy
               </Link>
-              <Link href="/terms" className="text-sm text-gray-300 hover:text-purple-400 transition-colors">
+              <Link href="/terms" className="text-sm text-gray-300 hover:text-white transition-colors">
                 Terms
               </Link>
-              <Link href="/cookies" className="text-sm text-gray-300 hover:text-purple-400 transition-colors">
+              <Link href="/cookies" className="text-sm text-gray-300 hover:text-white transition-colors">
                 Cookies
               </Link>
             </div>

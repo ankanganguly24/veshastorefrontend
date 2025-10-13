@@ -121,7 +121,7 @@ const ImageCarousel = memo(({ images, productName }) => {
   return (
     <div className="space-y-4">
       {/* Main Image Display */}
-      <Card className="relative overflow-hidden bg-white rounded-xl shadow-lg border border-purple-100">
+      <Card className="relative overflow-hidden bg-white rounded-xl shadow-lg border border-primary/10">
         <div 
           className="relative aspect-square cursor-zoom-in"
           onMouseMove={handleMouseMove}
@@ -192,8 +192,8 @@ const ImageCarousel = memo(({ images, productName }) => {
               key={index}
               className={`flex-shrink-0 w-20 h-20 cursor-pointer overflow-hidden border-2 transition-all ${
                 activeImageIndex === index 
-                  ? 'border-purple-500 shadow-lg' 
-                  : 'border-purple-200 hover:border-purple-300'
+                  ? 'border-primary shadow-lg' 
+                  : 'border-primary/20 hover:border-primary/40'
               }`}
               onClick={() => selectImage(index)}
             >

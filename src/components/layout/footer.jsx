@@ -45,13 +45,13 @@ const socialLinks = [
     name: "Facebook", 
     icon: Facebook, 
     href: "https://facebook.com/vesha", 
-    color: "hover:text-blue-600" 
+    color: "hover:text-primary/70" 
   },
   { 
     name: "Instagram", 
     icon: Instagram, 
     href: "https://www.instagram.com/vesha_official_?igsh=czhnZDB5NnB0OXV0", 
-    color: "hover:text-pink-600" 
+    color: "hover:text-primary/70" 
   }
 ];
 
@@ -69,44 +69,9 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-primary text-white">
       {/* Newsletter Section */}
-      <div className="bg-gradient-to-r from-blue-900 to-purple-900">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="max-w-4xl mx-auto text-center">
-            <h3 className="text-2xl md:text-3xl font-bold mb-4">
-              Stay in Style with Vesha
-            </h3>
-            <p className="text-blue-100 mb-8 text-lg">
-              Get exclusive access to new collections, special offers, and style inspiration
-            </p>
-            
-            <form onSubmit={handleNewsletterSubmit} className="max-w-md mx-auto">
-              <div className="flex gap-3">
-                <Input
-                  type="email"
-                  placeholder="Enter your email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/70 focus:bg-white/20"
-                  required
-                />
-                <Button 
-                  type="submit" 
-                >
-                  <Send className="w-4 h-4 mr-2" />
-                  Subscribe
-                </Button>
-              </div>
-              {isSubscribed && (
-                <p className="text-green-300 text-sm mt-2">
-                  ✓ Thank you for subscribing! Welcome to the Vesha family.
-                </p>
-              )}
-            </form>
-          </div>
-        </div>
-      </div>
+  
 
       {/* Main Footer Content */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -118,13 +83,13 @@ export default function Footer() {
                 <Image
                   src="/veshalogo.png"
                   alt="Vesha"
-                  width={100}
-                  height={100}
-                  className="h-32 w-auto object-contain filter brightness-0 invert"
+                  width={200}
+                  height={80}
+                  className="h-16 w-auto object-contain filter brightness-0 invert"
                   priority
                 />
               </Link>
-              <p className="text-gray-300 leading-relaxed mb-6">
+              <p className="text-white/80 leading-relaxed mb-6">
                 Crafting timeless elegance through contemporary fashion. From traditional heritage wear to modern chic, Vesha brings you curated collections that celebrate every woman's unique style.
               </p>
             </div>
@@ -132,16 +97,16 @@ export default function Footer() {
             {/* Contact Info */}
             <div className="space-y-3 mb-6">
               <div className="flex items-center space-x-3">
-                <Phone className="w-4 h-4 text-blue-400" />
-                <span className="text-gray-300">+91 93517 74585</span>
+                <Phone className="w-4 h-4 text-white/70" />
+                <span className="text-white/80">+91 93517 74585</span>
               </div>
               <div className="flex items-center space-x-3">
-                <Mail className="w-4 h-4 text-blue-400" />
-                <span className="text-gray-300">rinauraindia@gmail.com</span>
+                <Mail className="w-4 h-4 text-white/70" />
+                <span className="text-white/80">rinauraindia@gmail.com</span>
               </div>
               <div className="flex items-start space-x-3">
-                <MapPin className="w-4 h-4 text-blue-400 mt-1" />
-                <span className="text-gray-300">
+                <MapPin className="w-4 h-4 text-white/70 mt-1" />
+                <span className="text-white/80">
                   Rinaura Fashion Private Limited<br />
                   Mumbai, Maharashtra
                 </span>
@@ -158,7 +123,7 @@ export default function Footer() {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`p-2 rounded-full bg-gray-800 text-gray-400 transition-colors ${social.color}`}
+                    className="p-2 rounded-full bg-white/10 text-white/70 hover:bg-white/20 transition-colors"
                     aria-label={social.name}
                   >
                     <Icon className="w-5 h-5" />
@@ -176,7 +141,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link 
                     href={link.href}
-                    className="text-gray-300 hover:text-white transition-colors"
+                    className="text-white/70 hover:text-white transition-colors"
                   >
                     {link.name}
                   </Link>
@@ -193,7 +158,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link 
                     href={link.href}
-                    className="text-gray-300 hover:text-white transition-colors"
+                    className="text-white/70 hover:text-white transition-colors"
                   >
                     {link.name}
                   </Link>
@@ -210,7 +175,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link 
                     href={link.href}
-                    className="text-gray-300 hover:text-white transition-colors"
+                    className="text-white/70 hover:text-white transition-colors"
                   >
                     {link.name}
                   </Link>
@@ -222,36 +187,36 @@ export default function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-gray-800">
+      <div className="border-t border-white/10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="flex items-center space-x-4 mb-4 md:mb-0">
-              <p className="text-gray-400 text-sm">
-                © 2025 Rinaura Fashion Private Limited. All rights reserved.
+              <p className="text-white/60 text-sm">
+                © {new Date().getFullYear()} Rinaura Fashion Private Limited. All rights reserved.
               </p>
-              <div className="hidden md:flex items-center space-x-1 text-gray-400 text-sm">
+              <div className="hidden md:flex items-center space-x-1 text-white/60 text-sm">
                 <span>Made with</span>
                 <Heart className="w-4 h-4 text-red-500 fill-current" />
                 <span>in India</span>
               </div>
             </div>
             
-            <div className="flex items-center space-x-6 text-sm text-gray-400">
+            <div className="flex items-center space-x-6 text-sm text-white/60">
               <div className="flex items-center space-x-4">
                 <img 
                   src="https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg" 
                   alt="Razorpay"
-                  className="h-6 opacity-70"
+                  className="h-6 brightness-0 invert opacity-70"
                 />
                 <img 
                   src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" 
                   alt="Visa"
-                  className="h-4 opacity-70"
+                  className="h-4 brightness-0 invert opacity-70"
                 />
                 <img 
                   src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" 
                   alt="Mastercard"
-                  className="h-6 opacity-70"
+                  className="h-6 brightness-0 invert opacity-70"
                 />
                 <span className="text-xs">Secure payments</span>
               </div>

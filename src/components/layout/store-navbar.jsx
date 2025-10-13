@@ -3,10 +3,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/common/search-input";
 import { CartService } from "@/lib/cart-service";
+import useAuthStore from "@/stores/auth-store";
+import { useLogout } from "@/hooks/auth/use-auth";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -96,6 +98,8 @@ export default function StoreNavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [cartItemCount, setCartItemCount] = useState(0);
+  const { isAuthenticated, user, getFullName, getUserInitials } = useAuthStore();
+  const logoutMutation = useLogout();
 
   // Update cart count on component mount
   useEffect(() => {
@@ -127,8 +131,12 @@ export default function StoreNavbar() {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
+
   return (
-    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-purple-100 shadow-lg">
+    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-lg">
       <div className="container mx-auto px-4 lg:px-6">
         {/* Main Navigation */}
         <div className="flex items-center justify-between h-20">
@@ -138,9 +146,9 @@ export default function StoreNavbar() {
               <Image
                 src="/veshalogo.png"
                 alt="Vesha"
-                width={100}
-                height={100}
-                className="h-20 w-auto object-contain md:h-32 lg:h-32"
+                width={180}
+                height={60}
+                className="h-14 w-auto object-contain md:h-16 lg:h-18"
                 priority
               />
             </Link>
@@ -152,17 +160,17 @@ export default function StoreNavbar() {
               <NavigationMenuList>
                 {categories.map((category) => (
                   <NavigationMenuItem key={category.name}>
-                    <NavigationMenuTrigger className="h-10 text-gray-700 hover:text-purple-600 hover:bg-purple-50 transition-all duration-200 cursor-pointer">
+                    <NavigationMenuTrigger className="h-10 text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 cursor-pointer">
                       {category.name}
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
-                      <div className="grid w-80 gap-3 p-6 bg-white/95 backdrop-blur-md shadow-xl border border-purple-100">
+                      <div className="grid w-80 gap-3 p-6 bg-white/95 backdrop-blur-md shadow-xl border border-gray-100">
                         <div className="grid grid-cols-2 gap-2">
                           {category.subcategories.map((subcategory) => (
                             <NavigationMenuLink
                               key={subcategory}
                               asChild
-                              className="hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 hover:text-purple-700 rounded-md p-2 text-sm transition-all duration-200 cursor-pointer"
+                              className="hover:bg-primary/5 hover:text-primary rounded-md p-2 text-sm transition-all duration-200 cursor-pointer"
                             >
                               <Link href={`/category/${category.name.toLowerCase()}/${subcategory.toLowerCase().replace(/[^a-z0-9]/g, "-")}`} className="cursor-pointer">
                                 {subcategory}
@@ -170,11 +178,11 @@ export default function StoreNavbar() {
                             </NavigationMenuLink>
                           ))}
                         </div>
-                        <div className="mt-4 pt-4 border-t border-purple-100">
+                        <div className="mt-4 pt-4 border-t border-gray-100">
                           <NavigationMenuLink asChild>
                             <Link
                               href={`/category/${category.name.toLowerCase()}`}
-                              className="text-sm font-medium bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent hover:underline cursor-pointer"
+                              className="text-sm font-medium text-primary hover:underline cursor-pointer"
                             >
                               View All {category.name}
                             </Link>
@@ -201,7 +209,7 @@ export default function StoreNavbar() {
             </div>
 
             {/* Mobile Search Icon */}
-            <Button variant="ghost" size="icon" className="md:hidden hover:bg-purple-50 hover:text-purple-600 transition-colors cursor-pointer">
+            <Button variant="ghost" size="icon" className="md:hidden hover:bg-primary/5 hover:text-primary transition-colors cursor-pointer">
               <Search className="h-5 w-5" />
               <span className="sr-only">Search</span>
             </Button>
@@ -209,34 +217,69 @@ export default function StoreNavbar() {
             {/* Profile Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="hover:bg-purple-50 hover:text-purple-600 transition-colors cursor-pointer">
-                  <User className="h-5 w-5" />
+                <Button variant="ghost" size="icon" className="hover:bg-primary/5 hover:text-primary transition-colors cursor-pointer">
+                  {isAuthenticated ? (
+                    <div className="w-7 h-7 rounded-full bg-primary text-white text-xs flex items-center justify-center font-medium">
+                      {getUserInitials()}
+                    </div>
+                  ) : (
+                    <User className="h-5 w-5" />
+                  )}
                   <span className="sr-only">User menu</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-white/95 backdrop-blur-md border-purple-100">
-                <DropdownMenuItem asChild>
-                  <Link href="/profile" className="hover:bg-purple-50 hover:text-purple-700 transition-colors cursor-pointer">My Profile</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/orders" className="hover:bg-purple-50 hover:text-purple-700 transition-colors cursor-pointer">My Orders</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/login" className="hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer">Sign In</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/register" className="hover:bg-green-50 hover:text-green-700 transition-colors cursor-pointer">Sign Up</Link>
-                </DropdownMenuItem>
+              <DropdownMenuContent align="end" className="w-56 bg-white/95 backdrop-blur-md border-gray-100">
+                {isAuthenticated ? (
+                  <>
+                    <div className="px-3 py-2 text-sm font-medium border-b border-gray-100">
+                      <div className="text-gray-600">Welcome,</div>
+                      <div className="text-primary">{getFullName()}</div>
+                    </div>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="hover:bg-primary/5 hover:text-primary transition-colors cursor-pointer">
+                        My Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/orders" className="hover:bg-primary/5 hover:text-primary transition-colors cursor-pointer">
+                        My Orders
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/wishlist" className="hover:bg-primary/5 hover:text-primary transition-colors cursor-pointer">
+                        My Wishlist
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={handleLogout}
+                      disabled={logoutMutation.isPending}
+                      className="hover:bg-primary/5 hover:text-primary transition-colors cursor-pointer text-red-600 hover:text-red-700"
+                    >
+                      {logoutMutation.isPending ? 'Signing out...' : (
+                        <div className="flex items-center">
+                          <LogOut className="w-4 h-4 mr-2" />
+                          <span>Sign Out</span>
+                        </div>
+                      )}
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <DropdownMenuItem asChild>
+                    <Link href="/login" className="hover:bg-primary/5 hover:text-primary transition-colors cursor-pointer">
+                      Have an account? Sign In
+                    </Link>
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
 
             {/* Shopping Cart */}
             <Link href="/cart">
-              <Button variant="ghost" size="icon" className="relative hover:bg-purple-50 hover:text-purple-600 transition-colors cursor-pointer">
+              <Button variant="ghost" size="icon" className="relative hover:bg-primary/5 hover:text-primary transition-colors cursor-pointer">
                 <ShoppingCart className="h-5 w-5" />
                 {cartItemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold shadow-lg">
+                  <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold shadow-lg">
                     {cartItemCount > 99 ? '99+' : cartItemCount}
                   </span>
                 )}
@@ -248,7 +291,7 @@ export default function StoreNavbar() {
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden hover:bg-purple-50 hover:text-purple-600 transition-colors cursor-pointer"
+              className="lg:hidden hover:bg-primary/5 hover:text-primary transition-colors cursor-pointer"
               onClick={toggleMenu}
             >
               {isMenuOpen ? (
@@ -262,7 +305,7 @@ export default function StoreNavbar() {
         </div>
 
         {/* Mobile Search Bar */}
-        <div className="md:hidden py-3 border-t border-purple-100">
+        <div className="md:hidden py-3 border-t border-gray-100">
           <SearchInput
             placeholder="Search products..."
             value={searchValue}
@@ -273,12 +316,12 @@ export default function StoreNavbar() {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="lg:hidden bg-white/95 backdrop-blur-md border-t border-purple-100 shadow-lg">
+        <div className="lg:hidden bg-white/95 backdrop-blur-md border-t border-gray-100 shadow-lg">
           <div className="container mx-auto px-4 py-4">
             <div className="space-y-4">
               {categories.map((category) => (
                 <div key={category.name} className="space-y-2">
-                  <h3 className="font-semibold text-sm bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                  <h3 className="font-semibold text-sm text-primary">
                     {category.name}
                   </h3>
                   <div className="pl-4 space-y-1">
@@ -286,7 +329,7 @@ export default function StoreNavbar() {
                       <Link
                         key={subcategory}
                         href={`/category/${category.name.toLowerCase()}/${subcategory.toLowerCase().replace(/[^a-z0-9]/g, "-")}`}
-                        className="block py-1 text-sm text-gray-600 hover:text-purple-600 hover:bg-purple-50 px-2 rounded transition-all duration-200 cursor-pointer"
+                        className="block py-1 text-sm text-gray-600 hover:text-primary hover:bg-primary/5 px-2 rounded transition-all duration-200 cursor-pointer"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         {subcategory}
@@ -295,6 +338,60 @@ export default function StoreNavbar() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Mobile User Menu */}
+          <div className="container mx-auto px-4 py-4 border-t border-gray-100">
+            <div className="space-y-2">
+              <h3 className="font-semibold text-sm text-primary">
+                My Account
+              </h3>
+              <div className="pl-4 space-y-1">
+                {isAuthenticated ? (
+                  <>
+                    <Link
+                      href="/profile"
+                      className="block py-1 text-sm text-gray-600 hover:text-primary hover:bg-primary/5 px-2 rounded transition-all duration-200 cursor-pointer"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      My Profile
+                    </Link>
+                    <Link
+                      href="/orders"
+                      className="block py-1 text-sm text-gray-600 hover:text-primary hover:bg-primary/5 px-2 rounded transition-all duration-200 cursor-pointer"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      My Orders
+                    </Link>
+                    <Link
+                      href="/wishlist"
+                      className="block py-1 text-sm text-gray-600 hover:text-primary hover:bg-primary/5 px-2 rounded transition-all duration-200 cursor-pointer"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      My Wishlist
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsMenuOpen(false);
+                      }}
+                      disabled={logoutMutation.isPending}
+                      className="block w-full text-left py-1 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 px-2 rounded transition-all duration-200 cursor-pointer"
+                    >
+                      {logoutMutation.isPending ? 'Signing out...' : 'Sign Out'}
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="block py-1 text-sm text-gray-600 hover:text-primary hover:bg-primary/5 px-2 rounded transition-all duration-200 cursor-pointer"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Have an account? Sign In
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         </div>
