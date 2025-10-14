@@ -6,33 +6,42 @@ const useAuthStore = create(
     (set, get) => ({
       user: null,
       isAuthenticated: false,
+      token: null, // <-- Ensure token property exists
       
       // Set user after login
       setUser: (userData) => {
         if (!userData) return;
-        
         set({
           user: userData
         });
       },
-      
+
       // Set authentication status
       setAuthenticated: (status) => {
         set({
           isAuthenticated: !!status
         });
       },
+
+      // Set token
+      setToken: (token) => {
+        set({ token });
+      },
+
+      // Get token
+      getToken: () => get().token, // <-- Add getToken method
       
       // Check if user is authenticated (for components to use)
       checkAuth: () => {
-        return get().isAuthenticated && !!get().user;
+        return get().isAuthenticated && !!get().user && !!get().token;
       },
       
       // Clear user data on logout
       logout: () => {
         set({
           user: null,
-          isAuthenticated: false
+          isAuthenticated: false,
+          token: null // <-- Clear token on logout
         });
       },
       
@@ -56,7 +65,6 @@ const useAuthStore = create(
     }),
     {
       name: 'auth-storage',
-      // Use localStorage only for the user data, not for auth tokens
       getStorage: () => localStorage,
     }
   )

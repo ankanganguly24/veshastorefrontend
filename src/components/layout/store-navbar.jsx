@@ -24,75 +24,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-const categories = [
-  {
-    name: "NAWABI EXCLUSIVE",
-    subcategories: [
-      "Traditional Wear",
-      "Ethnic Ensembles",
-      "Royal Collection",
-      "Heritage Pieces",
-      "Luxury Items",
-      "Special Occasions",
-    ],
-  },
-  {
-    name: "ETHNIC WEAR",
-    subcategories: [
-      "KURTAS",
-      "KAFTAN",
-      "FESTIVE WEAR",
-      "Traditional Sets",
-      "Embroidered Collection",
-      "Designer Wear",
-    ],
-  },
-  {
-    name: "WESTERN WEAR",
-    subcategories: [
-      "DRESSES",
-      "SHIRTS",
-      "CO-ORD SET",
-      "Casual Wear",
-      "Formal Wear",
-      "Party Wear",
-    ],
-  },
-  {
-    name: "OUTERWEAR",
-    subcategories: [
-      "PEPLUM JACKET",
-      "SHRUGS",
-      "KOTI",
-      "Blazers",
-      "Cardigans",
-      "Winter Wear",
-    ],
-  },
-  {
-    name: "BOTTOM WEAR",
-    subcategories: [
-      "Pants",
-      "Trousers",
-      "Leggings",
-      "Palazzos",
-      "Skirts",
-      "Shorts",
-    ],
-  },
-  {
-    name: "NAWABI INDIA",
-    subcategories: [
-      "New Arrivals",
-      "Best Sellers",
-      "Trending Now",
-      "Collections",
-      "Limited Edition",
-      "Seasonal Special",
-    ],
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import api from "@/utils/axios";
 
 export default function StoreNavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -100,6 +33,24 @@ export default function StoreNavbar() {
   const [cartItemCount, setCartItemCount] = useState(0);
   const { isAuthenticated, user, getFullName, getUserInitials } = useAuthStore();
   const logoutMutation = useLogout();
+
+  // Fetch categories from backend
+  const { data: categoriesData, isLoading: categoriesLoading } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const res = await api.get("/product/category");
+      return res.data;
+    },
+  });
+
+  // Debug log to verify API response structure
+  console.log("Fetched categoriesData:", categoriesData);
+
+  // Extract categories array safely from the correct path
+  const fetchedCategories =
+    Array.isArray(categoriesData?.data?.categories)
+      ? categoriesData.data.categories
+      : [];
 
   // Update cart count on component mount
   useEffect(() => {
@@ -166,40 +117,63 @@ export default function StoreNavbar() {
           <div className="hidden lg:flex flex-1 justify-center ml-8">
             <NavigationMenu viewport={false}>
               <NavigationMenuList>
-                {categories.map((category) => (
-                  <NavigationMenuItem key={category.name}>
-                    <NavigationMenuTrigger className="h-10 text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 cursor-pointer">
-                      {category.name}
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <div className="grid w-80 gap-3 p-6 bg-white/95 backdrop-blur-md shadow-xl border border-gray-100">
-                        <div className="grid grid-cols-2 gap-2">
-                          {category.subcategories.map((subcategory) => (
-                            <NavigationMenuLink
-                              key={subcategory}
-                              asChild
-                              className="hover:bg-primary/5 hover:text-primary rounded-md p-2 text-sm transition-all duration-200 cursor-pointer"
-                            >
-                              <Link href={`/category/${category.name.toLowerCase()}/${subcategory.toLowerCase().replace(/[^a-z0-9]/g, "-")}`} className="cursor-pointer">
-                                {subcategory}
-                              </Link>
-                            </NavigationMenuLink>
-                          ))}
-                        </div>
-                        <div className="mt-4 pt-4 border-t border-gray-100">
+                {/* Only render if categoriesData is loaded */}
+                {categoriesData === undefined ? null : (
+                  fetchedCategories.length === 0 ? (
+                    <span className="text-muted-foreground px-4">No categories found</span>
+                  ) : (
+                    fetchedCategories.map((category) => (
+                      <NavigationMenuItem key={category.id}>
+                        {category.children && category.children.length > 0 ? (
+                          <>
+                            <NavigationMenuTrigger className="h-10 text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 cursor-pointer">
+                              {category.name}
+                            </NavigationMenuTrigger>
+                            <NavigationMenuContent>
+                              <div className="grid w-80 gap-3 p-6 bg-white/95 backdrop-blur-md shadow-xl border border-gray-100">
+                                <div className="grid grid-cols-2 gap-2">
+                                  {category.children.map((subcategory) => (
+                                    <NavigationMenuLink
+                                      key={subcategory.id}
+                                      asChild
+                                      className="hover:bg-primary/5 hover:text-primary rounded-md p-2 text-sm transition-all duration-200 cursor-pointer"
+                                    >
+                                      <Link
+                                        href={`/category/${category.slug}/${subcategory.slug}`}
+                                        className="cursor-pointer"
+                                      >
+                                        {subcategory.name}
+                                      </Link>
+                                    </NavigationMenuLink>
+                                  ))}
+                                </div>
+                                <div className="mt-4 pt-4 border-t border-gray-100">
+                                  <NavigationMenuLink asChild>
+                                    <Link
+                                      href={`/category/${category.slug}`}
+                                      className="text-sm font-medium text-primary hover:underline cursor-pointer"
+                                    >
+                                      View All {category.name}
+                                    </Link>
+                                  </NavigationMenuLink>
+                                </div>
+                              </div>
+                            </NavigationMenuContent>
+                          </>
+                        ) : (
                           <NavigationMenuLink asChild>
                             <Link
-                              href={`/category/${category.name.toLowerCase()}`}
-                              className="text-sm font-medium text-primary hover:underline cursor-pointer"
+                              href={`/category/${category.slug}`}
+                              className="h-10 flex items-center px-4 text-gray-700 hover:text-primary hover:bg-primary/5 rounded transition-all duration-200 cursor-pointer font-medium"
                             >
-                              View All {category.name}
+                              {category.name}
                             </Link>
                           </NavigationMenuLink>
-                        </div>
-                      </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                ))}
+                        )}
+                      </NavigationMenuItem>
+                    ))
+                  )
+                )}
               </NavigationMenuList>
             </NavigationMenu>
           </div>
@@ -327,25 +301,42 @@ export default function StoreNavbar() {
         <div className="lg:hidden bg-white/95 backdrop-blur-md border-t border-gray-100 shadow-lg">
           <div className="container mx-auto px-4 py-4">
             <div className="space-y-4">
-              {categories.map((category) => (
-                <div key={category.name} className="space-y-2">
-                  <h3 className="font-semibold text-sm text-primary">
-                    {category.name}
-                  </h3>
-                  <div className="pl-4 space-y-1">
-                    {category.subcategories.map((subcategory) => (
-                      <Link
-                        key={subcategory}
-                        href={`/category/${category.name.toLowerCase()}/${subcategory.toLowerCase().replace(/[^a-z0-9]/g, "-")}`}
-                        className="block py-1 text-sm text-gray-600 hover:text-primary hover:bg-primary/5 px-2 rounded transition-all duration-200 cursor-pointer"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {subcategory}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ))}
+              {/* Only render if categoriesData is loaded */}
+              {categoriesData === undefined ? null : (
+                fetchedCategories.length === 0 ? (
+                  <div className="text-muted-foreground py-4 text-center">No categories found</div>
+                ) : (
+                  fetchedCategories.map((category) => (
+                    <div key={category.id} className="space-y-2">
+                      <h3 className="font-semibold text-sm text-primary">
+                        {category.name}
+                      </h3>
+                      <div className="pl-4 space-y-1">
+                        {category.children && category.children.length > 0 ? (
+                          category.children.map((subcategory) => (
+                            <Link
+                              key={subcategory.id}
+                              href={`/category/${category.slug}/${subcategory.slug}`}
+                              className="block py-1 text-sm text-gray-600 hover:text-primary hover:bg-primary/5 px-2 rounded transition-all duration-200 cursor-pointer"
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              {subcategory.name}
+                            </Link>
+                          ))
+                        ) : (
+                          <Link
+                            href={`/category/${category.slug}`}
+                            className="block py-1 text-sm text-gray-600 hover:text-primary hover:bg-primary/5 px-2 rounded transition-all duration-200 cursor-pointer"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            {category.name}
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )
+              )}
             </div>
           </div>
 
