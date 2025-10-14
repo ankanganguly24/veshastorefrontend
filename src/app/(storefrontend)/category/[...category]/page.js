@@ -4,10 +4,10 @@ export default function CategoryPage({ params }) {
   const { category } = params || {};
   
   // Handle category parameter - it could be an array or string
-  const categoryName = Array.isArray(category) 
-    ? category.join(' ').replace(/-/g, ' ') 
-    : typeof category === 'string' 
-    ? category.replace(/-/g, ' ') 
+  const categoryName = Array.isArray(category)
+    ? category.map((c) => c.replace(/-/g, ' ')).join(' / ')
+    : typeof category === 'string'
+    ? category.replace(/-/g, ' ')
     : 'All Products';
   
   const categoryPath = Array.isArray(category) ? category.join('/') : category || '';
