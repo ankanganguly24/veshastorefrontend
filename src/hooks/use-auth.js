@@ -1,41 +1,52 @@
+'use client'; // ensure runs only on browser in Next.js
+
 import axios from 'axios';
 import useAuthStore from '../stores/auth-store';
 
-// Set baseURL from environment variable
+// ✅ Create axios instance configured for cookies
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
-  // ...existing config (baseURL, etc.)...
+  withCredentials: true, // 👈 crucial for sending/receiving cookies
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-// Add a request interceptor to include the token
+// ✅ Request interceptor (for logging/debugging only)
 api.interceptors.request.use(
   (config) => {
-    const token = useAuthStore.getState().getToken();
-    console.log("Axios Request:", {
+    console.log('Axios Request:', {
       url: config.url,
       method: config.method,
-      token,
-      headersBefore: { ...config.headers }
+      headersBefore: { ...config.headers },
     });
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
-      console.log("Authorization header set:", config.headers['Authorization']);
-    } else {
-      console.warn("No auth token found in store! Make sure to call useAuthStore.getState().setToken(auth_token) after login.");
-    }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-export default api;
+// ✅ Optional: response interceptor for logging
+api.interceptors.response.use(
+  (response) => {
+    console.log('✅ Axios Response:', {
+      url: response.config.url,
+      status: response.status,
+      data: response.data,
+    });
+    return response;
+  },
+  (error) => {
+    if (error.response) {
+      console.error('❌ Axios Error:', {
+        url: error.config?.url,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+    } else {
+      console.error('❌ Axios Network Error:', error.message);
+    }
+    return Promise.reject(error);
+  }
+);
 
-// ...existing code...
-const handleLogin = async (credentials) => {
-  const response = await api.post('/auth/login', credentials);
-  // Set token in Zustand store
-  useAuthStore.getState().setToken(response.data.auth_token); // <-- Make sure this matches your API response key
-  useAuthStore.getState().setUser(response.data.user); // If you have user info
-  useAuthStore.getState().setAuthenticated(true);
-  // ...existing code...
-};
+export default api;

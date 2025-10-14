@@ -23,11 +23,12 @@ import { cn } from "@/lib/utils";
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Products", href: "/admin/products", icon: Package },
-  { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { name: "Category", href: "/admin/category", icon: ShoppingCart },
+  { name: "Options", href: "/admin/options", icon: FileText},
+  // { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { name: "Customers", href: "/admin/customers", icon: Users },
-  { name: "CMS", href: "/admin/cms", icon: FileText },
-  { name: "Shipping", href: "/admin/shipping", icon: Truck },
+  // { name: "CMS", href: "/admin/cms", icon: FileText },
+  // { name: "Shipping", href: "/admin/shipping", icon: Truck },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 

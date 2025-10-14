@@ -72,16 +72,20 @@ export default function CategoryForm({ category = null, onSuccess = () => {} }) 
 
   const onSubmit = async (data) => {
     try {
+      // Fix: convert "null" string to actual null for parent_id
+      const payload = {
+        ...data,
+        parent_id: data.parent_id === "null" ? null : data.parent_id,
+      };
+
       if (isEditing) {
         if (!category.id) {
           throw new Error("Cannot update: Missing category ID");
         }
-        // Use correct endpoint for update
-        await api.put(`/product/category/${category.id}`, data);
+        await api.put(`/product/category/${category.id}`, payload);
         toast.success("Category updated successfully");
       } else {
-        // Use correct endpoint for create
-        await api.post("/product/category", data);
+        await api.post("/product/category", payload);
         toast.success("Category created successfully");
       }
       form.reset();
