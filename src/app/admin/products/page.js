@@ -9,86 +9,36 @@ import { StatusBadge } from "@/components/common/status-badge";
 import { PageHeader } from "@/components/common/page-header";
 import { DataTable } from "@/components/common/data-table";
 import { TableActions } from "@/components/common/table-actions";
-
-const products = [
-	{
-		id: 1,
-		name: "Organic Cotton T-Shirt",
-		category: "T-Shirts",
-		price: "₹2,299",
-		stock: 150,
-		status: "active",
-		image: "/api/placeholder/60/60",
-		sku: "OCT-001",
-		size: "S, M, L, XL",
-		color: "White, Black, Navy",
-	},
-	{
-		id: 2,
-		name: "Slim Fit Jeans",
-		category: "Jeans",
-		price: "₹5,999",
-		stock: 75,
-		status: "active",
-		image: "/api/placeholder/60/60",
-		sku: "SFJ-002",
-		size: "28, 30, 32, 34, 36",
-		color: "Blue, Black",
-	},
-	{
-		id: 3,
-		name: "Summer Dress",
-		category: "Dresses",
-		price: "₹4,499",
-		stock: 0,
-		status: "out_of_stock",
-		image: "/api/placeholder/60/60",
-		sku: "SD-003",
-		size: "XS, S, M, L",
-		color: "Floral, Solid",
-	},
-	{
-		id: 4,
-		name: "Casual Hoodie",
-		category: "Hoodies",
-		price: "₹3,699",
-		stock: 200,
-		status: "active",
-		image: "/api/placeholder/60/60",
-		sku: "CH-004",
-		size: "S, M, L, XL, XXL",
-		color: "Gray, Black, White",
-	},
-	{
-		id: 5,
-		name: "Formal Blazer",
-		category: "Blazers",
-		price: "₹9,799",
-		stock: 45,
-		status: "low_stock",
-		image: "/api/placeholder/60/60",
-		sku: "FB-005",
-		size: "36, 38, 40, 42, 44",
-		color: "Navy, Black, Charcoal",
-	},
-];
+import { useQuery } from "@tanstack/react-query";
+import { ProductService } from "@/services/product-service";
 
 export default function ProductsPage() {
 	const [searchTerm, setSearchTerm] = useState("");
 
+	// Fetch products from API
+	const { data, isLoading } = useQuery({
+		queryKey: ["products"],
+		queryFn: async () => {
+			const res = await ProductService.getAll();
+			// API returns { success, data: { products: [...] } }
+			return res.data?.products || [];
+		},
+	});
+
 	const filteredProducts = useMemo(() => {
-		return products.filter(
+		if (!data) return [];
+		return data.filter(
 			(product) =>
-				product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				product.sku.toLowerCase().includes(searchTerm.toLowerCase())
+				product.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				(product.categories?.[0]?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+				product.variants?.[0]?.sku?.toLowerCase().includes(searchTerm.toLowerCase())
 		);
-	}, [searchTerm]);
+	}, [searchTerm, data]);
 
 	const columns = useMemo(
 		() => [
 			{
-				accessorKey: "name",
+				accessorKey: "title",
 				header: "Product",
 				cell: ({ row }) => {
 					const product = row.original;
@@ -98,43 +48,82 @@ export default function ProductsPage() {
 								<Package className="h-6 w-6 text-muted-foreground" />
 							</div>
 							<div>
-								<p className="font-medium text-foreground">{product.name}</p>
-								<p className="text-sm text-muted-foreground">SKU: {product.sku}</p>
+								<p className="font-medium text-foreground">{product.title}</p>
+								<p className="text-sm text-muted-foreground">
+									SKU: {product.variants?.[0]?.sku || "-"}
+								</p>
 							</div>
 						</div>
 					);
 				},
 			},
 			{
-				accessorKey: "category",
+				accessorKey: "categories",
 				header: "Category",
-			},
-			{
-				accessorKey: "price",
-				header: "Price",
-				cell: ({ getValue }) => <span className="font-medium">{getValue()}</span>,
-			},
-			{
-				accessorKey: "stock",
-				header: "Stock",
-			},
-			{
-				id: "variants",
-				header: "Variants",
 				cell: ({ row }) => {
 					const product = row.original;
 					return (
+						<span>
+							{product.categories && product.categories.length > 0
+								? product.categories.map((cat) => cat.name).join(", ")
+								: "-"}
+						</span>
+					);
+				},
+			},
+			{
+				id: "price", // <-- unique id for price column
+				header: "Price",
+				cell: ({ row }) => {
+					const product = row.original;
+					const price = product.variants?.[0]?.price;
+					return <span className="font-medium">{price ? `₹${price}` : "-"}</span>;
+				},
+			},
+			{
+				id: "stock", // <-- unique id for stock column
+				header: "Stock",
+				cell: ({ row }) => {
+					const product = row.original;
+					const stock = product.variants?.[0]?.stock_quantity;
+					return <span>{stock ?? "-"}</span>;
+				},
+			},
+			{
+				id: "variantDetails", // <-- unique id for variants details column
+				header: "Variants",
+				cell: ({ row }) => {
+					const product = row.original;
+					const sizes = product.variants
+						?.map((v) =>
+							v.variantOptions
+								?.filter((opt) => opt.optionValue?.optionDefinition?.name === "size")
+								.map((opt) => opt.optionValue?.value)
+								.join(", ")
+						)
+						.filter(Boolean)
+						.join(" | ");
+					const colors = product.variants
+						?.map((v) =>
+							v.variantOptions
+								?.filter((opt) => opt.optionValue?.optionDefinition?.name === "color")
+								.map((opt) => opt.optionValue?.value)
+								.join(", ")
+						)
+						.filter(Boolean)
+						.join(" | ");
+					return (
 						<div>
-							<p className="text-sm text-foreground">Sizes: {product.size}</p>
-							<p className="text-sm text-muted-foreground">Colors: {product.color}</p>
+							<p className="text-sm text-foreground">Sizes: {sizes || "-"}</p>
+							<p className="text-sm text-muted-foreground">Colors: {colors || "-"}</p>
 						</div>
 					);
 				},
 			},
 			{
-				accessorKey: "status",
+				accessorKey: "is_active",
 				header: "Status",
-				cell: ({ getValue }) => <StatusBadge status={getValue()} />,
+				cell: ({ getValue }) => <StatusBadge status={getValue() ? "active" : "inactive"} />,
 			},
 			{
 				id: "actions",
@@ -182,6 +171,7 @@ export default function ProductsPage() {
 				data={filteredProducts}
 				columns={columns}
 				title="All Products"
+				loading={isLoading}
 			/>
 		</div>
 	);
