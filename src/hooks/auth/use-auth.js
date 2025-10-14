@@ -1,27 +1,52 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api-client';
+import apiClient from '@/lib/api-client';
 import useAuthStore from '@/stores/auth-store';
-import { useToast } from '@/components/common/toast';
+import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
 export const useLogin = () => {
-  const setUser = useAuthStore((state) => state.setUser);
+  const { setUser, setAuthenticated } = useAuthStore();
   const { success, error } = useToast();
   const router = useRouter();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (credentials) => {
-      console.log('Login attempt with:', { email: credentials.email });
-      const response = await apiClient.post('/auth/login', credentials);
+      console.log('Attempting login with credentials...');
+      // Set explicit credentials option
+      const response = await apiClient.post('/auth/login', credentials, {
+        withCredentials: true
+      });
+      
+      // Verify the response has the expected structure
+      if (!response.data || !response.data.success) {
+        throw new Error('Invalid server response');
+      }
+      
       return response;
     },
-    onSuccess: (data) => {
-      console.log('Login successful:', data);
-      setUser(data.data.user);
-      success('Login successful! Welcome back!');
-      queryClient.invalidateQueries({ queryKey: ['user'] });
-      router.push('/profile');
+    onSuccess: (response) => {
+      console.log('Login API call successful');
+      
+      // Verify cookie was set (can only check for existence, not content due to HTTP-only)
+      if (typeof document !== 'undefined') {
+        const hasCookies = document.cookie.length > 0;
+        console.log('Cookies present after login:', hasCookies);
+      }
+      
+      // Store user data
+      if (response.data && response.data.data && response.data.data.user) {
+        const userData = response.data.data.user;
+        setUser(userData);
+        setAuthenticated(true);
+        
+        success('Login successful! Welcome back!');
+        queryClient.invalidateQueries({ queryKey: ['user'] });
+        router.push('/profile');
+      } else {
+        console.error('Unexpected login response structure:', response.data);
+        error('Login response format error');
+      }
     },
     onError: (err) => {
       console.error('Login error:', err);
@@ -44,15 +69,10 @@ export const useRegister = () => {
 
   return useMutation({
     mutationFn: async (userData) => {
-      console.log('Register attempt with:', { 
-        email: userData.email, 
-        phone: userData.phone 
-      });
       const response = await apiClient.post('/auth/register', userData);
       return response;
     },
     onSuccess: (data) => {
-      console.log('Registration successful:', data);
       success('Account created successfully! Please login to continue.');
       router.push('/login');
     },
@@ -74,23 +94,37 @@ export const useRegister = () => {
 };
 
 export const useLogout = () => {
-  const logout = useAuthStore((state) => state.logout);
+  const { logout } = useAuthStore();
   const { success } = useToast();
   const router = useRouter();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async () => {
+      try {
+        // Send logout request with credentials to properly clear the cookie
+        await apiClient.post('/auth/logout', {}, {
+          withCredentials: true,
+          credentials: 'include'
+        });
+      } catch (error) {
+        console.log('Logout API call failed, proceeding with client-side logout');
+      }
       return Promise.resolve();
     },
     onSuccess: () => {
+      // Clear local auth state
       logout();
+      
+      // Clear React Query cache to prevent stale data
       queryClient.clear();
+      
       success('Logged out successfully');
       router.push('/login');
     },
     onError: (err) => {
       console.error('Logout error:', err);
+      // Even if the API call fails, we still want to logout locally
       logout();
       router.push('/login');
     },

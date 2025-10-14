@@ -123,6 +123,14 @@ export default function StoreNavbar() {
     };
   }, []);
 
+  // Add a check on component mount to see if there's a saved user in auth store
+  useEffect(() => {
+    // If we have user data but isAuthenticated is false, set it to true
+    if (user && !isAuthenticated) {
+      useAuthStore.getState().setAuthenticated(true);
+    }
+  }, [user, isAuthenticated]);
+
   const handleSearchChange = (e) => {
     setSearchValue(e.target.value);
   };

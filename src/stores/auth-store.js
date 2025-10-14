@@ -1,57 +1,63 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 
 const useAuthStore = create(
   persist(
     (set, get) => ({
       user: null,
       isAuthenticated: false,
-      isLoading: false,
-
-      setUser: (user) => {
-        console.log('Setting user:', user); // Debug log
+      
+      // Set user after login
+      setUser: (userData) => {
+        if (!userData) return;
+        
         set({
-          user,
-          isAuthenticated: !!user,
+          user: userData
         });
       },
-
-      setLoading: (isLoading) => set({ isLoading }),
-
+      
+      // Set authentication status
+      setAuthenticated: (status) => {
+        set({
+          isAuthenticated: !!status
+        });
+      },
+      
+      // Check if user is authenticated (for components to use)
+      checkAuth: () => {
+        return get().isAuthenticated && !!get().user;
+      },
+      
+      // Clear user data on logout
       logout: () => {
-        console.log('Logging out user'); // Debug log
         set({
           user: null,
-          isAuthenticated: false,
+          isAuthenticated: false
         });
       },
-
-      updateUser: (userData) => set((state) => ({
-        user: state.user ? { ...state.user, ...userData } : null,
-      })),
-
-      // Helper methods
+      
+      // Helper to get user's full name
       getFullName: () => {
-        const { user } = get();
+        const user = get().user;
         if (!user) return '';
-        return `${user.first_name} ${user.last_name}`.trim();
+        return `${user.first_name || ''} ${user.last_name || ''}`.trim();
       },
-
+      
+      // Helper to get user's initials for avatar
       getUserInitials: () => {
-        const { user } = get();
-        if (!user) return 'U';
-        const firstInitial = user.first_name?.[0] || '';
-        const lastInitial = user.last_name?.[0] || '';
-        return `${firstInitial}${lastInitial}`.toUpperCase() || 'U';
+        const user = get().user;
+        if (!user) return '';
+        
+        const firstInitial = user.first_name ? user.first_name.charAt(0).toUpperCase() : '';
+        const lastInitial = user.last_name ? user.last_name.charAt(0).toUpperCase() : '';
+        
+        return firstInitial + lastInitial;
       },
     }),
     {
       name: 'auth-storage',
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-      }),
+      // Use localStorage only for the user data, not for auth tokens
+      getStorage: () => localStorage,
     }
   )
 );

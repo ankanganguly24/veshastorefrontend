@@ -39,6 +39,10 @@ export default function Login() {
   });
 
   const onSubmit = async (data) => {
+    // Track the attempt for debugging
+    console.log("Login attempt with:", data.email);
+
+    // Add withCredentials option to ensure cookies are included
     loginMutation.mutate({
       email: data.email,
       password: data.password,
