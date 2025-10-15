@@ -154,16 +154,34 @@ export default function AddProductPage() {
     setIsLoading(true);
     try {
       const payload = {
-        ...data,
-        categories: selectedCategoryIds,
         title: data.name,
         slug: slugify(data.name || ""),
         description: data.description,
         is_active: true,
-        media: images.map((img) => ({ url: img.url, alt: img.name })),
-        variants, // use variants from ProductVariantsEditor
+        categories: selectedCategoryIds,
+        variants: variants.map((variant) => ({
+          sku: variant.sku,
+          price: Number(variant.price),
+          compare_at_price: variant.compare_at_price ? Number(variant.compare_at_price) : undefined,
+          stock_quantity: Number(variant.stock_quantity),
+          is_default: variant.is_default ?? true,
+          barcode: variant.barcode,
+          weight_value: variant.weight_value ? Number(variant.weight_value) : undefined,
+          weight_unit_id: variant.weight_unit_id,
+          length_value: variant.length_value ? Number(variant.length_value) : undefined,
+          length_unit_id: variant.length_unit_id,
+          width_value: variant.width_value ? Number(variant.width_value) : undefined,
+          width_unit_id: variant.width_unit_id,
+          height_value: variant.height_value ? Number(variant.height_value) : undefined,
+          height_unit_id: variant.height_unit_id,
+          is_active: variant.is_active ?? true,
+          is_returnable: variant.is_returnable ?? true,
+          return_in_days: variant.return_in_days ? Number(variant.return_in_days) : undefined,
+          option_value_ids: variant.option_value_ids,
+        })),
       };
 
+      // Log the payload when Create Product is clicked
       console.log("Product payload:", payload);
 
       const res = await fetch("/api/admin/products", {
@@ -415,6 +433,38 @@ export default function AddProductPage() {
                       type="submit"
                       disabled={isLoading}
                       className="w-full"
+                      onClick={() => {
+                        // This will log the payload when the button is clicked
+                        const data = form.getValues();
+                        const payload = {
+                          title: data.name,
+                          slug: slugify(data.name || ""),
+                          description: data.description,
+                          is_active: true,
+                          categories: selectedCategoryIds,
+                          variants: variants.map((variant) => ({
+                            sku: variant.sku,
+                            price: Number(variant.price),
+                            compare_at_price: variant.compare_at_price ? Number(variant.compare_at_price) : undefined,
+                            stock_quantity: Number(variant.stock_quantity),
+                            is_default: variant.is_default ?? true,
+                            barcode: variant.barcode,
+                            weight_value: variant.weight_value ? Number(variant.weight_value) : undefined,
+                            weight_unit_id: variant.weight_unit_id,
+                            length_value: variant.length_value ? Number(variant.length_value) : undefined,
+                            length_unit_id: variant.length_unit_id,
+                            width_value: variant.width_value ? Number(variant.width_value) : undefined,
+                            width_unit_id: variant.width_unit_id,
+                            height_value: variant.height_value ? Number(variant.height_value) : undefined,
+                            height_unit_id: variant.height_unit_id,
+                            is_active: variant.is_active ?? true,
+                            is_returnable: variant.is_returnable ?? true,
+                            return_in_days: variant.return_in_days ? Number(variant.return_in_days) : undefined,
+                            option_value_ids: variant.option_value_ids,
+                          })),
+                        };
+                        console.log("Product payload:", payload);
+                      }}
                     >
                       {isLoading ? "Creating..." : "Create Product"}
                     </Button>
