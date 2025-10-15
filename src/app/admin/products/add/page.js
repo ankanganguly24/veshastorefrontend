@@ -359,6 +359,16 @@ export default function AddProductPage() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Variants */}
+              <Card className="mb-6 p-4 bg-white border border-primary/10 rounded-xl shadow">
+                <h2 className="text-lg font-bold text-primary mb-2">Variants</h2>
+                <ProductVariantsEditor
+                  options={options}
+                  variants={variants}
+                  setVariants={setVariants}
+                />
+              </Card>
             </div>
 
             {/* Sidebar */}
@@ -395,16 +405,6 @@ export default function AddProductPage() {
         </ul>
       </div>
                 </CardContent>
-              </Card>
-
-              {/* Variants */}
-              <Card className="mb-6 p-4 bg-white border border-primary/10 rounded-xl shadow">
-                <h2 className="text-lg font-bold text-primary mb-2">Variants</h2>
-                <ProductVariantsEditor
-                  options={options}
-                  variants={variants}
-                  setVariants={setVariants}
-                />
               </Card>
 
               {/* Actions */}

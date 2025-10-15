@@ -5,6 +5,29 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { OptionService } from "@/services/option-service";
 import { OptionValueService } from "@/services/option-value-service";
 import { UnitService } from "@/services/unit-service";
+import { z } from "zod";
+
+// Zod schema for variant validation
+const variantSchema = z.object({
+  sku: z.string().min(1, "SKU is required"),
+  price: z.preprocess(val => Number(val), z.number().min(0.01, "Price must be greater than 0")),
+  compare_at_price: z.preprocess(val => val === "" ? undefined : Number(val), z.number().optional()),
+  stock_quantity: z.preprocess(val => Number(val), z.number().int().min(0, "Stock must be 0 or more")),
+  barcode: z.string().optional(),
+  weight_value: z.preprocess(val => val === "" ? undefined : Number(val), z.number().min(0, "Weight must be 0 or more").optional()),
+  weight_unit_id: z.string().optional(),
+  length_value: z.preprocess(val => val === "" ? undefined : Number(val), z.number().min(0, "Length must be 0 or more").optional()),
+  length_unit_id: z.string().optional(),
+  width_value: z.preprocess(val => val === "" ? undefined : Number(val), z.number().min(0, "Width must be 0 or more").optional()),
+  width_unit_id: z.string().optional(),
+  height_value: z.preprocess(val => val === "" ? undefined : Number(val), z.number().min(0, "Height must be 0 or more").optional()),
+  height_unit_id: z.string().optional(),
+  is_active: z.boolean().optional(),
+  is_default: z.boolean().optional(),
+  is_returnable: z.boolean().optional(),
+  return_in_days: z.preprocess(val => val === "" ? undefined : Number(val), z.number().int().min(0, "Return days must be 0 or more").optional()),
+  option_value_ids: z.array(z.string()).min(1, "Select all required options"),
+});
 
 const defaultVariantFields = {
   sku: "",
@@ -40,6 +63,9 @@ export default function ProductVariantsEditor({ options: initialOptions, variant
   const [allUnits, setAllUnits] = useState([]);
   const [isLoadingUnits, setIsLoadingUnits] = useState(false);
 
+  // Error state
+  const [errors, setErrors] = useState({});
+
   // Open modal for option definition
   const handleOpenOptionModal = (option) => {
     setActiveOption(option);
@@ -51,16 +77,39 @@ export default function ProductVariantsEditor({ options: initialOptions, variant
     setModalOpen(true);
   };
 
+  // Helper to generate SKU from selected option values
+  const generateSku = (optionValueIds, options) => {
+    if (!options || !optionValueIds) return "";
+    const skuParts = options.map(opt => {
+      const val = opt.values.find(v => optionValueIds.includes(v.id));
+      return val ? (val.code || val.value || val.name || "") : "";
+    }).filter(Boolean);
+    return skuParts.join("-").toUpperCase();
+  };
+
+  // Update SKU when option values change
+  const updateSkuFromOptions = (optionValueIds) => {
+    const autoSku = generateSku(optionValueIds, options);
+    setVariant(prev => ({
+      ...prev,
+      sku: autoSku,
+      option_value_ids: optionValueIds,
+    }));
+  };
+
   // Save selected value for option definition
   const handleSaveOptionValue = () => {
     setVariant((prev) => {
-      // Remove previous value for this option group
       const otherIds = prev.option_value_ids.filter(
         (id) => !activeOption.values.some(val => val.id === id)
       );
+      const newOptionValueIds = selectedValueId ? [...otherIds, selectedValueId] : otherIds;
+      // Auto-generate SKU
+      const autoSku = generateSku(newOptionValueIds, options);
       return {
         ...prev,
-        option_value_ids: selectedValueId ? [...otherIds, selectedValueId] : otherIds,
+        option_value_ids: newOptionValueIds,
+        sku: autoSku,
       };
     });
     setModalOpen(false);
@@ -81,20 +130,32 @@ export default function ProductVariantsEditor({ options: initialOptions, variant
   };
 
   const handleAddVariant = () => {
-    // Validate required fields (sku, price, stock_quantity, option_value_ids)
-    if (
-      !variant.sku ||
-      !variant.price ||
-      !variant.stock_quantity ||
-      options.some(opt =>
-        !variant.option_value_ids.some(id => opt.values.some(val => val.id === id))
-      )
-    ) {
-      alert("Please fill SKU, price, stock, and select all required options.");
-      return;
+    // Validate with Zod
+    try {
+      // Ensure all required options are selected
+      const requiredOptionIds = options.map(opt =>
+        variant.option_value_ids.find(id => opt.values.some(val => val.id === id))
+      );
+      if (requiredOptionIds.some(id => !id)) {
+        setErrors({ option_value_ids: "Select all required options" });
+        return;
+      }
+      const parsed = variantSchema.parse(variant);
+      setVariants([...variants, parsed]);
+      setVariant(defaultVariantFields);
+      setErrors({});
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        // Map errors to field names
+        const fieldErrors = {};
+        err.errors.forEach(e => {
+          if (e.path && e.path.length > 0) {
+            fieldErrors[e.path[0]] = e.message;
+          }
+        });
+        setErrors(fieldErrors);
+      }
     }
-    setVariants([...variants, variant]);
-    setVariant(defaultVariantFields);
   };
 
   const handleRemoveVariant = (idx) => {
@@ -167,42 +228,65 @@ export default function ProductVariantsEditor({ options: initialOptions, variant
                   </div>
                 );
               })}
-              <Input
-                placeholder="SKU"
-                value={variant.sku}
-                onChange={e => handleFieldChange("sku", e.target.value)}
-              />
-              <Input
-                placeholder="Price"
-                type="number"
-                value={variant.price}
-                onChange={e => handleFieldChange("price", e.target.value)}
-              />
-              <Input
-                placeholder="Compare at Price"
-                type="number"
-                value={variant.compare_at_price}
-                onChange={e => handleFieldChange("compare_at_price", e.target.value)}
-              />
-              <Input
-                placeholder="Stock Quantity"
-                type="number"
-                value={variant.stock_quantity}
-                onChange={e => handleFieldChange("stock_quantity", e.target.value)}
-              />
-              <Input
-                placeholder="Barcode"
-                value={variant.barcode}
-                onChange={e => handleFieldChange("barcode", e.target.value)}
-              />
+              {/* SKU */}
+              <div>
+                <Input
+                  placeholder="SKU"
+                  value={variant.sku}
+                  onChange={e => handleFieldChange("sku", e.target.value)}
+                />
+                {errors.sku && <div className="text-destructive text-xs mt-1">{errors.sku}</div>}
+              </div>
+              {/* Price */}
+              <div>
+                <Input
+                  placeholder="Price"
+                  type="number"
+                  value={variant.price}
+                  onChange={e => handleFieldChange("price", e.target.value)}
+                />
+                {errors.price && <div className="text-destructive text-xs mt-1">{errors.price}</div>}
+              </div>
+              {/* Compare at Price */}
+              <div>
+                <Input
+                  placeholder="Compare at Price"
+                  type="number"
+                  value={variant.compare_at_price}
+                  onChange={e => handleFieldChange("compare_at_price", e.target.value)}
+                />
+                {errors.compare_at_price && <div className="text-destructive text-xs mt-1">{errors.compare_at_price}</div>}
+              </div>
+              {/* Stock Quantity */}
+              <div>
+                <Input
+                  placeholder="Stock Quantity"
+                  type="number"
+                  value={variant.stock_quantity}
+                  onChange={e => handleFieldChange("stock_quantity", e.target.value)}
+                />
+                {errors.stock_quantity && <div className="text-destructive text-xs mt-1">{errors.stock_quantity}</div>}
+              </div>
+              {/* Barcode */}
+              <div>
+                <Input
+                  placeholder="Barcode"
+                  value={variant.barcode}
+                  onChange={e => handleFieldChange("barcode", e.target.value)}
+                />
+                {errors.barcode && <div className="text-destructive text-xs mt-1">{errors.barcode}</div>}
+              </div>
               {/* Weight */}
               <div className="flex gap-2 items-center">
-                <Input
-                  placeholder="Weight"
-                  type="number"
-                  value={variant.weight_value}
-                  onChange={e => handleFieldChange("weight_value", e.target.value)}
-                />
+                <div className="flex-1">
+                  <Input
+                    placeholder="Weight"
+                    type="number"
+                    value={variant.weight_value}
+                    onChange={e => handleFieldChange("weight_value", e.target.value)}
+                  />
+                  {errors.weight_value && <div className="text-destructive text-xs mt-1">{errors.weight_value}</div>}
+                </div>
                 <select
                   value={variant.weight_unit_id}
                   onChange={e => handleFieldChange("weight_unit_id", e.target.value)}
@@ -215,15 +299,19 @@ export default function ProductVariantsEditor({ options: initialOptions, variant
                     </option>
                   ))}
                 </select>
+                {errors.weight_unit_id && <div className="text-destructive text-xs mt-1">{errors.weight_unit_id}</div>}
               </div>
               {/* Length */}
               <div className="flex gap-2 items-center">
-                <Input
-                  placeholder="Length"
-                  type="number"
-                  value={variant.length_value}
-                  onChange={e => handleFieldChange("length_value", e.target.value)}
-                />
+                <div className="flex-1">
+                  <Input
+                    placeholder="Length"
+                    type="number"
+                    value={variant.length_value}
+                    onChange={e => handleFieldChange("length_value", e.target.value)}
+                  />
+                  {errors.length_value && <div className="text-destructive text-xs mt-1">{errors.length_value}</div>}
+                </div>
                 <select
                   value={variant.length_unit_id}
                   onChange={e => handleFieldChange("length_unit_id", e.target.value)}
@@ -236,15 +324,19 @@ export default function ProductVariantsEditor({ options: initialOptions, variant
                     </option>
                   ))}
                 </select>
+                {errors.length_unit_id && <div className="text-destructive text-xs mt-1">{errors.length_unit_id}</div>}
               </div>
               {/* Width */}
               <div className="flex gap-2 items-center">
-                <Input
-                  placeholder="Width"
-                  type="number"
-                  value={variant.width_value}
-                  onChange={e => handleFieldChange("width_value", e.target.value)}
-                />
+                <div className="flex-1">
+                  <Input
+                    placeholder="Width"
+                    type="number"
+                    value={variant.width_value}
+                    onChange={e => handleFieldChange("width_value", e.target.value)}
+                  />
+                  {errors.width_value && <div className="text-destructive text-xs mt-1">{errors.width_value}</div>}
+                </div>
                 <select
                   value={variant.width_unit_id}
                   onChange={e => handleFieldChange("width_unit_id", e.target.value)}
@@ -257,15 +349,19 @@ export default function ProductVariantsEditor({ options: initialOptions, variant
                     </option>
                   ))}
                 </select>
+                {errors.width_unit_id && <div className="text-destructive text-xs mt-1">{errors.width_unit_id}</div>}
               </div>
               {/* Height */}
               <div className="flex gap-2 items-center">
-                <Input
-                  placeholder="Height"
-                  type="number"
-                  value={variant.height_value}
-                  onChange={e => handleFieldChange("height_value", e.target.value)}
-                />
+                <div className="flex-1">
+                  <Input
+                    placeholder="Height"
+                    type="number"
+                    value={variant.height_value}
+                    onChange={e => handleFieldChange("height_value", e.target.value)}
+                  />
+                  {errors.height_value && <div className="text-destructive text-xs mt-1">{errors.height_value}</div>}
+                </div>
                 <select
                   value={variant.height_unit_id}
                   onChange={e => handleFieldChange("height_unit_id", e.target.value)}
@@ -278,14 +374,23 @@ export default function ProductVariantsEditor({ options: initialOptions, variant
                     </option>
                   ))}
                 </select>
+                {errors.height_unit_id && <div className="text-destructive text-xs mt-1">{errors.height_unit_id}</div>}
               </div>
-              <Input
-                placeholder="Return in Days"
-                type="number"
-                value={variant.return_in_days}
-                onChange={e => handleFieldChange("return_in_days", e.target.value)}
-              />
-              {/* Add toggles for is_active, is_default, is_returnable if needed */}
+              {/* Return in Days */}
+              <div>
+                <Input
+                  placeholder="Return in Days"
+                  type="number"
+                  value={variant.return_in_days}
+                  onChange={e => handleFieldChange("return_in_days", e.target.value)}
+                />
+                {errors.return_in_days && <div className="text-destructive text-xs mt-1">{errors.return_in_days}</div>}
+              </div>
+              {/* Option errors */}
+              {errors.option_value_ids && (
+                <div className="text-destructive text-xs mt-1 col-span-2">{errors.option_value_ids}</div>
+              )}
+              {/* ...other fields/toggles if needed... */}
             </div>
           )}
         </>
