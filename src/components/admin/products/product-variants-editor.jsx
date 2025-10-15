@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { OptionService } from "@/services/option-service";
 import { OptionValueService } from "@/services/option-value-service";
+import { UnitService } from "@/services/unit-service";
 
 const defaultVariantFields = {
   sku: "",
@@ -34,6 +35,10 @@ export default function ProductVariantsEditor({ options: initialOptions, variant
   const [showOptions, setShowOptions] = useState(false);
   const [options, setOptions] = useState(initialOptions || []);
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
+
+  // Unit state
+  const [allUnits, setAllUnits] = useState([]);
+  const [isLoadingUnits, setIsLoadingUnits] = useState(false);
 
   // Open modal for option definition
   const handleOpenOptionModal = (option) => {
@@ -98,9 +103,11 @@ export default function ProductVariantsEditor({ options: initialOptions, variant
 
   const handleShowOptions = async () => {
     setShowOptions(true);
-    if (options.length === 0) {
-      setIsLoadingOptions(true);
-      try {
+    setIsLoadingOptions(true);
+    setIsLoadingUnits(true);
+    try {
+      // Fetch options
+      if (options.length === 0) {
         const optionResponse = await OptionService.getAll();
         const valueResponse = await OptionValueService.getAll();
         if (
@@ -117,11 +124,17 @@ export default function ProductVariantsEditor({ options: initialOptions, variant
           }));
           setOptions(optionsWithValues);
         }
-      } catch (err) {
-        // Optionally handle error
-      } finally {
-        setIsLoadingOptions(false);
       }
+      // Fetch all units
+      const unitRes = await UnitService.getAllUnits();
+      if (unitRes.success && Array.isArray(unitRes.data.units)) {
+        setAllUnits(unitRes.data.units);
+      }
+    } catch (err) {
+      // Optionally handle error
+    } finally {
+      setIsLoadingOptions(false);
+      setIsLoadingUnits(false);
     }
   };
 
@@ -132,8 +145,8 @@ export default function ProductVariantsEditor({ options: initialOptions, variant
       </Button>
       {showOptions && (
         <>
-          {isLoadingOptions ? (
-            <div className="text-muted-foreground mb-4">Loading options...</div>
+          {(isLoadingOptions || isLoadingUnits) ? (
+            <div className="text-muted-foreground mb-4">Loading options & units...</div>
           ) : (
             <div className="mb-4 grid gap-4 md:grid-cols-2">
               {options.map((option) => {
@@ -182,50 +195,90 @@ export default function ProductVariantsEditor({ options: initialOptions, variant
                 value={variant.barcode}
                 onChange={e => handleFieldChange("barcode", e.target.value)}
               />
-              <Input
-                placeholder="Weight"
-                type="number"
-                value={variant.weight_value}
-                onChange={e => handleFieldChange("weight_value", e.target.value)}
-              />
-              <Input
-                placeholder="Weight Unit ID"
-                value={variant.weight_unit_id}
-                onChange={e => handleFieldChange("weight_unit_id", e.target.value)}
-              />
-              <Input
-                placeholder="Length"
-                type="number"
-                value={variant.length_value}
-                onChange={e => handleFieldChange("length_value", e.target.value)}
-              />
-              <Input
-                placeholder="Length Unit ID"
-                value={variant.length_unit_id}
-                onChange={e => handleFieldChange("length_unit_id", e.target.value)}
-              />
-              <Input
-                placeholder="Width"
-                type="number"
-                value={variant.width_value}
-                onChange={e => handleFieldChange("width_value", e.target.value)}
-              />
-              <Input
-                placeholder="Width Unit ID"
-                value={variant.width_unit_id}
-                onChange={e => handleFieldChange("width_unit_id", e.target.value)}
-              />
-              <Input
-                placeholder="Height"
-                type="number"
-                value={variant.height_value}
-                onChange={e => handleFieldChange("height_value", e.target.value)}
-              />
-              <Input
-                placeholder="Height Unit ID"
-                value={variant.height_unit_id}
-                onChange={e => handleFieldChange("height_unit_id", e.target.value)}
-              />
+              {/* Weight */}
+              <div className="flex gap-2 items-center">
+                <Input
+                  placeholder="Weight"
+                  type="number"
+                  value={variant.weight_value}
+                  onChange={e => handleFieldChange("weight_value", e.target.value)}
+                />
+                <select
+                  value={variant.weight_unit_id}
+                  onChange={e => handleFieldChange("weight_unit_id", e.target.value)}
+                  className="border rounded px-2 py-1"
+                >
+                  <option value="">Select Unit</option>
+                  {allUnits.filter(u => u.type === "weight").map(unit => (
+                    <option key={unit.id} value={unit.id}>
+                      {unit.name} ({unit.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {/* Length */}
+              <div className="flex gap-2 items-center">
+                <Input
+                  placeholder="Length"
+                  type="number"
+                  value={variant.length_value}
+                  onChange={e => handleFieldChange("length_value", e.target.value)}
+                />
+                <select
+                  value={variant.length_unit_id}
+                  onChange={e => handleFieldChange("length_unit_id", e.target.value)}
+                  className="border rounded px-2 py-1"
+                >
+                  <option value="">Select Unit</option>
+                  {allUnits.filter(u => u.type === "length").map(unit => (
+                    <option key={unit.id} value={unit.id}>
+                      {unit.name} ({unit.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {/* Width */}
+              <div className="flex gap-2 items-center">
+                <Input
+                  placeholder="Width"
+                  type="number"
+                  value={variant.width_value}
+                  onChange={e => handleFieldChange("width_value", e.target.value)}
+                />
+                <select
+                  value={variant.width_unit_id}
+                  onChange={e => handleFieldChange("width_unit_id", e.target.value)}
+                  className="border rounded px-2 py-1"
+                >
+                  <option value="">Select Unit</option>
+                  {allUnits.filter(u => u.type === "length").map(unit => (
+                    <option key={unit.id} value={unit.id}>
+                      {unit.name} ({unit.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {/* Height */}
+              <div className="flex gap-2 items-center">
+                <Input
+                  placeholder="Height"
+                  type="number"
+                  value={variant.height_value}
+                  onChange={e => handleFieldChange("height_value", e.target.value)}
+                />
+                <select
+                  value={variant.height_unit_id}
+                  onChange={e => handleFieldChange("height_unit_id", e.target.value)}
+                  className="border rounded px-2 py-1"
+                >
+                  <option value="">Select Unit</option>
+                  {allUnits.filter(u => u.type === "length").map(unit => (
+                    <option key={unit.id} value={unit.id}>
+                      {unit.name} ({unit.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
               <Input
                 placeholder="Return in Days"
                 type="number"
