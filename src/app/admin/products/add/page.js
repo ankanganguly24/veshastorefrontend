@@ -27,7 +27,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 const productSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  category: z.string().min(1, "Category is required"),
+  category: z.array(z.string()).min(1, "At least one category must be selected"),
   price: z.string().min(1, "Price is required"),
   sku: z.string().min(1, "SKU is required"),
   stock: z.string().min(1, "Stock quantity is required"),
@@ -74,7 +74,6 @@ export default function AddProductPage() {
       height_value: "",
       height_unit_id: "",
       brand: "",
-      material: "",
     },
   });
 
@@ -286,20 +285,6 @@ export default function AddProductPage() {
                             placeholder="Describe the product features, fit, and care instructions"
                             {...field}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="material"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Material</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., 100% Cotton, Polyester Blend" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
