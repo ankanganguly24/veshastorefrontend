@@ -107,7 +107,7 @@ export default function StoreNavbar() {
                 alt="Vesha"
                 width={180}
                 height={60}
-                className="h-14 w-auto object-contain md:h-16 lg:h-18"
+                className="h-14 w-auto object-contain md:h-28 lg:h-28"
                 priority
               />
             </Link>
