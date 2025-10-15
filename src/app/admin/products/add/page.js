@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -19,6 +19,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
+import { CategoryService } from "@/services/category-service";
+import CategoryTree from "@/components/admin/categories/category-tree";
+import CategoryMultiSelect from "@/components/admin/categories/category-multi-select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 const productSchema = z.object({
   name: z.string().min(1, "Product name is required"),
@@ -27,40 +31,28 @@ const productSchema = z.object({
   price: z.string().min(1, "Price is required"),
   sku: z.string().min(1, "SKU is required"),
   stock: z.string().min(1, "Stock quantity is required"),
+  compare_at_price: z.string().optional(),
+  barcode: z.string().optional(),
+  weight_value: z.string().optional(),
+  weight_unit_id: z.string().optional(),
+  length_value: z.string().optional(),
+  length_unit_id: z.string().optional(),
+  width_value: z.string().optional(),
+  width_unit_id: z.string().optional(),
+  height_value: z.string().optional(),
+  height_unit_id: z.string().optional(),
   brand: z.string().optional(),
   material: z.string().optional(),
 });
-
-const clothingCategories = [
-  "T-Shirts",
-  "Shirts",
-  "Jeans",
-  "Pants",
-  "Dresses",
-  "Skirts",
-  "Hoodies",
-  "Sweatshirts",
-  "Jackets",
-  "Blazers",
-  "Coats",
-  "Shorts",
-  "Activewear",
-  "Underwear",
-  "Sleepwear",
-  "Accessories",
-];
-
-const sizesOptions = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
-const colorsOptions = [
-  "Black", "White", "Gray", "Navy", "Blue", "Red", "Green", 
-  "Yellow", "Pink", "Purple", "Brown", "Beige", "Orange"
-];
 
 export default function AddProductPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [selectedColors, setSelectedColors] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(productSchema),
@@ -71,18 +63,121 @@ export default function AddProductPage() {
       price: "",
       sku: "",
       stock: "",
+      compare_at_price: "",
+      barcode: "",
+      weight_value: "",
+      weight_unit_id: "",
+      length_value: "",
+      length_unit_id: "",
+      width_value: "",
+      width_unit_id: "",
+      height_value: "",
+      height_unit_id: "",
       brand: "",
       material: "",
     },
   });
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setIsLoading(true); // Start loading
+      try {
+        const response = await CategoryService.getCategoriesTree();
+        if (response.success && response.data?.categories_tree) {
+          setCategories(response.data.categories_tree); // Extract categories_tree
+        } else {
+          console.error("Invalid response format:", response);
+        }
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      } finally {
+        setIsLoading(false); // Stop loading
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    console.log("Categories state updated:", categories);
+  }, [categories]);
+
+  const slugify = (text) =>
+    text
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-") // Replace spaces with -
+      .replace(/[^a-z0-9\-]/g, "") // Remove invalid chars
+      .replace(/\-+/g, "-");
+
   const onSubmit = async (data) => {
     setIsLoading(true);
-    // Mock API call
-    setTimeout(() => {
-      console.log("Product data:", { ...data, sizes: selectedSizes, colors: selectedColors, images });
+    try {
+      const payload = {
+        ...data,
+        categories: selectedCategoryIds,
+        title: data.name,
+        slug: slugify(data.name || ""),
+        description: data.description,
+        is_active: true,
+        // brand_ids: [], // include if available
+        media: images.map((img) => ({ url: img.url, alt: img.name })),
+        variants: [
+          {
+            sku: data.sku || `sku-${Date.now()}`,
+            price: parseFloat(data.price) || 0,
+            compare_at_price: null,
+            stock_quantity: parseInt(data.stock, 10) || 0,
+            is_default: true,
+            barcode: "",
+            weight_value: 0.25,
+            // Placeholder unit IDs - replace with real IDs from your system
+            weight_unit_id: "c9385f47-76e0-432e-aca9-78355a9245f1",
+            length_value: 30,
+            length_unit_id: "8a17f86f-f3d0-4f69-8deb-a4655db47165",
+            width_value: 20,
+            width_unit_id: "8a17f86f-f3d0-4f69-8deb-a4655db47165",
+            height_value: 2,
+            height_unit_id: "8a17f86f-f3d0-4f69-8deb-a4655db47165",
+            is_active: true,
+            is_returnable: true,
+            return_in_days: 7,
+            option_value_ids: [
+              // Map selected sizes and colors to placeholder option value IDs. Replace these with actual IDs.
+              ...selectedSizes.map((s) => ({ option_value_id: `size-${s}` })),
+              ...selectedColors.map((c) => ({ option_value_id: `color-${c}` })),
+            ],
+          },
+        ],
+      };
+
+      console.log("Product payload (with categories):", payload);
+
+      // Dummy API call
+      const res = await fetch("/api/admin/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        console.error("API error:", await res.text());
+        alert("Failed to create product.");
+      } else {
+        alert("Product created successfully.");
+        form.reset();
+        setImages([]);
+        setSelectedSizes([]);
+        setSelectedColors([]);
+        setSelectedCategoryIds([]);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Unexpected error while preparing the product. See console.");
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   const handleImageUpload = (e) => {
@@ -119,6 +214,24 @@ export default function AddProductPage() {
         ? prev.filter(c => c !== color)
         : [...prev, color]
     );
+  };
+
+  const handleCategorySelect = (category) => {
+    const collectAllChildren = (cat) => {
+      const children = cat.children || [];
+      return [cat.id, ...children.flatMap(collectAllChildren)];
+    };
+
+    const allIds = collectAllChildren(category);
+
+    setSelectedCategoryIds((prev) => {
+      const isSelected = allIds.every((id) => prev.includes(id));
+      if (isSelected) {
+        return prev.filter((id) => !allIds.includes(id));
+      } else {
+        return [...prev, ...allIds.filter((id) => !prev.includes(id))];
+      }
+    });
   };
 
   return (
@@ -179,46 +292,6 @@ export default function AddProductPage() {
                     )}
                   />
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="category"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Category</FormLabel>
-                          <FormControl>
-                            <select
-                              className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                              {...field}
-                            >
-                              <option value="">Select category</option>
-                              {clothingCategories.map((category) => (
-                                <option key={category} value={category}>
-                                  {category}
-                                </option>
-                              ))}
-                            </select>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="brand"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Brand</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g., Nike, Adidas" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
                   <FormField
                     control={form.control}
                     name="material"
@@ -235,58 +308,7 @@ export default function AddProductPage() {
                 </CardContent>
               </Card>
 
-              {/* Variants */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Product Variants</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Sizes */}
-                  <div>
-                    <label className="block text-sm font-medium mb-3">Available Sizes</label>
-                    <div className="flex flex-wrap gap-2">
-                      {sizesOptions.map((size) => (
-                        <button
-                          key={size}
-                          type="button"
-                          onClick={() => toggleSize(size)}
-                          className={cn(
-                            "px-3 py-2 border rounded-md text-sm font-medium transition-colors",
-                            selectedSizes.includes(size)
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : "bg-background border-input hover:bg-accent"
-                          )}
-                        >
-                          {size}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Colors */}
-                  <div>
-                    <label className="block text-sm font-medium mb-3">Available Colors</label>
-                    <div className="flex flex-wrap gap-2">
-                      {colorsOptions.map((color) => (
-                        <button
-                          key={color}
-                          type="button"
-                          onClick={() => toggleColor(color)}
-                          className={cn(
-                            "px-3 py-2 border rounded-md text-sm font-medium transition-colors",
-                            selectedColors.includes(color)
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : "bg-background border-input hover:bg-accent"
-                          )}
-                        >
-                          {color}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
+        
               {/* Images */}
               <Card>
                 <CardHeader>
@@ -393,6 +415,132 @@ export default function AddProductPage() {
                 </CardContent>
               </Card>
 
+              {/* Additional Details */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Additional Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="compare_at_price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Compare at Price (₹)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="699" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="barcode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Barcode</FormLabel>
+                        <FormControl>
+                          <Input placeholder="8901234567890" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="weight_value"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Weight (kg)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="0.25" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="length_value"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Length (cm)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="30" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="width_value"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Width (cm)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="20" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="height_value"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Height (cm)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="2" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Categories */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Categories</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Button onClick={() => setIsCategoryModalOpen(true)}>
+                    Select Categories
+                  </Button>
+
+                    {/* Display selected categories outside the modal */}
+      <div className="mt-4">
+        <strong>Selected Categories:</strong>
+        <ul className="list-disc pl-5">
+          {selectedCategoryIds.map((id) => {
+            const findCategory = (categories, id) => {
+              for (const category of categories) {
+                if (category.id === id) return category;
+                if (category.children) {
+                  const found = findCategory(category.children, id);
+                  if (found) return found;
+                }
+              }
+              return null;
+            };
+
+            const category = findCategory(categories, id);
+            return category ? <li key={id}>{category.name}</li> : null;
+          })}
+        </ul>
+      </div>
+                </CardContent>
+              </Card>
+
               {/* Actions */}
               <Card>
                 <CardContent className="pt-6">
@@ -414,6 +562,33 @@ export default function AddProductPage() {
           </div>
         </form>
       </Form>
+
+      <Dialog open={isCategoryModalOpen} onOpenChange={setIsCategoryModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Select Categories</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[400px] overflow-y-auto">
+            {isLoading ? (
+              <div className="text-muted-foreground py-4 text-center">Loading categories...</div>
+            ) : categories.length === 0 ? (
+              <div className="text-muted-foreground py-4 text-center">No categories available</div>
+            ) : (
+              <>
+                <CategoryMultiSelect
+                  categories={categories}
+                  onSelect={(selectedIds) => setSelectedCategoryIds(selectedIds)}
+                />
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsCategoryModalOpen(false)}>Done</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+    
     </div>
   );
 }
