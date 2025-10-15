@@ -20,9 +20,13 @@ import {
 } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 import { CategoryService } from "@/services/category-service";
+import { OptionService } from "@/services/option-service";
+import { OptionValueService } from "@/services/option-value-service";
 import CategoryTree from "@/components/admin/categories/category-tree";
 import CategoryMultiSelect from "@/components/admin/categories/category-multi-select";
+import MultiSelect from "@/components/ui/multi-select"; // Assuming a reusable multi-select component exists
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import ProductVariantsEditor from "@/components/admin/products/product-variants-editor";
 
 const productSchema = z.object({
   name: z.string().min(1, "Product name is required"),
@@ -52,7 +56,10 @@ export default function AddProductPage() {
   const [selectedColors, setSelectedColors] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
+  const [options, setOptions] = useState([]);
+  const [selectedOptionValueIds, setSelectedOptionValueIds] = useState([]);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [variants, setVariants] = useState([]);
 
   const form = useForm({
     resolver: zodResolver(productSchema),
@@ -94,7 +101,40 @@ export default function AddProductPage() {
       }
     };
 
+    const fetchOptions = async () => {
+      try {
+        const optionResponse = await OptionService.getAll();
+        const valueResponse = await OptionValueService.getAll();
+
+        console.log("Option Response:", optionResponse);
+        console.log("Value Response:", valueResponse);
+
+        if (
+          optionResponse.success &&
+          Array.isArray(optionResponse.data.options) &&
+          valueResponse.success &&
+          Array.isArray(valueResponse.data.optionValues)
+        ) {
+          const optionsWithValues = optionResponse.data.options.map((option) => ({
+            ...option,
+            values: valueResponse.data.optionValues.filter(
+              (val) => val.option_definition_id === option.id
+            ),
+          }));
+          setOptions(optionsWithValues);
+        } else {
+          console.error("Unexpected response format:", {
+            optionResponse,
+            valueResponse,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching options and values:", error);
+      }
+    };
+
     fetchCategories();
+    fetchOptions();
   }, []);
 
   useEffect(() => {
@@ -120,40 +160,12 @@ export default function AddProductPage() {
         slug: slugify(data.name || ""),
         description: data.description,
         is_active: true,
-        // brand_ids: [], // include if available
         media: images.map((img) => ({ url: img.url, alt: img.name })),
-        variants: [
-          {
-            sku: data.sku || `sku-${Date.now()}`,
-            price: parseFloat(data.price) || 0,
-            compare_at_price: null,
-            stock_quantity: parseInt(data.stock, 10) || 0,
-            is_default: true,
-            barcode: "",
-            weight_value: 0.25,
-            // Placeholder unit IDs - replace with real IDs from your system
-            weight_unit_id: "c9385f47-76e0-432e-aca9-78355a9245f1",
-            length_value: 30,
-            length_unit_id: "8a17f86f-f3d0-4f69-8deb-a4655db47165",
-            width_value: 20,
-            width_unit_id: "8a17f86f-f3d0-4f69-8deb-a4655db47165",
-            height_value: 2,
-            height_unit_id: "8a17f86f-f3d0-4f69-8deb-a4655db47165",
-            is_active: true,
-            is_returnable: true,
-            return_in_days: 7,
-            option_value_ids: [
-              // Map selected sizes and colors to placeholder option value IDs. Replace these with actual IDs.
-              ...selectedSizes.map((s) => ({ option_value_id: `size-${s}` })),
-              ...selectedColors.map((c) => ({ option_value_id: `color-${c}` })),
-            ],
-          },
-        ],
+        variants, // use variants from ProductVariantsEditor
       };
 
-      console.log("Product payload (with categories):", payload);
+      console.log("Product payload:", payload);
 
-      // Dummy API call
       const res = await fetch("/api/admin/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -170,6 +182,7 @@ export default function AddProductPage() {
         setSelectedSizes([]);
         setSelectedColors([]);
         setSelectedCategoryIds([]);
+        setSelectedOptionValueIds([]);
       }
     } catch (err) {
       console.error(err);
@@ -350,148 +363,6 @@ export default function AddProductPage() {
 
             {/* Sidebar */}
             <div className="space-y-6">
-              {/* Pricing & Inventory */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Pricing & Inventory</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="price"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Price (₹)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="2,299" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="stock"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Total Stock Quantity</FormLabel>
-                        <FormControl>
-                          <Input placeholder="100" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="sku"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>SKU</FormLabel>
-                        <FormControl>
-                          <Input placeholder="CT-BLK-M-001" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-
-              {/* Additional Details */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Additional Details</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="compare_at_price"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Compare at Price (₹)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="699" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="barcode"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Barcode</FormLabel>
-                        <FormControl>
-                          <Input placeholder="8901234567890" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="weight_value"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Weight (kg)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="0.25" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="length_value"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Length (cm)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="30" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="width_value"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Width (cm)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="20" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="height_value"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Height (cm)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="2" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-
               {/* Categories */}
               <Card>
                 <CardHeader>
@@ -524,6 +395,16 @@ export default function AddProductPage() {
         </ul>
       </div>
                 </CardContent>
+              </Card>
+
+              {/* Variants */}
+              <Card className="mb-6 p-4 bg-white border border-primary/10 rounded-xl shadow">
+                <h2 className="text-lg font-bold text-primary mb-2">Variants</h2>
+                <ProductVariantsEditor
+                  options={options}
+                  variants={variants}
+                  setVariants={setVariants}
+                />
               </Card>
 
               {/* Actions */}
