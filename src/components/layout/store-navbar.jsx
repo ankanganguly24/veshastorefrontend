@@ -139,7 +139,7 @@ export default function StoreNavbar() {
                                       className="hover:bg-primary/5 hover:text-primary rounded-md p-2 text-sm transition-all duration-200 cursor-pointer"
                                     >
                                       <Link
-                                        href={`/category/${category.slug}/${subcategory.slug}`}
+                                        href={`/category/${category.id}/${subcategory.id}`}
                                         className="cursor-pointer"
                                       >
                                         {subcategory.name}
@@ -150,7 +150,7 @@ export default function StoreNavbar() {
                                 <div className="mt-4 pt-4 border-t border-gray-100">
                                   <NavigationMenuLink asChild>
                                     <Link
-                                      href={`/category/${category.slug}`}
+                                      href={`/category/${category.id}`}
                                       className="text-sm font-medium text-primary hover:underline cursor-pointer"
                                     >
                                       View All {category.name}
@@ -163,7 +163,7 @@ export default function StoreNavbar() {
                         ) : (
                           <NavigationMenuLink asChild>
                             <Link
-                              href={`/category/${category.slug}`}
+                              href={`/category/${category.id}`}
                               className="h-10 flex items-center px-4 text-gray-700 hover:text-primary hover:bg-primary/5 rounded transition-all duration-200 cursor-pointer font-medium"
                             >
                               {category.name}
@@ -191,10 +191,10 @@ export default function StoreNavbar() {
             </div>
 
             {/* Mobile Search Icon */}
-            <Button variant="ghost" size="icon" className="md:hidden hover:bg-primary/5 hover:text-primary transition-colors cursor-pointer">
+            {/* <Button variant="ghost" size="icon" className="md:hidden hover:bg-primary/5 hover:text-primary transition-colors cursor-pointer">
               <Search className="h-5 w-5" />
               <span className="sr-only">Search</span>
-            </Button>
+            </Button> */}
 
             {/* Profile Dropdown */}
             <DropdownMenu>
@@ -316,7 +316,7 @@ export default function StoreNavbar() {
                           category.children.map((subcategory) => (
                             <Link
                               key={subcategory.id}
-                              href={`/category/${category.slug}/${subcategory.slug}`}
+                              href={`/category/${category.id}/${subcategory.id}`}
                               className="block py-1 text-sm text-gray-600 hover:text-primary hover:bg-primary/5 px-2 rounded transition-all duration-200 cursor-pointer"
                               onClick={() => setIsMenuOpen(false)}
                             >
@@ -325,7 +325,7 @@ export default function StoreNavbar() {
                           ))
                         ) : (
                           <Link
-                            href={`/category/${category.slug}`}
+                            href={`/category/${category.id}`}
                             className="block py-1 text-sm text-gray-600 hover:text-primary hover:bg-primary/5 px-2 rounded transition-all duration-200 cursor-pointer"
                             onClick={() => setIsMenuOpen(false)}
                           >
