@@ -43,14 +43,12 @@ export default function StoreNavbar() {
     },
   });
 
-  // Debug log to verify API response structure
   console.log("Fetched categoriesData:", categoriesData);
 
-  // Extract categories array safely from the correct path
-  const fetchedCategories =
-    Array.isArray(categoriesData?.data?.categories)
-      ? categoriesData.data.categories
-      : [];
+  // Extract categories array safely and filter only parent categories (parent_id is null)
+  const fetchedCategories = Array.isArray(categoriesData?.data?.categories)
+    ? categoriesData.data.categories.filter((cat) => !cat.parent_id)
+    : [];
 
   // Update cart count on component mount
   useEffect(() => {
@@ -59,10 +57,8 @@ export default function StoreNavbar() {
       setCartItemCount(itemCount);
     };
 
-    // Initial cart count
     updateCartCount();
 
-    // Listen for cart updates
     const handleCartUpdate = () => {
       updateCartCount();
     };
@@ -74,9 +70,7 @@ export default function StoreNavbar() {
     };
   }, []);
 
-  // Add a check on component mount to see if there's a saved user in auth store
   useEffect(() => {
-    // If we have user data but isAuthenticated is false, set it to true
     if (user && !isAuthenticated) {
       useAuthStore.getState().setAuthenticated(true);
     }
@@ -117,7 +111,6 @@ export default function StoreNavbar() {
           <div className="hidden lg:flex flex-1 justify-center ml-8">
             <NavigationMenu viewport={false}>
               <NavigationMenuList>
-                {/* Only render if categoriesData is loaded */}
                 {categoriesData === undefined ? null : (
                   fetchedCategories.length === 0 ? (
                     <span className="text-muted-foreground px-4">No categories found</span>
@@ -189,12 +182,6 @@ export default function StoreNavbar() {
                 className="w-64"
               />
             </div>
-
-            {/* Mobile Search Icon */}
-            {/* <Button variant="ghost" size="icon" className="md:hidden hover:bg-primary/5 hover:text-primary transition-colors cursor-pointer">
-              <Search className="h-5 w-5" />
-              <span className="sr-only">Search</span>
-            </Button> */}
 
             {/* Profile Dropdown */}
             <DropdownMenu>
@@ -301,7 +288,6 @@ export default function StoreNavbar() {
         <div className="lg:hidden bg-white/95 backdrop-blur-md border-t border-gray-100 shadow-lg">
           <div className="container mx-auto px-4 py-4">
             <div className="space-y-4">
-              {/* Only render if categoriesData is loaded */}
               {categoriesData === undefined ? null : (
                 fetchedCategories.length === 0 ? (
                   <div className="text-muted-foreground py-4 text-center">No categories found</div>
@@ -329,7 +315,7 @@ export default function StoreNavbar() {
                             className="block py-1 text-sm text-gray-600 hover:text-primary hover:bg-primary/5 px-2 rounded transition-all duration-200 cursor-pointer"
                             onClick={() => setIsMenuOpen(false)}
                           >
-                            {category.name}
+                            View All {category.name}
                           </Link>
                         )}
                       </div>
