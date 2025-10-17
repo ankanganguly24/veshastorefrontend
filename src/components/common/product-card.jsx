@@ -264,8 +264,8 @@ const ProductCard = memo(({ product, className = "" }) => {
     setCurrentImageIndex(0);
   }, []);
 
-  // Memoize the product link
-  const productLink = useMemo(() => `/product/${slug || id}`, [slug, id]);
+  // Memoize the product link - use id only so product page receives product id
+  const productLink = useMemo(() => `/product/${id}`, [id]);
 
   return (
     <Link href={productLink} className="block">

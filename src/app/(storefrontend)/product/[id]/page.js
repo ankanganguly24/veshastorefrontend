@@ -1,183 +1,122 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
 import ImageCarousel from "@/components/common/image-carousel";
 import ProductInfo from "@/components/common/product-info";
 import TrustBadges from "@/components/common/trust-badges";
 import ProductTabs from "@/components/common/product-tabs";
 import RelatedProducts from "@/components/common/related-products";
+import { ProductService } from "@/services/product-service";
+import api from "@/utils/axios";
 
 export default function ProductPage({ params }) {
-  const { id } = params;
+  // Unwrap params (React.use for possible promise params is used elsewhere; here we can directly read)
+  const resolvedParams = React.use(params);
+  const { id } = resolvedParams || {};
 
-  // Mock product database - in real app, fetch from API
-  const products = {
-    1: {
-      id: 1,
-      slug: "nawabi-royal-kurta-set",
-      name: "Nawabi Royal Kurta Set",
-      brand: "Vesha Fashion",
-      price: 2299,
-      originalPrice: 2799,
-      discount: 18,
-      category: "NAWABI EXCLUSIVE",
-      inStock: true,
-      stockCount: 25,
-      rating: 4.8,
-      reviewCount: 156,
-      images: [
-        "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=500&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1583391733956-6c78276477e1?w=500&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=500&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=500&h=600&fit=crop"
-      ],
-      description: "Crafted with premium fabrics and intricate embroidery, this Nawabi Royal Kurta Set embodies traditional elegance with a contemporary twist. Perfect for festive occasions and special celebrations.",
-      washCare: "Dry clean only. Store in a cool, dry place. Avoid direct sunlight when drying.",
-      offers: [
-        "Extra 10% off on prepaid orders",
-        "Free shipping on orders above ₹1999",
-        "Easy 15-day return policy"
-      ],
-      features: [
-        "Premium cotton fabric",
-        "Intricate embroidery work",
-        "Comfortable fit",
-        "Machine washable"
-      ]
-    },
-    2: {
-      id: 2,
-      slug: "designer-peplum-jacket",
-      name: "Designer Peplum Jacket",
-      brand: "Vesha Fashion",
-      price: 1899,
-      originalPrice: 2299,
-      discount: 17,
-      category: "OUTERWEAR",
-      inStock: true,
-      stockCount: 18,
-      rating: 4.6,
-      reviewCount: 89,
-      images: [
-        "https://images.unsplash.com/photo-1544966503-7bb6d3967ff6?w=500&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=500&h=600&fit=crop"
-      ],
-      description: "Elevate your style with this contemporary designer peplum jacket. Perfect for layering over any outfit, this versatile piece combines modern aesthetics with timeless elegance.",
-      washCare: "Machine wash cold. Hang dry in shade. Iron on medium heat.",
-      offers: [
-        "Extra 10% off on prepaid orders",
-        "Free shipping on orders above ₹1999",
-        "Easy 15-day return policy"
-      ],
-      features: [
-        "Lightweight fabric",
-        "Contemporary design",
-        "Versatile styling",
-        "Easy care"
-      ]
-    },
-    3: {
-      id: 3,
-      slug: "elegant-kaftan-dress",
-      name: "Elegant Kaftan Dress",
-      brand: "Vesha Fashion",
-      price: 1599,
-      originalPrice: 1999,
-      discount: 20,
-      category: "ETHNIC WEAR",
-      inStock: true,
-      stockCount: 12,
-      rating: 4.7,
-      reviewCount: 124,
-      images: [
-        "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=500&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=500&h=600&fit=crop"
-      ],
-      description: "Experience comfort and elegance with this flowing kaftan dress. Perfect for casual outings or relaxed gatherings, this piece offers both style and comfort.",
-      washCare: "Hand wash gently. Air dry in shade. Steam iron if needed.",
-      offers: [
-        "Extra 10% off on prepaid orders",
-        "Free shipping on orders above ₹1999",
-        "Easy 15-day return policy"
-      ],
-      features: [
-        "Flowing silhouette",
-        "Comfortable fit",
-        "Breathable fabric",
-        "Elegant drape"
-      ]
-    },
-    4: {
-      id: 4,
-      slug: "embroidered-shrug",
-      name: "Embroidered Shrug",
-      brand: "Vesha Fashion",
-      price: 1299,
-      originalPrice: 1599,
-      discount: 19,
-      category: "OUTERWEAR",
-      inStock: true,
-      stockCount: 22,
-      rating: 4.5,
-      reviewCount: 67,
-      images: [
-        "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=500&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1618932260643-eee4a2f652a6?w=500&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1566479179817-0a0ca2e18c72?w=500&h=600&fit=crop"
-      ],
-      description: "Add a touch of sophistication to any outfit with this beautifully embroidered shrug. The intricate details and quality craftsmanship make it a perfect addition to your wardrobe.",
-      washCare: "Dry clean recommended. Store flat. Avoid direct sunlight.",
-      offers: [
-        "Extra 10% off on prepaid orders",
-        "Free shipping on orders above ₹1999",
-        "Easy 15-day return policy"
-      ],
-      features: [
-        "Hand embroidered",
-        "Premium quality",
-        "Versatile styling",
-        "Perfect finish"
-      ]
-    },
-    5: {
-      id: 5,
-      slug: "festive-wear-set",
-      name: "Festive Wear Set",
-      brand: "Vesha Fashion",
-      price: 2499,
-      originalPrice: 2999,
-      discount: 17,
-      category: "ETHNIC WEAR",
-      inStock: true,
-      stockCount: 8,
-      rating: 4.8,
-      reviewCount: 98,
-      images: [
-        "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=500&h=600&fit=crop",
-        "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=500&h=600&fit=crop"
-      ],
-      description: "Make a statement at special occasions with this stunning festive wear set. Combining traditional elements with contemporary style, this outfit is perfect for celebrations.",
-      washCare: "Dry clean only. Store in garment bag. Handle with care.",
-      offers: [
-        "Extra 10% off on prepaid orders",
-        "Free shipping on orders above ₹1999",
-        "Easy 15-day return policy"
-      ],
-      features: [
-        "Festival ready",
-        "Traditional design",
-        "Premium materials",
-        "Special occasion wear"
-      ]
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(Boolean(id));
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    if (!id) {
+      setProduct(null);
+      setLoading(false);
+      return;
     }
-  };
 
-  // Create a slug-to-product mapping for easy lookup
-  const productsBySlug = Object.values(products).reduce((acc, product) => {
-    acc[product.slug] = product;
-    return acc;
-  }, {});
+    const fetchProduct = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Try service first (returns res.data), fallback to direct axios if needed
+        let res;
+        try {
+          res = await ProductService.getById(id); // ProductService returns res.data from axios wrapper
+        } catch (err) {
+          // fallback direct call
+          const fallback = await api.get(`/product/${encodeURIComponent(id)}`);
+          res = fallback.data;
+        }
 
-  // Get product by slug first, then by ID, fallback to product 1
-  const product = productsBySlug[id] || products[parseInt(id)] || products[1];
+        // Normalize payload - backend may return different shapes
+        const payload = res?.data ? res : res;
+        // Try common variants:
+        // - { success, message, data: { product: {...} } }
+        // - { success, message, data: {...} }
+        // - direct product object
+        const p = payload?.data?.product ?? payload?.data ?? payload;
+
+        // safe mapping to UI-friendly product object used by existing components
+        const variant = (Array.isArray(p?.variants) && p.variants.length) ? p.variants[0] : {};
+        const images =
+          (Array.isArray(p?.media) && p.media.length)
+            ? p.media.map((m) => m.url || m.path || m.src || m)
+            : (p?.images || []);
+
+        const price = variant?.price ?? p?.price ?? 0;
+        const compareAt = variant?.compare_at_price ?? p?.originalPrice ?? p?.compare_at_price ?? null;
+        const discount = (compareAt && price) ? Math.round((1 - price / compareAt) * 100) : (p?.discount ?? null);
+        const stockQty = variant?.stock_quantity ?? p?.stock_quantity ?? p?.stockCount ?? 0;
+
+        const mapped = {
+          id: p?.id ?? id,
+          slug: p?.slug ?? String(p?.id ?? id),
+          title: p?.title ?? p?.name ?? "",
+          name: p?.title ?? p?.name ?? p?.slug ?? String(p?.id ?? id),
+          brand: (p?.brands && p.brands.length) ? p.brands[0].name : (p?.brand || ""),
+          price,
+          originalPrice: compareAt,
+          discount,
+          category: (Array.isArray(p?.categories) && p.categories.length) ? p.categories[0].name : (p?.category || ""),
+          inStock: stockQty > 0,
+          stockCount: stockQty,
+          rating: p?.rating ?? 4.5,
+          reviewCount: p?.reviewCount ?? 0,
+          images,
+          description: p?.description ?? "",
+          washCare: p?.washCare ?? p?.wash_care ?? "",
+          offers: p?.offers ?? [],
+          features: p?.features ?? [],
+        };
+
+        if (mounted) setProduct(mapped);
+      } catch (err) {
+        console.error("Failed to fetch product:", err);
+        if (mounted) setError("Failed to load product.");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    fetchProduct();
+    return () => { mounted = false; };
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-500">Loading product...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-red-600">{error}</div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-600">Product not found.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-primary/10">
@@ -202,7 +141,7 @@ export default function ProductPage({ params }) {
 
         {/* Product Details Tabs with Reviews */}
         <div className="mb-12">
-          <ProductTabs 
+          <ProductTabs
             description={product.description}
             washCare={product.washCare}
             features={product.features}
