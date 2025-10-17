@@ -21,13 +21,6 @@ export default function CategoryPage({ params }) {
 
   const categoryPath = useMemo(() => (categoryIdsArray.length ? categoryIdsArray.join('/') : ''), [categoryIdsArray]);
 
-  // Display name: try to show readable names from ids (fallback to id)
-  const categoryName = useMemo(() => {
-    if (!categoryIdsArray.length) return 'All Products';
-    // Join ids but replace dashes with spaces for a bit more readable header
-    return categoryIdsArray.map((c) => c.replace(/-/g, ' ')).join(' / ');
-  }, [categoryIdsArray]);
-
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(Boolean(categoryIdsArray.length));
   const [error, setError] = useState(null);
@@ -36,10 +29,13 @@ export default function CategoryPage({ params }) {
   const [parentCategories, setParentCategories] = useState([]);
   const [parentsLoading, setParentsLoading] = useState(false);
 
+  // State to store category names
+  const [categoryNames, setCategoryNames] = useState([]);
+
   // Filters state
-  const [selectedPriceRanges, setSelectedPriceRanges] = useState([]); // array of range ids
-  const [selectedColors, setSelectedColors] = useState([]); // array of color ids/values
-  const [selectedCategoryFilters, setSelectedCategoryFilters] = useState([]); // array of parent category ids
+  const [selectedPriceRanges, setSelectedPriceRanges] = useState([]);
+  const [selectedColors, setSelectedColors] = useState([]);
+  const [selectedCategoryFilters, setSelectedCategoryFilters] = useState([]);
 
   // Fetch parent categories (top-level) for sidebar
   useEffect(() => {
@@ -49,7 +45,6 @@ export default function CategoryPage({ params }) {
       try {
         const res = await api.get("/product/category");
         const all = res?.data?.data?.categories || [];
-        // top-level parents have null parent_id
         const parents = Array.isArray(all) ? all.filter((c) => !c.parent_id) : [];
         if (mounted) setParentCategories(parents);
       } catch (err) {
@@ -61,6 +56,50 @@ export default function CategoryPage({ params }) {
     fetchParentCategories();
     return () => { mounted = false; };
   }, []);
+
+  // Fetch category names from IDs
+  useEffect(() => {
+    if (categoryIdsArray.length === 0) {
+      setCategoryNames([]);
+      return;
+    }
+
+    let mounted = true;
+
+    const fetchCategoryNames = async () => {
+      try {
+        const res = await api.get("/product/category");
+        const allCategories = res?.data?.data?.categories || [];
+
+        // Create a map of id to category for quick lookup
+        const categoryMap = {};
+        const buildMap = (cats) => {
+          cats.forEach((cat) => {
+            categoryMap[cat.id] = cat.name;
+            if (cat.children && cat.children.length > 0) {
+              buildMap(cat.children);
+            }
+          });
+        };
+        buildMap(allCategories);
+
+        // Get names for the requested category IDs
+        const names = categoryIdsArray.map((id) => categoryMap[id] || id);
+        if (mounted) setCategoryNames(names);
+      } catch (err) {
+        console.error("Failed to fetch category names:", err);
+      }
+    };
+
+    fetchCategoryNames();
+    return () => { mounted = false; };
+  }, [categoryIdsArray]);
+
+  // Display name using fetched category names
+  const categoryName = useMemo(() => {
+    if (categoryNames.length === 0) return 'All Products';
+    return categoryNames.join(' / ');
+  }, [categoryNames]);
 
   useEffect(() => {
     if (categoryIdsArray.length === 0) {
@@ -75,18 +114,14 @@ export default function CategoryPage({ params }) {
       try {
         const idsParam = categoryIdsArray.join(',');
         const res = await api.get(`/product?category_ids=${encodeURIComponent(idsParam)}`);
-        // Expecting res.data.data.products
         const fetched = res?.data?.data?.products || [];
 
-        // Map backend product shape to ProductCard expected props
         const mapped = fetched.map((p) => {
           const variant = p.variants && p.variants.length ? p.variants[0] : {};
-          // derive images from media (common field) or fallback to empty array
           const images = (p.media && Array.isArray(p.media) && p.media.length)
             ? p.media.map((m) => m.url || m.path || m.src || m)
             : (p.images || []);
 
-          // derive color values from variants -> variantOptions
           const colors = [];
           if (Array.isArray(p.variants)) {
             p.variants.forEach((v) => {
@@ -94,7 +129,6 @@ export default function CategoryPage({ params }) {
                 v.variantOptions.forEach((vo) => {
                   const opt = vo.optionValue;
                   const def = opt?.optionDefinition;
-                  // check a few ways to identify color option
                   const key = (def?.name || def?.display_name || "").toLowerCase();
                   if (key.includes("color") || key.includes("colour")) {
                     const val = opt?.metadata?.hex || opt?.value || opt?.label;
@@ -125,7 +159,7 @@ export default function CategoryPage({ params }) {
             gradient: undefined,
             rating: 4.5,
             reviewCount: p.reviewCount || 0,
-            colors // array of color identifiers (hex or value)
+            colors
           };
         });
 
@@ -144,16 +178,12 @@ export default function CategoryPage({ params }) {
   // Apply client-side filters
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
-      // Category filter (parent categories selected)
       if (selectedCategoryFilters.length > 0) {
-        // If product's category ids don't intersect selectedCategoryFilters, exclude
         const intersects = p.categoryIds && p.categoryIds.some((cid) => selectedCategoryFilters.includes(cid));
         if (!intersects) return false;
       }
 
-      // Price filter
       if (selectedPriceRanges.length > 0) {
-        // if none of selected ranges match product price -> exclude
         const matchesPrice = selectedPriceRanges.some((rid) => {
           const range = PRICE_RANGES.find((r) => r.id === rid);
           if (!range) return false;
@@ -162,10 +192,8 @@ export default function CategoryPage({ params }) {
         if (!matchesPrice) return false;
       }
 
-      // Color filter
       if (selectedColors.length > 0) {
         const matchesColor = (p.colors || []).some((c) => {
-          // compare by hex/value/label: normalize to lowercase strings
           const norm = String(c || "").toLowerCase();
           return selectedColors.some((sel) => String(sel || "").toLowerCase() === norm);
         });
@@ -193,7 +221,6 @@ export default function CategoryPage({ params }) {
           {/* Filters Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-primary/10 sticky top-24">
-              {/* Filters: Category, Price, Color - use separate components */}
               <CategoryFilter
                 categories={parentCategories}
                 selected={selectedCategoryFilters}
@@ -203,33 +230,11 @@ export default function CategoryPage({ params }) {
               <div className="mt-6">
                 <PriceFilter selected={selectedPriceRanges} onChange={setSelectedPriceRanges} />
               </div>
-
-              <div className="mt-6">
-                <ColorFilter selected={selectedColors} onChange={setSelectedColors} />
-              </div>
-
-              {/* ...existing Size / other filters can remain below if desired ... */}
             </div>
           </div>
           
           {/* Products Grid */}
           <div className="lg:col-span-3">
-            {/* Sort and View Options */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-primary/10">
-              <div className="text-sm text-gray-600 mb-2 sm:mb-0">
-                Showing <span className="font-semibold">{filteredProducts.length > 0 ? `1-${filteredProducts.length}` : 0}</span> of <span className="font-semibold">{products.length}</span> products
-              </div>
-              <div className="flex items-center space-x-4">
-                <select className="px-3 py-2 text-sm border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                  <option>Sort by: Featured</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
-                  <option>Newest First</option>
-                  <option>Most Popular</option>
-                </select>
-              </div>
-            </div>
-
             {/* Products Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {loading ? (
@@ -245,7 +250,7 @@ export default function CategoryPage({ params }) {
               )}
             </div>
 
-            {/* Pagination (keeps original static UI; can be wired to backend later) */}
+            {/* Pagination */}
             <div className="flex justify-center mt-12">
               <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-xl p-2 shadow-lg border border-primary/10">
                 <button className="px-3 py-2 text-sm text-gray-500 hover:text-primary transition-colors">
