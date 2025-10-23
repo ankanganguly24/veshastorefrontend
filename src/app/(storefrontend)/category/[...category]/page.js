@@ -119,7 +119,7 @@ export default function CategoryPage({ params }) {
         const mapped = fetched.map((p) => {
           const variant = p.variants && p.variants.length ? p.variants[0] : {};
           const images = (p.media && Array.isArray(p.media) && p.media.length)
-            ? p.media.map((m) => m.url || m.path || m.src || m)
+            ? p.media.map((m) => m.media?.url || m.url || m.path || m.src || null)
             : (p.images || []);
 
           const colors = [];
@@ -147,19 +147,18 @@ export default function CategoryPage({ params }) {
           const discount = (compareAt && price) ? Math.round((1 - price / compareAt) * 100) : null;
 
           return {
-            id: p.id,
-            slug: p.slug,
+            ...p,
             name: p.title || p.name || p.slug,
             price: price,
             originalPrice: compareAt,
             discount: discount,
             category: categoryNameFromProduct,
             categoryIds: categoryIdsFromProduct,
-            images: images,
+            image: images[0] || null, // Use the first image or null
             gradient: undefined,
             rating: 4.5,
             reviewCount: p.reviewCount || 0,
-            colors
+            colors,
           };
         });
 

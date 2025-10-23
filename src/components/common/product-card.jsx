@@ -385,7 +385,7 @@ const ProductCard = memo(({ product, className = "" }) => {
           </Button>
         </div>
         
-        <CardContent className="p-5">
+        <CardContent className="p-5 text-left">
           <h4 className="font-bold text-lg mb-2 text-gray-900 group-hover:text-primary transition-colors">
             {name}
           </h4>
@@ -403,8 +403,7 @@ const ProductCard = memo(({ product, className = "" }) => {
               )}
             </div>
             
-            {/* Rating */}
-            {StarRating}
+          
           </div>
           
           <Button 
@@ -435,6 +434,24 @@ const ProductCard = memo(({ product, className = "" }) => {
               </>
             )}
           </Button>
+
+          {/* Display price and image URL */}
+          <div className="mt-4 text-sm text-gray-700">
+            
+            {images?.[0] && (
+              <div className="mt-2">
+                <span className="font-medium">Image URL:</span>
+                <a
+                  href={images[0]}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 underline"
+                >
+                  {images[0]}
+                </a>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </Link>
