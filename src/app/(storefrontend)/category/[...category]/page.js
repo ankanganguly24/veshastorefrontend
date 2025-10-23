@@ -7,7 +7,6 @@ import PriceFilter, { PRICE_RANGES } from "@/components/common/filters/PriceFilt
 import ColorFilter from "@/components/common/filters/ColorFilter";
 import CategoryFilter from "@/components/common/filters/CategoryFilter";
 
-// Skeleton loader for product grid
 function ProductSkeletonLoader() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -15,7 +14,7 @@ function ProductSkeletonLoader() {
         <div
           key={index}
           className="w-full h-64 bg-gray-200 animate-pulse rounded-lg"
-          style={{ minWidth: "200px", maxWidth: "300px" }} // Added min-width and max-width
+          style={{ minWidth: "200px", maxWidth: "300px" }} 
         ></div>
       ))}
     </div>
