@@ -7,6 +7,21 @@ import PriceFilter, { PRICE_RANGES } from "@/components/common/filters/PriceFilt
 import ColorFilter from "@/components/common/filters/ColorFilter";
 import CategoryFilter from "@/components/common/filters/CategoryFilter";
 
+// Skeleton loader for product grid
+function ProductSkeletonLoader() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+      {Array.from({ length: 2 }).map((_, index) => (
+        <div
+          key={index}
+          className="w-full h-64 bg-gray-200 animate-pulse rounded-lg"
+          style={{ minWidth: "200px", maxWidth: "300px" }} // Added min-width and max-width
+        ></div>
+      ))}
+    </div>
+  );
+}
+
 export default function CategoryPage({ params }) {
   // Unwrap params which may be a Promise in newer Next.js versions
   // React.use will resolve the promise so we can safely access properties.
@@ -234,10 +249,9 @@ export default function CategoryPage({ params }) {
           
           {/* Products Grid */}
           <div className="lg:col-span-3">
-            {/* Products Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {loading ? (
-                <div className="col-span-full text-center py-12">Loading products...</div>
+                <ProductSkeletonLoader />
               ) : error ? (
                 <div className="col-span-full text-center py-12 text-red-600">{error}</div>
               ) : filteredProducts.length === 0 ? (
@@ -249,29 +263,7 @@ export default function CategoryPage({ params }) {
               )}
             </div>
 
-            {/* Pagination */}
-            <div className="flex justify-center mt-12">
-              <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-xl p-2 shadow-lg border border-primary/10">
-                <button className="px-3 py-2 text-sm text-gray-500 hover:text-primary transition-colors">
-                  Previous
-                </button>
-                {[1, 2, 3, 4].map((page) => (
-                  <button
-                    key={page}
-                    className={`px-3 py-2 text-sm rounded-lg transition-colors ${
-                      page === 1 
-                        ? 'bg-primary text-white' 
-                        : 'text-gray-600 hover:text-primary hover:bg-primary/5'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button className="px-3 py-2 text-sm text-gray-500 hover:text-primary transition-colors">
-                  Next
-                </button>
-              </div>
-            </div>
+          
           </div>
         </div>
       </div>
