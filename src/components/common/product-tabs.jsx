@@ -73,31 +73,31 @@ const ProductTabs = memo(({ description, washCare, features = [], productId, pro
   }, [reviews]);
 
   return (
-    <Card className="bg-white/80 backdrop-blur-sm shadow-lg border border-purple-100">
+    <Card className="bg-white/80 backdrop-blur-sm shadow-lg border border-primary/20">
       <CardContent className="p-6">
         <Tabs defaultValue="description" className="w-full my-4">
-          <TabsList className="grid w-full grid-cols-4 bg-purple-50 border border-purple-200 py-8">
+          <TabsList className="grid w-full grid-cols-4 bg-primary/5 border border-primary/20 py-8">
             <TabsTrigger 
               value="description"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-blue-900 data-[state=active]:text-white"
             >
               Description
             </TabsTrigger>
             <TabsTrigger 
               value="features"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-blue-900 data-[state=active]:text-white"
             >
               Features
             </TabsTrigger>
             <TabsTrigger 
               value="care"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-blue-900 data-[state=active]:text-white"
             >
               Wash Care
             </TabsTrigger>
             <TabsTrigger 
               value="reviews"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-blue-900 data-[state=active]:text-white"
             >
               Reviews ({reviewStats.totalReviews})
             </TabsTrigger>
@@ -106,24 +106,24 @@ const ProductTabs = memo(({ description, washCare, features = [], productId, pro
           <TabsContent value="description" className="mt-6">
             <div className="space-y-8">
               {/* Product Description Header */}
-              <div className="text-center pb-4 border-b border-purple-100">
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+              <div className="text-center pb-4 border-b border-primary/20">
+                <h3 className="text-2xl font-bold bg-gradient-to-r from-primary via-blue-900 to-primary bg-clip-text text-transparent mb-2">
                   Product Description
                 </h3>
-                <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-blue-500 mx-auto rounded-full"></div>
+                <div className="w-24 h-1 bg-gradient-to-r from-primary to-blue-900 mx-auto rounded-full"></div>
               </div>
               
               {/* Main Description */}
-              <div className="bg-gradient-to-br from-purple-50 via-white to-blue-50 p-6 rounded-xl border border-purple-100 shadow-sm">
+              <div className="bg-gradient-to-br from-primary/5 via-white to-blue-50 p-6 rounded-xl border border-primary/20 shadow-sm">
                 <p className="text-gray-800 leading-relaxed text-lg font-light tracking-wide">
                   {description}
                 </p>
               </div>
               
               {/* Key Highlights */}
-              <div className="bg-white p-6 rounded-xl border border-purple-200 shadow-lg">
+              <div className="bg-white p-6 rounded-xl border border-primary/20 shadow-lg">
                 <div className="flex items-center mb-6">
-                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center mr-3">
+                  <div className="w-8 h-8 bg-gradient-to-r from-primary to-blue-900 rounded-lg flex items-center justify-center mr-3">
                     <CheckCircle className="w-5 h-5 text-white" />
                   </div>
                   <h4 className="text-xl font-bold text-gray-900">Key Highlights</h4>
@@ -137,7 +137,7 @@ const ProductTabs = memo(({ description, washCare, features = [], productId, pro
                     { title: "Perfect for Special Occasions", desc: "Elegant choice for celebrations" }
                   ].map((highlight, index) => (
                     <div key={index} className="group hover:scale-105 transition-all duration-300">
-                      <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg border border-purple-100 hover:border-purple-300 hover:shadow-md transition-all">
+                      <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-4 rounded-lg border border-primary/20 hover:border-primary/300 hover:shadow-md transition-all">
                         <div className="flex items-start space-x-3">
                           <div className="w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                             <CheckCircle className="w-4 h-4 text-white" />
@@ -155,28 +155,28 @@ const ProductTabs = memo(({ description, washCare, features = [], productId, pro
 
               {/* Additional Info Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-gradient-to-br from-purple-100 to-purple-50 rounded-lg border border-purple-200">
-                  <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                <div className="text-center p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg border border-primary/20">
+                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-3">
                     <Shirt className="w-6 h-6 text-white" />
                   </div>
-                  <h5 className="font-semibold text-purple-900 mb-1">Premium Craftsmanship</h5>
-                  <p className="text-xs text-purple-700">Meticulously crafted with attention to detail</p>
+                  <h5 className="font-semibold text-primary mb-1">Premium Craftsmanship</h5>
+                  <p className="text-xs text-primary/80">Meticulously crafted with attention to detail</p>
                 </div>
                 
                 <div className="text-center p-4 bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg border border-blue-200">
-                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <div className="w-12 h-12 bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3">
                     <CheckCircle className="w-6 h-6 text-white" />
                   </div>
                   <h5 className="font-semibold text-blue-900 mb-1">Quality Assured</h5>
                   <p className="text-xs text-blue-700">Tested for durability and comfort</p>
                 </div>
                 
-                <div className="text-center p-4 bg-gradient-to-br from-indigo-100 to-indigo-50 rounded-lg border border-indigo-200">
-                  <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                <div className="text-center p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg border border-primary/20">
+                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-3">
                     <Sun className="w-6 h-6 text-white" />
                   </div>
-                  <h5 className="font-semibold text-indigo-900 mb-1">Festive Ready</h5>
-                  <p className="text-xs text-indigo-700">Perfect for celebrations and special events</p>
+                  <h5 className="font-semibold text-primary mb-1">Festive Ready</h5>
+                  <p className="text-xs text-primary/80">Perfect for celebrations and special events</p>
                 </div>
               </div>
             </div>
@@ -185,18 +185,18 @@ const ProductTabs = memo(({ description, washCare, features = [], productId, pro
           <TabsContent value="features" className="mt-6">
             <div className="space-y-8">
               {/* Features Header */}
-              <div className="text-center pb-4 border-b border-purple-100">
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+              <div className="text-center pb-4 border-b border-primary/20">
+                <h3 className="text-2xl font-bold bg-gradient-to-r from-primary via-blue-900 to-primary bg-clip-text text-transparent mb-2">
                   Product Features
                 </h3>
-                <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-blue-500 mx-auto rounded-full"></div>
+                <div className="w-24 h-1 bg-gradient-to-r from-primary to-blue-900 mx-auto rounded-full"></div>
               </div>
               
               {features.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {features.map((feature, index) => (
                     <div key={index} className="group hover:scale-105 transition-all duration-300">
-                      <div className="bg-gradient-to-br from-white to-purple-50 p-5 rounded-xl border border-purple-200 hover:border-purple-400 hover:shadow-lg transition-all">
+                      <div className="bg-gradient-to-br from-white to-primary/5 p-5 rounded-xl border border-primary/20 hover:border-primary/400 hover:shadow-lg transition-all">
                         <div className="flex items-start space-x-4">
                           <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
                             <CheckCircle className="w-6 h-6 text-white" />
@@ -220,7 +220,7 @@ const ProductTabs = memo(({ description, washCare, features = [], productId, pro
                     { title: "Versatile Styling", desc: "Perfect for both casual and formal occasions" }
                   ].map((feature, index) => (
                     <div key={index} className="group hover:scale-105 transition-all duration-300">
-                      <div className="bg-gradient-to-br from-white to-blue-50 p-5 rounded-xl border border-purple-200 hover:border-blue-400 hover:shadow-lg transition-all">
+                      <div className="bg-gradient-to-br from-white to-blue-50 p-5 rounded-xl border border-primary/20 hover:border-blue-400 hover:shadow-lg transition-all">
                         <div className="flex items-start space-x-4">
                           <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full flex items-center justify-center flex-shrink-0">
                             <CheckCircle className="w-6 h-6 text-white" />
@@ -241,15 +241,15 @@ const ProductTabs = memo(({ description, washCare, features = [], productId, pro
           <TabsContent value="care" className="mt-6">
             <div className="space-y-8">
               {/* Wash Care Header */}
-              <div className="text-center pb-4 border-b border-purple-100">
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+              <div className="text-center pb-4 border-b border-primary/20">
+                <h3 className="text-2xl font-bold bg-gradient-to-r from-primary via-blue-900 to-primary bg-clip-text text-transparent mb-2">
                   Wash Care Instructions
                 </h3>
-                <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-blue-500 mx-auto rounded-full"></div>
+                <div className="w-24 h-1 bg-gradient-to-r from-primary to-blue-900 mx-auto rounded-full"></div>
               </div>
               
               {/* Care Description */}
-              <div className="bg-gradient-to-br from-yellow-50 via-white to-orange-50 p-6 rounded-xl border border-yellow-200 shadow-sm">
+              <div className="bg-gradient-to-br from-yellow-50 via-white to-primary/5 p-6 rounded-xl border border-primary/20 shadow-sm">
                 <p className="text-gray-800 leading-relaxed text-lg font-light">{washCare}</p>
               </div>
 
@@ -259,9 +259,9 @@ const ProductTabs = memo(({ description, washCare, features = [], productId, pro
                   const IconComponent = instruction.icon;
                   return (
                     <div key={index} className="group hover:scale-105 transition-all duration-300">
-                      <div className="bg-gradient-to-br from-white to-purple-50 p-6 rounded-xl border border-purple-200 hover:border-purple-400 hover:shadow-lg transition-all">
+                      <div className="bg-gradient-to-br from-white to-primary/5 p-6 rounded-xl border border-primary/20 hover:border-primary/400 hover:shadow-lg transition-all">
                         <div className="flex items-start space-x-4">
-                          <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                          <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-primary to-blue-900 rounded-full flex items-center justify-center">
                             <IconComponent className="w-6 h-6 text-white" />
                           </div>
                           <div className="flex-1">
@@ -319,9 +319,9 @@ const ProductTabs = memo(({ description, washCare, features = [], productId, pro
           <TabsContent value="reviews" className="mt-6">
             <div className="space-y-6">
               {/* Reviews Header */}
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-4 border-b border-purple-100">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-4 border-b border-primary/20">
                 <div>
-                  <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-primary via-blue-900 to-primary bg-clip-text text-transparent mb-2">
                     Customer Reviews
                   </h3>
                   <div className="flex items-center space-x-4">
@@ -347,7 +347,7 @@ const ProductTabs = memo(({ description, washCare, features = [], productId, pro
                 </div>
                 
                 <ReviewModal productId={productId} productName={productName}>
-                  <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white">
+                  <Button className="bg-gradient-to-r from-primary to-blue-900 hover:from-primary/80 hover:to-blue-900/80 text-white">
                     Write a Review
                   </Button>
                 </ReviewModal>
@@ -355,7 +355,7 @@ const ProductTabs = memo(({ description, washCare, features = [], productId, pro
 
               {/* Rating Distribution */}
               {reviewStats.totalReviews > 0 && (
-                <div className="bg-gradient-to-br from-purple-50 via-white to-blue-50 p-6 rounded-xl border border-purple-100">
+                <div className="bg-gradient-to-br from-primary/5 via-white to-blue-50 p-6 rounded-xl border border-primary/20">
                   <h4 className="font-semibold text-gray-900 mb-4">Rating Distribution</h4>
                   <div className="space-y-2">
                     {[5, 4, 3, 2, 1].map((rating) => (
@@ -382,7 +382,7 @@ const ProductTabs = memo(({ description, washCare, features = [], productId, pro
               {reviews.length > 0 ? (
                 <div className="space-y-4">
                   {reviews.map((review) => (
-                    <div key={review.id} className="bg-white p-6 rounded-xl border border-purple-200 shadow-sm">
+                    <div key={review.id} className="bg-white p-6 rounded-xl border border-primary/20 shadow-sm">
                       <div className="flex flex-col md:flex-row justify-between items-start mb-4">
                         <div>
                           <div className="flex items-center space-x-2 mb-2">
@@ -433,15 +433,15 @@ const ProductTabs = memo(({ description, washCare, features = [], productId, pro
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Star className="w-8 h-8 text-purple-400" />
+                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Star className="w-8 h-8 text-primary/400" />
                   </div>
                   <h4 className="text-lg font-semibold text-gray-900 mb-2">No Reviews Yet</h4>
                   <p className="text-gray-600 mb-6">
                     Be the first to review this product and help others make informed decisions.
                   </p>
                   <ReviewModal productId={productId} productName={productName}>
-                    <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white">
+                    <Button className="bg-gradient-to-r from-primary to-blue-900 hover:from-primary/80 hover:to-blue-900/80 text-white">
                       Write the First Review
                     </Button>
                   </ReviewModal>
