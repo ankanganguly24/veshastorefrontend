@@ -65,6 +65,7 @@ export default function StoreNavbar() {
 
     window.addEventListener('cartUpdated', handleCartUpdate);
     
+    
     return () => {
       window.removeEventListener('cartUpdated', handleCartUpdate);
     };
@@ -119,17 +120,17 @@ export default function StoreNavbar() {
                       <NavigationMenuItem key={category.id}>
                         {category.children && category.children.length > 0 ? (
                           <>
-                            <NavigationMenuTrigger className="h-10 text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 cursor-pointer">
+                            <NavigationMenuTrigger className="h-10 text-gray-700 hover:text-primary hover:bg-primary/10 transition-all duration-200 cursor-pointer px-4 rounded-md">
                               {category.name}
                             </NavigationMenuTrigger>
                             <NavigationMenuContent>
-                              <div className="grid w-80 gap-3 p-6 bg-white/95 backdrop-blur-md shadow-xl border border-gray-100">
-                                <div className="grid grid-cols-2 gap-2">
+                              <div className="grid w-80 gap-3 p-4 bg-white shadow-lg border border-gray-200 rounded-md">
+                                <div className="grid grid-cols-1 gap-2">
                                   {category.children.map((subcategory) => (
                                     <NavigationMenuLink
                                       key={subcategory.id}
                                       asChild
-                                      className="hover:bg-primary/5 hover:text-primary rounded-md p-2 text-sm transition-all duration-200 cursor-pointer"
+                                      className="hover:bg-primary/10 hover:text-primary rounded-md p-2 text-sm transition-all duration-200 cursor-pointer"
                                     >
                                       <Link
                                         href={`/category/${category.id}/${subcategory.id}`}
@@ -157,7 +158,7 @@ export default function StoreNavbar() {
                           <NavigationMenuLink asChild>
                             <Link
                               href={`/category/${category.id}`}
-                              className="h-10 flex items-center px-4 text-gray-700 hover:text-primary hover:bg-primary/5 rounded transition-all duration-200 cursor-pointer font-medium"
+                              className="h-10 flex items-center px-4 text-gray-700 hover:text-primary hover:bg-primary/10 rounded-md transition-all duration-200 cursor-pointer font-medium"
                             >
                               {category.name}
                             </Link>
