@@ -5,12 +5,10 @@ import ImageCarousel from "@/components/common/image-carousel";
 import ProductInfo from "@/components/common/product-info";
 import TrustBadges from "@/components/common/trust-badges";
 import ProductTabs from "@/components/common/product-tabs";
-import RelatedProducts from "@/components/common/related-products";
 import { ProductService } from "@/services/product-service";
 import api from "@/utils/axios";
 
 export default function ProductPage({ params }) {
-  // Unwrap params (React.use for possible promise params is used elsewhere; here we can directly read)
   const resolvedParams = React.use(params);
   const { id } = resolvedParams || {};
 
@@ -30,55 +28,96 @@ export default function ProductPage({ params }) {
       setLoading(true);
       setError(null);
       try {
-        // Try service first (returns res.data), fallback to direct axios if needed
         let res;
         try {
-          res = await ProductService.getById(id); // ProductService returns res.data from axios wrapper
+          res = await ProductService.getById(id);
         } catch (err) {
-          // fallback direct call
           const fallback = await api.get(`/product/${encodeURIComponent(id)}`);
           res = fallback.data;
         }
 
-        // Normalize payload - backend may return different shapes
-        const payload = res?.data ? res : res;
-        // Try common variants:
-        // - { success, message, data: { product: {...} } }
-        // - { success, message, data: {...} }
-        // - direct product object
-        const p = payload?.data?.product ?? payload?.data ?? payload;
+        // Extract product from response
+        const productData = res?.data?.product || res?.product || res?.data || res;
 
-        // safe mapping to UI-friendly product object used by existing components
-        const variant = (Array.isArray(p?.variants) && p.variants.length) ? p.variants[0] : {};
-        const images =
-          (Array.isArray(p?.media) && p.media.length)
-            ? p.media.map((m) => m.url || m.path || m.src || m)
-            : (p?.images || []);
+        // Get default variant
+        const defaultVariant = productData.variants?.find(v => v.is_default) || productData.variants?.[0];
 
-        const price = variant?.price ?? p?.price ?? 0;
-        const compareAt = variant?.compare_at_price ?? p?.originalPrice ?? p?.compare_at_price ?? null;
-        const discount = (compareAt && price) ? Math.round((1 - price / compareAt) * 100) : (p?.discount ?? null);
-        const stockQty = variant?.stock_quantity ?? p?.stock_quantity ?? p?.stockCount ?? 0;
+        // Extract all images with proper preference for quality
+        const images = productData.media?.map(mediaItem => {
+          // Prefer medium 720p, then thumbnail 720p, then original
+          const medium720p = mediaItem.media?.variants?.find(
+            v => v.variant_key === 'medium' && v.metadata?.resolution === '720p'
+          );
+          const thumbnail720p = mediaItem.media?.variants?.find(
+            v => v.variant_key === 'thumbnail' && v.metadata?.resolution === '720p'
+          );
+          
+          return medium720p?.url || thumbnail720p?.url || mediaItem.media?.url;
+        }).filter(Boolean) || [];
 
+        // Extract sizes and colors from all variants
+        const sizes = [...new Set(
+          productData.variants?.flatMap(v =>
+            v.variantOptions
+              ?.filter(opt => opt.optionValue?.optionDefinition?.name === "size")
+              .map(opt => opt.optionValue?.value)
+          ).filter(Boolean)
+        )] || ["XS", "S", "M", "L", "XL", "XXL"];
+
+        const colors = [...new Set(
+          productData.variants?.flatMap(v =>
+            v.variantOptions
+              ?.filter(opt => opt.optionValue?.optionDefinition?.name === "color")
+              .map(opt => opt.optionValue?.value)
+          ).filter(Boolean)
+        )] || ["Default"];
+
+        // Calculate price details
+        const price = defaultVariant?.price || 0;
+        const compareAt = defaultVariant?.compare_at_price || null;
+        const discount = (compareAt && price) 
+          ? Math.round(((compareAt - price) / compareAt) * 100) 
+          : null;
+
+        // Map to UI-friendly format
         const mapped = {
-          id: p?.id ?? id,
-          slug: p?.slug ?? String(p?.id ?? id),
-          title: p?.title ?? p?.name ?? "",
-          name: p?.title ?? p?.name ?? p?.slug ?? String(p?.id ?? id),
-          brand: (p?.brands && p.brands.length) ? p.brands[0].name : (p?.brand || ""),
+          id: productData.id,
+          slug: productData.slug || String(productData.id),
+          title: productData.title,
+          name: productData.title,
+          brand: productData.brands?.[0]?.name || "Premium Brand",
           price,
           originalPrice: compareAt,
           discount,
-          category: (Array.isArray(p?.categories) && p.categories.length) ? p.categories[0].name : (p?.category || ""),
-          inStock: stockQty > 0,
-          stockCount: stockQty,
-          rating: p?.rating ?? 4.5,
-          reviewCount: p?.reviewCount ?? 0,
-          images,
-          description: p?.description ?? "",
-          washCare: p?.washCare ?? p?.wash_care ?? "",
-          offers: p?.offers ?? [],
-          features: p?.features ?? [],
+          category: productData.categories?.[0]?.category?.name || "Fashion",
+          inStock: (defaultVariant?.stock_quantity || 0) > 0,
+          stockCount: defaultVariant?.stock_quantity || 0,
+          rating: 4.5,
+          reviewCount: 0,
+          images: images.length > 0 ? images : ['/placeholder-image.jpg'],
+          description: productData.description || "Premium quality product with excellent craftsmanship.",
+          washCare: "Dry clean recommended. Machine wash cold on gentle cycle. Do not bleach. Tumble dry low. Iron on low heat if needed.",
+          offers: [
+            "Get 10% instant discount on all bank cards",
+            "Free shipping on orders above ₹499",
+            "Easy 7-day return and exchange",
+            "Cash on Delivery available"
+          ],
+          features: [
+            "Premium quality fabric with superior finish",
+            "Comfortable and breathable material",
+            "Perfect fit with modern design",
+            "Durable construction for long-lasting wear",
+            "Easy care and maintenance",
+            "Available in multiple sizes and colors"
+          ],
+          // Pass raw data for advanced features
+          variants: productData.variants || [],
+          availableSizes: sizes,
+          availableColors: colors,
+          media: productData.media || [],
+          categories: productData.categories || [],
+          tags: productData.tags || [],
         };
 
         if (mounted) setProduct(mapped);
@@ -96,24 +135,55 @@ export default function ProductPage({ params }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-500">Loading product...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Loading product...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-red-600">{error}</div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100">
+        <div className="text-center bg-white p-8 rounded-xl shadow-lg">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Error Loading Product</h3>
+          <p className="text-red-600 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600">Product not found.</div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center bg-white p-8 rounded-xl shadow-lg">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Product Not Found</h3>
+          <p className="text-gray-600 mb-4">The product you're looking for doesn't exist.</p>
+          
+          <a  href="/"
+            className="inline-block px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            Go to Home
+          </a>
+        </div>
       </div>
     );
   }
@@ -121,14 +191,14 @@ export default function ProductPage({ params }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-primary/10">
       <div className="container mx-auto px-4 py-8">
-        {/* Main Product Section - 2 Column Layout */}
+        {/* Main Product Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {/* Left Column - Image Carousel */}
+          {/* Left - Image Carousel */}
           <div className="lg:sticky lg:top-8 lg:h-fit">
             <ImageCarousel images={product.images} productName={product.name} />
           </div>
 
-          {/* Right Column - Product Info */}
+          {/* Right - Product Info */}
           <div>
             <ProductInfo product={product} />
           </div>
@@ -139,7 +209,7 @@ export default function ProductPage({ params }) {
           <TrustBadges />
         </div>
 
-        {/* Product Details Tabs with Reviews */}
+        {/* Product Details Tabs */}
         <div className="mb-12">
           <ProductTabs
             description={product.description}
@@ -148,11 +218,6 @@ export default function ProductPage({ params }) {
             productId={product.id}
             productName={product.name}
           />
-        </div>
-
-        {/* Related Products */}
-        <div>
-          <RelatedProducts currentProductId={product.id} category={product.category} />
         </div>
       </div>
     </div>
