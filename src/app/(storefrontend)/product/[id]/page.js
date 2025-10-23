@@ -7,6 +7,7 @@ import TrustBadges from "@/components/common/trust-badges";
 import ProductTabs from "@/components/common/product-tabs";
 import { ProductService } from "@/services/product-service";
 import api from "@/utils/axios";
+import Link from "next/link";
 
 export default function ProductPage({ params }) {
   const resolvedParams = React.use(params);
