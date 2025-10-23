@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Plus, Package } from "lucide-react";
+import { Plus, Package, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SearchAndFilters } from "@/components/common/search-and-filters";
 import { StatusBadge } from "@/components/common/status-badge";
@@ -11,16 +11,18 @@ import { DataTable } from "@/components/common/data-table";
 import { TableActions } from "@/components/common/table-actions";
 import { useQuery } from "@tanstack/react-query";
 import { ProductService } from "@/services/product-service";
+import { ProductDetailsDialog } from "@/components/admin/products/product-details-dialogue";
 
 export default function ProductsPage() {
 	const [searchTerm, setSearchTerm] = useState("");
+	const [selectedProduct, setSelectedProduct] = useState(null);
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
 	// Fetch products from API
 	const { data, isLoading } = useQuery({
 		queryKey: ["products"],
 		queryFn: async () => {
 			const res = await ProductService.getAll();
-			// API returns { success, data: { products: [...] } }
 			return res.data?.products || [];
 		},
 	});
@@ -30,10 +32,19 @@ export default function ProductsPage() {
 		return data.filter(
 			(product) =>
 				product.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				(product.categories?.[0]?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+				(product.categories?.[0]?.category?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
 				product.variants?.[0]?.sku?.toLowerCase().includes(searchTerm.toLowerCase())
 		);
 	}, [searchTerm, data]);
+
+	const handleViewProduct = (product) => {
+		setSelectedProduct(product);
+		setIsDialogOpen(true);
+	};
+
+	const handleOpenInNewTab = (productId) => {
+		window.open(`/product/${productId}`, '_blank');
+	};
 
 	const columns = useMemo(
 		() => [
@@ -42,10 +53,19 @@ export default function ProductsPage() {
 				header: "Product",
 				cell: ({ row }) => {
 					const product = row.original;
+					const primaryImage = product.media?.find(m => m.is_primary)?.media?.url;
 					return (
 						<div className="flex items-center space-x-3">
-							<div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
-								<Package className="h-6 w-6 text-muted-foreground" />
+							<div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center overflow-hidden">
+								{primaryImage ? (
+									<img 
+										src={primaryImage} 
+										alt={product.title}
+										className="w-full h-full object-cover"
+									/>
+								) : (
+									<Package className="h-6 w-6 text-muted-foreground" />
+								)}
 							</div>
 							<div>
 								<p className="font-medium text-foreground">{product.title}</p>
@@ -65,57 +85,83 @@ export default function ProductsPage() {
 					return (
 						<span>
 							{product.categories && product.categories.length > 0
-								? product.categories.map((cat) => cat.name).join(", ")
+								? product.categories.map((cat) => cat.category?.name || cat.name).join(", ")
 								: "-"}
 						</span>
 					);
 				},
 			},
 			{
-				id: "price", // <-- unique id for price column
+				id: "price",
 				header: "Price",
 				cell: ({ row }) => {
 					const product = row.original;
 					const price = product.variants?.[0]?.price;
-					return <span className="font-medium">{price ? `₹${price}` : "-"}</span>;
+					const comparePrice = product.variants?.[0]?.compare_at_price;
+					return (
+						<div>
+							<span className="font-medium">
+								{price ? `₹${price}` : "-"}
+							</span>
+							{comparePrice && comparePrice > price && (
+								<span className="text-xs text-muted-foreground line-through ml-2">
+									₹{comparePrice}
+								</span>
+							)}
+						</div>
+					);
 				},
 			},
 			{
-				id: "stock", // <-- unique id for stock column
+				id: "stock",
 				header: "Stock",
 				cell: ({ row }) => {
 					const product = row.original;
 					const stock = product.variants?.[0]?.stock_quantity;
-					return <span>{stock ?? "-"}</span>;
+					return (
+						<span className={stock === 0 ? "text-red-500 font-medium" : ""}>
+							{stock ?? "-"}
+						</span>
+					);
 				},
 			},
 			{
-				id: "variantDetails", // <-- unique id for variants details column
+				id: "variantDetails",
 				header: "Variants",
 				cell: ({ row }) => {
 					const product = row.original;
-					const sizes = product.variants
-						?.map((v) =>
+					const variantCount = product.variants?.length || 0;
+					const sizes = [...new Set(
+						product.variants?.flatMap(v =>
 							v.variantOptions
-								?.filter((opt) => opt.optionValue?.optionDefinition?.name === "size")
-								.map((opt) => opt.optionValue?.value)
-								.join(", ")
-						)
-						.filter(Boolean)
-						.join(" | ");
-					const colors = product.variants
-						?.map((v) =>
+								?.filter(opt => opt.optionValue?.optionDefinition?.name === "size")
+								.map(opt => opt.optionValue?.value)
+						).filter(Boolean)
+					)];
+					const colors = [...new Set(
+						product.variants?.flatMap(v =>
 							v.variantOptions
-								?.filter((opt) => opt.optionValue?.optionDefinition?.name === "color")
-								.map((opt) => opt.optionValue?.value)
-								.join(", ")
-						)
-						.filter(Boolean)
-						.join(" | ");
+								?.filter(opt => opt.optionValue?.optionDefinition?.name === "color")
+								.map(opt => opt.optionValue?.value)
+						).filter(Boolean)
+					)];
 					return (
 						<div>
-							<p className="text-sm text-foreground">Sizes: {sizes || "-"}</p>
-							<p className="text-sm text-muted-foreground">Colors: {colors || "-"}</p>
+							<p className="text-sm font-medium text-foreground">
+								{variantCount} variant{variantCount !== 1 ? 's' : ''}
+							</p>
+							{sizes.length > 0 && (
+								<p className="text-xs text-muted-foreground">
+									Sizes: {sizes.slice(0, 3).join(", ")}
+									{sizes.length > 3 && ` +${sizes.length - 3}`}
+								</p>
+							)}
+							{colors.length > 0 && (
+								<p className="text-xs text-muted-foreground">
+									Colors: {colors.slice(0, 3).join(", ")}
+									{colors.length > 3 && ` +${colors.length - 3}`}
+								</p>
+							)}
 						</div>
 					);
 				},
@@ -131,11 +177,22 @@ export default function ProductsPage() {
 				cell: ({ row }) => {
 					const product = row.original;
 					return (
-						<TableActions
-							editHref={`/admin/products/edit/${product.id}`}
-							onView={() => console.log("View", product.id)}
-							onDelete={() => console.log("Delete", product.id)}
-						/>
+						<div className="flex items-center gap-2">
+							<TableActions
+								editHref={`/admin/products/edit/${product.id}`}
+								onView={() => handleViewProduct(product)}
+								onDelete={() => console.log("Delete", product.id)}
+							/>
+							<Button
+								variant="ghost"
+								size="icon"
+								className="h-8 w-8"
+								onClick={() => handleOpenInNewTab(product.id)}
+								title="Open in new tab"
+							>
+								<ExternalLink className="h-4 w-4" />
+							</Button>
+						</div>
 					);
 				},
 			},
@@ -173,7 +230,13 @@ export default function ProductsPage() {
 				title="All Products"
 				loading={isLoading}
 			/>
+
+			{/* Product Details Dialog */}
+			<ProductDetailsDialog
+				product={selectedProduct}
+				open={isDialogOpen}
+				onOpenChange={setIsDialogOpen}
+			/>
 		</div>
 	);
 }
-
