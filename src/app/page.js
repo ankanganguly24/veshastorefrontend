@@ -19,7 +19,7 @@ export default function Home() {
         
         {/* Product Collections */}
         <ProductSections />
-      Welcome back! Here's what's happening with your clothing store
+      
         <TestimonialsCarousel />
       </main>
       <Footer />

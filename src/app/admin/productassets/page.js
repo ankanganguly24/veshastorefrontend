@@ -16,6 +16,7 @@ import {
   Download,
 } from "lucide-react";
 import { MediaService } from "@/services/media-service";
+import Image from "next/image";
 
 
 
@@ -248,8 +249,10 @@ export default function MediaManager() {
                     <>
                       <div className="bg-gray-100 h-40 flex items-center justify-center overflow-hidden">
                         {item.mime_type?.startsWith("image") ? (
-                          <img
+                          <Image
                             src={item.url}
+                            width={100}
+                            height={100}
                             alt={item.file_name}
                             className="object-cover w-full h-full"
                           />
