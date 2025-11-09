@@ -11,8 +11,8 @@ const testimonials = [
     name: "Priya Sharma",
     location: "Mumbai, Maharashtra",
     rating: 5,
-    review: "Absolutely love my Nawabi kurta set! The quality is exceptional and the fit is perfect. Vesha has become my go-to for ethnic wear.",
-    product: "Nawabi Royal Kurta Set",
+    review: "Absolutely love my outfit! The detailing and craftsmanship are beyond expectations. The fabric feels luxurious, and the fit was spot on.",
+    product: "Embroidered Kurta Set",
     image: "https://images.unsplash.com/photo-1494790108755-2616b612b442?w=100&h=100&fit=crop&crop=face",
     purchaseDate: "2 weeks ago",
     verified: true
@@ -22,8 +22,8 @@ const testimonials = [
     name: "Rahul Mehta",
     location: "Delhi, India",
     rating: 5,
-    review: "The festive collection is outstanding! Received so many compliments at my cousin's wedding. The embroidery work is intricate and beautiful.",
-    product: "Festive Lehenga Set",
+    review: "The festive collection is simply stunning. The outfit looked even better in person and made me stand out at the event. Excellent finish and comfort.",
+    product: "Classic Festive Sherwani",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
     purchaseDate: "1 month ago",
     verified: true
@@ -33,7 +33,7 @@ const testimonials = [
     name: "Anita Desai",
     location: "Bangalore, Karnataka",
     rating: 5,
-    review: "Fast delivery and amazing customer service! The designer peplum jacket fits like a glove. Will definitely shop again from Vesha.",
+    review: "Quick delivery and flawless design. The outfit was elegant yet modern — received so many compliments. Highly recommend ordering from here!",
     product: "Designer Peplum Jacket",
     image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
     purchaseDate: "3 weeks ago",
@@ -44,8 +44,8 @@ const testimonials = [
     name: "Vikram Singh",
     location: "Jaipur, Rajasthan",
     rating: 5,
-    review: "Traditional meets modern perfectly! The sherwani set I ordered was exactly as shown in pictures. Excellent craftsmanship and attention to detail.",
-    product: "Royal Sherwani Set",
+    review: "The craftsmanship is exceptional — feels tailor-made. Perfect balance of traditional charm and modern styling. Worth every penny.",
+    product: "Regal Sherwani Set",
     image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
     purchaseDate: "2 months ago",
     verified: true
@@ -55,8 +55,8 @@ const testimonials = [
     name: "Sneha Patel",
     location: "Ahmedabad, Gujarat",
     rating: 5,
-    review: "The Retro Bellá collection is simply gorgeous! Love how vintage pieces can look so contemporary. Quality and style both are top-notch.",
-    product: "Vintage Silk Blouse",
+    review: "Loved the fabric quality and subtle elegance. The silhouette and color were exactly as shown. It made me feel effortlessly beautiful.",
+    product: "Vintage Silk Saree",
     image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=100&h=100&fit=crop&crop=face",
     purchaseDate: "1 week ago",
     verified: true
@@ -66,43 +66,43 @@ const testimonials = [
     name: "Arjun Kumar",
     location: "Chennai, Tamil Nadu",
     rating: 5,
-    review: "Impressed with the Moonlit Dream collection! The evening gown was perfect for our anniversary dinner. Wife looked absolutely stunning!",
+    review: "Ordered for my wife’s birthday — she loved it! The fit, finish, and packaging were all premium. Thank you for making the day special.",
     product: "Starlight Evening Gown",
     image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
     purchaseDate: "3 weeks ago",
     verified: true
-  } ,
-  {
-    id: 7,
-    name: "Rahul Mehta",
-    location: "Delhi, India",
-    rating: 5,
-    review: "The festive collection is outstanding! Received so many compliments at my cousin's wedding. The embroidery work is intricate and beautiful.",
-    product: "Festive Lehenga Set",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-    purchaseDate: "1 month ago",
-    verified: true
   },
   {
-    id: 8,
-    name: "Anita Desai",
-    location: "Bangalore, Karnataka",
+    id: 7,
+    name: "Riya Kapoor",
+    location: "Pune, Maharashtra",
     rating: 5,
-    review: "Fast delivery and amazing customer service! The designer peplum jacket fits like a glove. Will definitely shop again from Vesha.",
-    product: "Designer Peplum Jacket",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
+    review: "Elegant designs and amazing comfort! I wore this outfit to a family function, and everyone kept asking where I got it from.",
+    product: "Pastel Lehenga Set",
+    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=face",
     purchaseDate: "3 weeks ago",
     verified: true
   },
   {
-    id: 9,
-    name: "Vikram Singh",
-    location: "Jaipur, Rajasthan",
+    id: 8,
+    name: "Manish Verma",
+    location: "Lucknow, Uttar Pradesh",
     rating: 5,
-    review: "Traditional meets modern perfectly! The sherwani set I ordered was exactly as shown in pictures. Excellent craftsmanship and attention to detail.",
-    product: "Royal Sherwani Set",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-    purchaseDate: "2 months ago",
+    review: "I appreciate the attention to detail and quality finish. It arrived beautifully packed and looked even better in person.",
+    product: "Handwoven Kurta Set",
+    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop&crop=face",
+    purchaseDate: "1 month ago",
+    verified: true
+  },
+  {
+    id: 9,
+    name: "Aditi Nair",
+    location: "Kochi, Kerala",
+    rating: 5,
+    review: "It’s rare to find something that feels luxurious yet so comfortable. Loved how timeless the piece feels — definitely shopping again.",
+    product: "Velvet Heritage Gown",
+    image: "https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=100&h=100&fit=crop&crop=face",
+    purchaseDate: "2 weeks ago",
     verified: true
   },
 ];
@@ -141,7 +141,6 @@ export default function TestimonialsCarousel() {
 
   useEffect(() => {
     if (!isAutoPlay) return;
-
     const interval = setInterval(nextSlide, 4000);
     return () => clearInterval(interval);
   }, [nextSlide, isAutoPlay]);
@@ -157,7 +156,7 @@ export default function TestimonialsCarousel() {
             What Our Customers Say
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Real stories from real customers who love Vesha fashion
+            Real stories from people who chose timeless elegance
           </p>
           <div className="flex items-center justify-center mt-6">
             <div className="flex items-center space-x-2">
@@ -167,7 +166,7 @@ export default function TestimonialsCarousel() {
                 ))}
               </div>
               <span className="text-gray-600 font-medium">4.9 out of 5</span>
-              <span className="text-gray-500">• 1,200+ reviews</span>
+              <span className="text-gray-500">• 1,200+ happy customers</span>
             </div>
           </div>
         </div>
@@ -192,23 +191,19 @@ export default function TestimonialsCarousel() {
                   style={{ width: `${100 / testimonials.length}%` }}
                 >
                   <Card className="p-6 h-full bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
-                    {/* Quote Icon */}
                     <div className="mb-4">
                       <Quote className="w-8 h-8 text-blue-500 opacity-60" />
                     </div>
 
-                    {/* Review Text */}
                     <p className="text-gray-700 mb-6 leading-relaxed text-sm lg:text-base">
                       "{testimonial.review}"
                     </p>
 
-                    {/* Product */}
                     <div className="mb-4">
                       <p className="text-xs text-gray-500 mb-1">Purchased:</p>
                       <p className="text-sm font-medium text-gray-900">{testimonial.product}</p>
                     </div>
 
-                    {/* Rating */}
                     <div className="flex items-center mb-4">
                       {[...Array(5)].map((_, i) => (
                         <Star 
@@ -222,7 +217,6 @@ export default function TestimonialsCarousel() {
                       ))}
                     </div>
 
-                    {/* Customer Info */}
                     <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                       <div className="flex items-center space-x-3">
                         <img
