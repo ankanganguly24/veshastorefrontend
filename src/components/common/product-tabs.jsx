@@ -76,7 +76,7 @@ const ProductTabs = memo(({ description, washCare, features = [], productId, pro
     <Card className="bg-white/80 backdrop-blur-sm shadow-lg border border-primary/20">
       <CardContent className="p-6">
         <Tabs defaultValue="description" className="w-full my-4">
-          <TabsList className="grid w-full grid-cols-4 bg-primary/5 border border-primary/20 py-8">
+          <TabsList className="grid w-full grid-cols-4 bg-primary/5 border border-primary/20">
             <TabsTrigger 
               value="description"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-blue-900 data-[state=active]:text-white"

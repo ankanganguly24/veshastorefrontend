@@ -206,9 +206,9 @@ if (!product) {
         </div>
 
         {/* Trust Badges */}
-        <div className="mb-12">
+        {/* <div className="mb-12">
           <TrustBadges />
-        </div>
+        </div> */}
 
         {/* Product Details Tabs */}
         <div className="mb-12">

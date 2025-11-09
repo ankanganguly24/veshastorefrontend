@@ -4,47 +4,143 @@ import { useState, useCallback, useMemo, memo, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, Minus, Plus, Heart, Share2, Truck, Shield, RotateCcw, ShoppingCart, Check } from "lucide-react";
+import { Star, Minus, Plus, Heart, Share2, Truck, Shield, RotateCcw, ShoppingCart, Check, AlertTriangle } from "lucide-react";
 import { CartService, WishlistService } from "@/lib/cart-service";
 import ReviewModal from "./review-modal";
 
 const ProductInfo = memo(({ product }) => {
   const [quantity, setQuantity] = useState(1);
-  const [selectedSize, setSelectedSize] = useState("M");
-  const [selectedColor, setSelectedColor] = useState("Default");
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(null);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isInCart, setIsInCart] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
 
-  // Memoized product destructuring
   const {
     name,
     brand,
-    price,
-    originalPrice,
-    discount,
     category,
-    inStock,
-    stockCount,
     rating,
     reviewCount,
-    offers
+    offers,
+    variants = []
   } = useMemo(() => product, [product]);
 
-  const sizes = useMemo(() => ["XS", "S", "M", "L", "XL", "XXL"], []);
-  const colors = useMemo(() => ["Default", "Black", "White", "Navy", "Maroon"], []);
+  // Extract unique sizes and colors from variants
+  const { availableSizes, availableColors } = useMemo(() => {
+    const sizes = new Set();
+    const colors = new Set();
 
-  // Check cart and wishlist status on mount
+    variants.forEach(variant => {
+      variant.variantOptions?.forEach(option => {
+        const optionName = option.optionValue?.optionDefinition?.name?.toLowerCase();
+        if (optionName === 'size') {
+          sizes.add(option.optionValue.value);
+        } else if (optionName === 'color') {
+          colors.add(option.optionValue.value);
+        }
+      });
+    });
+
+    return {
+      availableSizes: Array.from(sizes),
+      availableColors: Array.from(colors)
+    };
+  }, [variants]);
+
+  // Set default selections on mount
   useEffect(() => {
-    setIsInCart(CartService.isInCart(product.id, selectedSize, selectedColor));
+    if (!selectedSize && availableSizes.length > 0) {
+      setSelectedSize(availableSizes[0]);
+    }
+    if (!selectedColor && availableColors.length > 0) {
+      setSelectedColor(availableColors[0]);
+    }
+  }, [availableSizes, availableColors, selectedSize, selectedColor]);
+
+  // Find current variant based on selections
+  const currentVariant = useMemo(() => {
+    if (!selectedSize && !selectedColor) return variants[0];
+    
+    return variants.find(variant => {
+      const options = variant.variantOptions || [];
+      const sizeMatch = !selectedSize || options.some(opt => 
+        opt.optionValue?.optionDefinition?.name?.toLowerCase() === 'size' && 
+        opt.optionValue?.value === selectedSize
+      );
+      const colorMatch = !selectedColor || options.some(opt => 
+        opt.optionValue?.optionDefinition?.name?.toLowerCase() === 'color' && 
+        opt.optionValue?.value === selectedColor
+      );
+      return sizeMatch && colorMatch;
+    }) || variants[0];
+  }, [variants, selectedSize, selectedColor]);
+
+  // Get stock info for each size with current color
+  const sizeStockMap = useMemo(() => {
+    const stockMap = {};
+    availableSizes.forEach(size => {
+      const variant = variants.find(v => {
+        const options = v.variantOptions || [];
+        const sizeMatch = options.some(opt => 
+          opt.optionValue?.optionDefinition?.name?.toLowerCase() === 'size' && 
+          opt.optionValue?.value === size
+        );
+        const colorMatch = !selectedColor || options.some(opt => 
+          opt.optionValue?.optionDefinition?.name?.toLowerCase() === 'color' && 
+          opt.optionValue?.value === selectedColor
+        );
+        return sizeMatch && colorMatch;
+      });
+      stockMap[size] = variant?.stock_quantity || 0;
+    });
+    return stockMap;
+  }, [variants, availableSizes, selectedColor]);
+
+  // Get stock info for each color with current size
+  const colorStockMap = useMemo(() => {
+    const stockMap = {};
+    availableColors.forEach(color => {
+      const variant = variants.find(v => {
+        const options = v.variantOptions || [];
+        const colorMatch = options.some(opt => 
+          opt.optionValue?.optionDefinition?.name?.toLowerCase() === 'color' && 
+          opt.optionValue?.value === color
+        );
+        const sizeMatch = !selectedSize || options.some(opt => 
+          opt.optionValue?.optionDefinition?.name?.toLowerCase() === 'size' && 
+          opt.optionValue?.value === selectedSize
+        );
+        return colorMatch && sizeMatch;
+      });
+      stockMap[color] = variant?.stock_quantity || 0;
+    });
+    return stockMap;
+  }, [variants, availableColors, selectedSize]);
+
+  const price = currentVariant?.price || 0;
+  const originalPrice = currentVariant?.compare_at_price || null;
+  const discount = (originalPrice && price) 
+    ? Math.round(((originalPrice - price) / originalPrice) * 100) 
+    : null;
+  const inStock = (currentVariant?.stock_quantity || 0) > 0;
+  const stockCount = currentVariant?.stock_quantity || 0;
+
+  // Check cart and wishlist status
+  useEffect(() => {
+    if (selectedSize && selectedColor) {
+      setIsInCart(CartService.isInCart(product.id, selectedSize, selectedColor));
+    }
     setIsWishlisted(WishlistService.isInWishlist(product.id));
   }, [product.id, selectedSize, selectedColor]);
 
-  // Listen for cart and wishlist updates
+  // Listen for updates
   useEffect(() => {
     const handleCartUpdate = () => {
-      setIsInCart(CartService.isInCart(product.id, selectedSize, selectedColor));
+      if (selectedSize && selectedColor) {
+        setIsInCart(CartService.isInCart(product.id, selectedSize, selectedColor));
+      }
     };
 
     const handleWishlistUpdate = () => {
@@ -60,7 +156,6 @@ const ProductInfo = memo(({ product }) => {
     };
   }, [product.id, selectedSize, selectedColor]);
 
-  // Memoized Star Rating component
   const StarRating = useMemo(() => (
     <div className="flex items-center space-x-1">
       {[1, 2, 3, 4, 5].map((star) => (
@@ -86,9 +181,8 @@ const ProductInfo = memo(({ product }) => {
   }, [quantity]);
 
   const handleAddToCart = useCallback(async () => {
-    if (!selectedSize) {
-      // Could show a subtle error indicator instead of alert
-      console.warn('Please select a size');
+    if (!selectedSize || !selectedColor) {
+      console.warn('Please select size and color');
       return;
     }
 
@@ -99,32 +193,25 @@ const ProductInfo = memo(({ product }) => {
     try {
       await CartService.addToCart(product, selectedSize, selectedColor, quantity);
       setIsInCart(true);
-      
-      // Silent success - no alert needed
       console.log(`${name} added to cart successfully!`);
     } catch (error) {
       console.error('Error adding to cart:', error);
-      // Could show error toast instead of alert
     } finally {
       setIsAddingToCart(false);
     }
   }, [selectedSize, selectedColor, quantity, product, name, isAddingToCart]);
 
   const handleBuyNow = useCallback(async () => {
-    if (!selectedSize) {
-      // Could show a subtle error indicator instead of alert
-      console.warn('Please select a size');
+    if (!selectedSize || !selectedColor) {
+      console.warn('Please select size and color');
       return;
     }
 
-    // Add to cart first, then redirect to checkout
     try {
       await CartService.addToCart(product, selectedSize, selectedColor, quantity);
-      // Redirect to checkout/cart page
       window.location.href = '/cart';
     } catch (error) {
       console.error('Error during buy now:', error);
-      // Could show error toast instead of alert
     }
   }, [selectedSize, selectedColor, quantity, product]);
 
@@ -156,9 +243,7 @@ const ProductInfo = memo(({ product }) => {
         url: window.location.href,
       });
     } else {
-      // Fallback for browsers that don't support Web Share API
       navigator.clipboard.writeText(window.location.href);
-      // Silent copy - no alert needed
       console.log('Link copied to clipboard!');
     }
   }, [name, category]);
@@ -196,8 +281,6 @@ const ProductInfo = memo(({ product }) => {
       {/* Product Title */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">{name}</h1>
-        
-        {/* Rating */}
         <div className="flex items-center space-x-2 mb-4">
           {StarRating}
         </div>
@@ -222,8 +305,19 @@ const ProductInfo = memo(({ product }) => {
         {/* Stock Status */}
         <div className="flex items-center space-x-2">
           <div className={`w-3 h-3 rounded-full ${inStock ? 'bg-green-500' : 'bg-red-500'}`}></div>
-          <span className={`text-sm font-medium ${inStock ? 'text-green-700' : 'text-red-700'}`}>
-            {inStock ? `In Stock (${stockCount} items available)` : 'Out of Stock'}
+          <span className={`text-sm font-medium ${stockCount < 10 && inStock ? 'text-red-700' : inStock ? 'text-green-700' : 'text-red-700'}`}>
+            {inStock ? (
+              stockCount < 10 ? (
+                <span className="flex items-center">
+                  <AlertTriangle className="w-4 h-4 mr-1" />
+                  Only {stockCount} items left!
+                </span>
+              ) : (
+                `In Stock (${stockCount} items available)`
+              )
+            ) : (
+              'Out of Stock'
+            )}
           </span>
         </div>
       </Card>
@@ -244,47 +338,93 @@ const ProductInfo = memo(({ product }) => {
       )}
 
       {/* Size Selection */}
-      <div>
-        <h3 className="font-semibold text-gray-900 mb-3">Size</h3>
-        <div className="grid grid-cols-6 gap-2">
-          {sizes.map((size) => (
-            <Button
-              key={size}
-              variant={selectedSize === size ? "default" : "outline"}
-              className={`py-2 px-3 text-sm ${
-                selectedSize === size 
-                  ? 'bg-purple-600 text-white' 
-                  : 'hover:bg-purple-50 hover:border-purple-300'
-              }`}
-              onClick={() => setSelectedSize(size)}
-            >
-              {size}
-            </Button>
-          ))}
+      {availableSizes.length > 0 && (
+        <div>
+          <h3 className="font-semibold text-gray-900 mb-3">Size</h3>
+          <div className="grid grid-cols-6 gap-2">
+            {availableSizes.map((size) => {
+              const stock = sizeStockMap[size];
+              const isLowStock = stock > 0 && stock < 10;
+              const isOutOfStock = stock === 0;
+              
+              return (
+                <div key={size} className="relative">
+                  <Button
+                    variant={selectedSize === size ? "default" : "outline"}
+                    className={`py-2 px-3 text-sm w-full ${
+                      selectedSize === size 
+                        ? 'bg-purple-600 text-white' 
+                        : isOutOfStock
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'hover:bg-purple-50 hover:border-purple-300'
+                    }`}
+                    onClick={() => !isOutOfStock && setSelectedSize(size)}
+                    disabled={isOutOfStock}
+                  >
+                    {size}
+                  </Button>
+                  {isLowStock && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {selectedSize && sizeStockMap[selectedSize] < 10 && sizeStockMap[selectedSize] > 0 && (
+            <p className="text-xs text-red-600 mt-2 flex items-center">
+              <AlertTriangle className="w-3 h-3 mr-1" />
+              Only {sizeStockMap[selectedSize]} left in this size
+            </p>
+          )}
         </div>
-      </div>
+      )}
 
       {/* Color Selection */}
-      <div>
-        <h3 className="font-semibold text-gray-900 mb-3">Color</h3>
-        <div className="flex flex-wrap gap-2">
-          {colors.map((color) => (
-            <Button
-              key={color}
-              variant={selectedColor === color ? "default" : "outline"}
-              className={`py-2 px-4 text-sm ${
-                selectedColor === color 
-                  ? 'bg-purple-600 text-white' 
-                  : 'hover:bg-purple-50 hover:border-purple-300'
-              }`}
-              onClick={() => setSelectedColor(color)}
-            >
-              {color}
-            </Button>
-          ))}
+      {availableColors.length > 0 && (
+        <div>
+          <h3 className="font-semibold text-gray-900 mb-3">Color</h3>
+          <div className="flex flex-wrap gap-2">
+            {availableColors.map((color) => {
+              const stock = colorStockMap[color];
+              const isLowStock = stock > 0 && stock < 10;
+              const isOutOfStock = stock === 0;
+              
+              return (
+                <div key={color} className="relative">
+                  <Button
+                    variant={selectedColor === color ? "default" : "outline"}
+                    className={`py-2 px-4 text-sm ${
+                      selectedColor === color 
+                        ? 'bg-purple-600 text-white' 
+                        : isOutOfStock
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'hover:bg-purple-50 hover:border-purple-300'
+                    }`}
+                    onClick={() => !isOutOfStock && setSelectedColor(color)}
+                    disabled={isOutOfStock}
+                  >
+                    {color}
+                  </Button>
+                  {isLowStock && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {selectedColor && (
+            <p className="text-xs text-gray-500 mt-2">
+              Selected: {selectedColor}
+              {colorStockMap[selectedColor] < 10 && colorStockMap[selectedColor] > 0 && (
+                <span className="text-red-600 ml-2 inline-flex items-center">
+                  <AlertTriangle className="w-3 h-3 mr-1" />
+                  Only {colorStockMap[selectedColor]} left
+                </span>
+              )}
+            </p>
+          )}
         </div>
-        <p className="text-xs text-gray-500 mt-2">Selected: {selectedColor}</p>
-      </div>
+      )}
 
       {/* Quantity Selector */}
       <div>
@@ -327,7 +467,7 @@ const ProductInfo = memo(({ product }) => {
               ? 'bg-green-600 hover:bg-green-700 text-white' 
               : 'bg-gradient-to-r from-blue-500 to-blue-900 text-white'
           }`}
-          disabled={!inStock || !selectedSize || isAddingToCart}
+          disabled={!inStock || !selectedSize || !selectedColor || isAddingToCart}
           onClick={handleAddToCart}
         >
           {isAddingToCart ? (
@@ -352,7 +492,7 @@ const ProductInfo = memo(({ product }) => {
           <Button 
             variant="outline"
             className="border-purple-300 text-purple-600 hover:bg-purple-50 py-3 px-6 rounded-lg font-semibold"
-            disabled={!inStock || !selectedSize}
+            disabled={!inStock || !selectedSize || !selectedColor}
             onClick={handleBuyNow}
           >
             Buy Now
