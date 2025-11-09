@@ -1,34 +1,20 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { 
   Facebook, 
   Instagram, 
   Mail, 
   Phone, 
   MapPin,
-  Heart,
-  Send
+  Heart
 } from "lucide-react";
 
 const footerLinks = {
   company: [
-    { name: "About Us", href: "/about" },
     { name: "Our Story", href: "/our-story" },
-    { name: "Meet the Founder", href: "/meet-the-founder" },
-    { name: "Blog", href: "/blog" }
-  ],
-  customerCare: [
-    { name: "Contact Us", href: "/contact" },
-    { name: "Size Guide", href: "/size-guide" },
     { name: "FAQ", href: "/faq" },
-    { name: "Track Order", href: "/track-order" },
-    { name: "Returns & Exchange", href: "/return-exchange-policy" },
-    { name: "Care Instructions", href: "/care-instructions" }
   ],
   policies: [
     { name: "Privacy Policy", href: "/privacy-policy" },
@@ -36,8 +22,8 @@ const footerLinks = {
     { name: "Terms of Use", href: "/terms-of-use" },
     { name: "Shipping Policy", href: "/shipping-policy" },
     { name: "Refund Policy", href: "/refund-policy" },
-    { name: "Cookie Policy", href: "/cookie-policy" }
-  ]
+    { name: "Cookie Policy", href: "/cookie-policy" },
+  ],
 };
 
 const socialLinks = [
@@ -45,44 +31,28 @@ const socialLinks = [
     name: "Facebook", 
     icon: Facebook, 
     href: "https://facebook.com/vesha", 
-    color: "hover:text-primary/70" 
   },
   { 
     name: "Instagram", 
     icon: Instagram, 
     href: "https://www.instagram.com/vesha_official_?igsh=czhnZDB5NnB0OXV0", 
-    color: "hover:text-primary/70" 
-  }
+  },
 ];
 
 export default function Footer() {
-  const [email, setEmail] = useState("");
-  const [isSubscribed, setIsSubscribed] = useState(false);
-
-  const handleNewsletterSubmit = (e) => {
-    e.preventDefault();
-    if (email) {
-      setIsSubscribed(true);
-      setEmail("");
-      setTimeout(() => setIsSubscribed(false), 3000);
-    }
-  };
-
   return (
     <footer className="bg-primary text-white">
-      {/* Newsletter Section */}
-  
-
-      {/* Main Footer Content */}
+      {/* Main Footer */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          
           {/* Brand Section */}
           <div className="lg:col-span-2">
             <div className="mb-6">
               <Link href="/" className="flex items-center mb-4">
                 <Image
                   src="/veshalogo.png"
-                  alt="Vesha"
+                  alt="VESHA"
                   width={200}
                   height={80}
                   className="h-16 w-auto object-contain filter brightness-0 invert"
@@ -90,7 +60,10 @@ export default function Footer() {
                 />
               </Link>
               <p className="text-white/80 leading-relaxed mb-6">
-                Crafting timeless elegance through contemporary fashion. From traditional heritage wear to modern chic, Vesha brings you curated collections that celebrate every woman's unique style.
+                Where tradition meets effortless elegance. At{" "}
+                <span className="font-semibold text-white">VESHA</span>, we curate handpicked ethnic wear that beautifully blends cultural craftsmanship with modern grace. 
+                Every piece is chosen to make you feel confident, timeless, and uniquely you — no matter the occasion. Because VESHA is not just an attire, it’s{" "}
+                <span className="italic">The Art of Indian Attire.</span>
               </p>
             </div>
 
@@ -98,17 +71,17 @@ export default function Footer() {
             <div className="space-y-3 mb-6">
               <div className="flex items-center space-x-3">
                 <Phone className="w-4 h-4 text-white/70" />
-                <span className="text-white/80">+91 93517 74585</span>
+                <span className="text-white/80">+91 92390 00677</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Mail className="w-4 h-4 text-white/70" />
-                <span className="text-white/80">rinauraindia@gmail.com</span>
+                <span className="text-white/80">myvesha2025@gmail.com</span>
               </div>
               <div className="flex items-start space-x-3">
                 <MapPin className="w-4 h-4 text-white/70 mt-1" />
                 <span className="text-white/80">
-                  Rinaura Fashion Private Limited<br />
-                  Mumbai, Maharashtra
+                  H.I.G, Uttorayon<br />
+                  Siliguri, West Bengal 734010
                 </span>
               </div>
             </div>
@@ -150,23 +123,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Customer Care Links */}
-          <div>
-            <h4 className="text-lg font-semibold mb-6">Customer Care</h4>
-            <ul className="space-y-3">
-              {footerLinks.customerCare.map((link) => (
-                <li key={link.name}>
-                  <Link 
-                    href={link.href}
-                    className="text-white/70 hover:text-white transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
           {/* Policies Links */}
           <div>
             <h4 className="text-lg font-semibold mb-6">Policies</h4>
@@ -192,7 +148,7 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="flex items-center space-x-4 mb-4 md:mb-0">
               <p className="text-white/60 text-sm">
-                © {new Date().getFullYear()} Rinaura Fashion Private Limited. All rights reserved.
+                © {new Date().getFullYear()} VESHA. All rights reserved.
               </p>
               <div className="hidden md:flex items-center space-x-1 text-white/60 text-sm">
                 <span>Made with</span>
