@@ -8,6 +8,7 @@ import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { CartService, WishlistService } from "@/lib/cart-service";
+import { Router } from "next/router";
 
 // Skeleton loader component
 const ImageSkeleton = memo(() => (
@@ -178,50 +179,12 @@ const ProductCard = memo(({ product, className = "" }) => {
   }, [productImages.length]);
 
   // Add to cart handler
-  const handleAddToCart = useCallback(async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (isAddingToCart || isInCart) return;
+  const handleAddToCart =  (e) => {
+      e.preventDefault();
+  e.stopPropagation();
+  router.push(`/product/${id}`);
+  }
 
-    setIsAddingToCart(true);
-    
-    try {
-      await CartService.addToCart(product);
-      setIsInCart(true);
-      
-      // Show success feedback (you can replace with toast notification)
-      console.log(`${name} added to cart!`);
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-    } finally {
-      setIsAddingToCart(false);
-    }
-  }, [isAddingToCart, isInCart, product, name]);
-
-  // Toggle wishlist handler
-  const handleToggleWishlist = useCallback(async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (isAddingToWishlist) return;
-
-    setIsAddingToWishlist(true);
-    
-    try {
-      if (isWishlisted) {
-        await WishlistService.removeFromWishlist(id);
-        setIsWishlisted(false);
-      } else {
-        await WishlistService.addToWishlist(product);
-        setIsWishlisted(true);
-      }
-    } catch (error) {
-      console.error('Error updating wishlist:', error);
-    } finally {
-      setIsAddingToWishlist(false);
-    }
-  }, [isAddingToWishlist, isWishlisted, id, product]);
 
   const goToImage = useCallback((index, e) => {
     e.preventDefault();
@@ -229,28 +192,7 @@ const ProductCard = memo(({ product, className = "" }) => {
     setCurrentImageIndex(index);
   }, []);
 
-  const handleWishlist = useCallback(async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (isAddingToWishlist) return;
 
-    setIsAddingToWishlist(true);
-    
-    try {
-      if (isWishlisted) {
-        await WishlistService.removeFromWishlist(id);
-        setIsWishlisted(false);
-      } else {
-        await WishlistService.addToWishlist(product);
-        setIsWishlisted(true);
-      }
-    } catch (error) {
-      console.error('Error updating wishlist:', error);
-    } finally {
-      setIsAddingToWishlist(false);
-    }
-  }, [isAddingToWishlist, isWishlisted, id, product]);
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -362,34 +304,13 @@ const ProductCard = memo(({ product, className = "" }) => {
               {category}
             </Badge>
           )}
-          
-          {/* Wishlist Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`absolute bottom-3 right-3 w-8 h-8 backdrop-blur-sm rounded-full hover:scale-110 transition-all shadow-lg z-10 ${
-              isWishlisted ? 'bg-red-100 hover:bg-red-200' : 'bg-white/90 hover:bg-white'
-            }`}
-            onClick={handleWishlist}
-            onMouseDown={(e) => e.stopPropagation()}
-            onMouseUp={(e) => e.stopPropagation()}
-            disabled={isAddingToWishlist}
-          >
-            {isAddingToWishlist ? (
-              <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              <Heart 
-                className={`w-4 h-4 transition-colors ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
-              />
-            )}
-          </Button>
+  
         </div>
         
         <CardContent className="p-5 text-left">
           <h4 className="font-bold text-lg mb-2 text-gray-900 group-hover:text-primary transition-colors">
             {name}
           </h4>
-          <p className="text-sm text-gray-600 mb-3">Premium quality • Latest design • Free shipping</p>
           
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
@@ -406,34 +327,16 @@ const ProductCard = memo(({ product, className = "" }) => {
           
           </div>
           
-          <Button 
+            <Link 
             className={`w-full py-2.5 px-4 rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-105 ${
               isInCart 
                 ? 'bg-green-600 hover:bg-green-700 text-white' 
                 : 'bg-primary hover:bg-primary/90 text-white'
             }`}
-            onClick={handleAddToCart}
-            onMouseDown={(e) => e.stopPropagation()}
-            onMouseUp={(e) => e.stopPropagation()}
-            disabled={isAddingToCart || isInCart}
+            href={productLink}
           >
-            {isAddingToCart ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                Adding...
-              </>
-            ) : isInCart ? (
-              <>
-                <Check className="w-4 h-4 mr-2" />
-                In Cart
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Add to Cart
-              </>
-            )}
-          </Button>
+          Show product
+            </Link>
 
           {/* Display price and image URL */}
           <div className="mt-4 text-sm text-gray-700">
