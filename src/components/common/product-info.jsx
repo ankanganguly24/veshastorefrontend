@@ -480,41 +480,6 @@ const ProductInfo = memo(({ product }) => {
           )}
         </Button>
         
-        <div className="grid grid-cols-2 gap-3">
-          <Button 
-            variant="outline"
-            className="border-purple-300 text-purple-600 hover:bg-purple-50 py-3 px-6 rounded-lg font-semibold"
-            disabled={!inStock || !selectedSize || !selectedColor}
-            onClick={handleBuyNow}
-          >
-            Buy Now
-          </Button>
-          
-          <ReviewModal productId={product.id} productName={product.name}>
-            <Button 
-              variant="outline"
-              className="border-gray-300 text-gray-700 hover:bg-gray-50 py-3 px-6 rounded-lg font-semibold"
-            >
-              Write Review
-            </Button>
-          </ReviewModal>
-        </div>
-      </div>
-
-      {/* Service Features */}
-      <div className="grid grid-cols-3 gap-4 pt-4 border-t border-purple-100">
-        <div className="text-center">
-          <Truck className="w-6 h-6 text-purple-600 mx-auto mb-2" />
-          <p className="text-xs text-gray-600">Free Shipping</p>
-        </div>
-        <div className="text-center">
-          <RotateCcw className="w-6 h-6 text-purple-600 mx-auto mb-2" />
-          <p className="text-xs text-gray-600">Easy Returns</p>
-        </div>
-        <div className="text-center">
-          <Shield className="w-6 h-6 text-purple-600 mx-auto mb-2" />
-          <p className="text-xs text-gray-600">Secure Payment</p>
-        </div>
       </div>
     </div>
   );
