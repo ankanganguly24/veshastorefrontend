@@ -5,26 +5,26 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star, Minus, Plus, Heart, Share2, Truck, Shield, RotateCcw, ShoppingCart, Check, AlertTriangle } from "lucide-react";
-import { CartService, WishlistService } from "@/lib/cart-service";
+import CartService from "@/services/cart-service";
 import ReviewModal from "./review-modal";
 
 const ProductInfo = memo(({ product }) => {
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
-  const [isWishlisted, setIsWishlisted] = useState(false);
-  const [isInCart, setIsInCart] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
 
   const {
+    id: productId,
     name,
     brand,
     category,
     rating,
     reviewCount,
     offers,
-    variants = []
+    variants = [],
+    media = []
   } = useMemo(() => product, [product]);
 
   // Extract unique sizes and colors from variants
@@ -127,35 +127,6 @@ const ProductInfo = memo(({ product }) => {
   const inStock = (currentVariant?.stock_quantity || 0) > 0;
   const stockCount = currentVariant?.stock_quantity || 0;
 
-  // Check cart and wishlist status
-  useEffect(() => {
-    if (selectedSize && selectedColor) {
-      setIsInCart(CartService.isInCart(product.id, selectedSize, selectedColor));
-    }
-    setIsWishlisted(WishlistService.isInWishlist(product.id));
-  }, [product.id, selectedSize, selectedColor]);
-
-  // Listen for updates
-  useEffect(() => {
-    const handleCartUpdate = () => {
-      if (selectedSize && selectedColor) {
-        setIsInCart(CartService.isInCart(product.id, selectedSize, selectedColor));
-      }
-    };
-
-    const handleWishlistUpdate = () => {
-      setIsWishlisted(WishlistService.isInWishlist(product.id));
-    };
-
-    window.addEventListener('cartUpdated', handleCartUpdate);
-    window.addEventListener('wishlistUpdated', handleWishlistUpdate);
-
-    return () => {
-      window.removeEventListener('cartUpdated', handleCartUpdate);
-      window.removeEventListener('wishlistUpdated', handleWishlistUpdate);
-    };
-  }, [product.id, selectedSize, selectedColor]);
-
   const StarRating = useMemo(() => (
     <div className="flex items-center space-x-1">
       {[1, 2, 3, 4, 5].map((star) => (
@@ -180,9 +151,30 @@ const ProductInfo = memo(({ product }) => {
     }
   }, [quantity]);
 
+  // Get responsive image URL from media variants
+  const getResponsiveImageUrl = useCallback((isMobile = false) => {
+    if (!media || media.length === 0) return null;
+    
+    const primaryMedia = media.find(m => m.is_primary) || media[0];
+    if (!primaryMedia?.media?.variants) return primaryMedia?.media?.url;
+
+    // For mobile: use 360p, for web: use 720p
+    const targetResolution = isMobile ? '360p' : '720p';
+    const imageVariant = primaryMedia.media.variants.find(
+      v => v.variant_key === 'thumbnail' && v.metadata?.resolution === targetResolution
+    );
+
+    return imageVariant?.url || primaryMedia.media.url;
+  }, [media]);
+
   const handleAddToCart = useCallback(async () => {
     if (!selectedSize || !selectedColor) {
       console.warn('Please select size and color');
+      return;
+    }
+
+    if (!currentVariant?.id) {
+      console.warn('Variant ID not found');
       return;
     }
 
@@ -191,15 +183,20 @@ const ProductInfo = memo(({ product }) => {
     setIsAddingToCart(true);
     
     try {
-      await CartService.addToCart(product, selectedSize, selectedColor, quantity);
-      setIsInCart(true);
+      const cartPayload = {
+        variant_id: currentVariant.id,
+        product_id: productId,
+        quantity: quantity
+      };
+
+      await CartService.addToCart(cartPayload);
       console.log(`${name} added to cart successfully!`);
+      setIsAddingToCart(false);
     } catch (error) {
       console.error('Error adding to cart:', error);
-    } finally {
       setIsAddingToCart(false);
     }
-  }, [selectedSize, selectedColor, quantity, product, name, isAddingToCart]);
+  }, [selectedSize, selectedColor, quantity, productId, currentVariant, name]);
 
   const handleBuyNow = useCallback(async () => {
     if (!selectedSize || !selectedColor) {
@@ -207,33 +204,37 @@ const ProductInfo = memo(({ product }) => {
       return;
     }
 
+    if (!currentVariant?.id) {
+      console.warn('Variant ID not found');
+      return;
+    }
+
     try {
-      await CartService.addToCart(product, selectedSize, selectedColor, quantity);
+      const cartPayload = {
+        variant_id: currentVariant.id,
+        product_id: productId,
+        quantity: quantity
+      };
+
+      await CartService.addToCart(cartPayload);
       window.location.href = '/cart';
     } catch (error) {
       console.error('Error during buy now:', error);
     }
-  }, [selectedSize, selectedColor, quantity, product]);
+  }, [selectedSize, selectedColor, quantity, productId, currentVariant]);
 
-  const toggleWishlist = useCallback(async () => {
-    if (isAddingToWishlist) return;
-
+  const toggleWishlist = useCallback(() => {
     setIsAddingToWishlist(true);
     
     try {
-      if (isWishlisted) {
-        await WishlistService.removeFromWishlist(product.id);
-        setIsWishlisted(false);
-      } else {
-        await WishlistService.addToWishlist(product);
-        setIsWishlisted(true);
-      }
+      // Wishlist logic would go here
+      console.log('Wishlist toggled');
+      setIsAddingToWishlist(false);
     } catch (error) {
       console.error('Error updating wishlist:', error);
-    } finally {
       setIsAddingToWishlist(false);
     }
-  }, [isAddingToWishlist, isWishlisted, product]);
+  }, []);
 
   const handleShare = useCallback(() => {
     if (navigator.share) {
@@ -263,13 +264,13 @@ const ProductInfo = memo(({ product }) => {
             variant="ghost"
             size="icon"
             onClick={toggleWishlist}
-            className={`hover:bg-purple-50 ${isWishlisted ? 'bg-red-50' : ''}`}
+            className="hover:bg-purple-50"
             disabled={isAddingToWishlist}
           >
             {isAddingToWishlist ? (
               <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
             ) : (
-              <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+              <Heart className="w-5 h-5 text-gray-600" />
             )}
           </Button>
           <Button variant="ghost" size="icon" className="hover:bg-purple-50" onClick={handleShare}>
@@ -462,11 +463,7 @@ const ProductInfo = memo(({ product }) => {
       {/* Action Buttons */}
       <div className="space-y-3">
         <Button 
-          className={`w-full py-3 px-6 rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-105 ${
-            isInCart 
-              ? 'bg-green-600 hover:bg-green-700 text-white' 
-              : 'bg-gradient-to-r from-blue-500 to-blue-900 text-white'
-          }`}
+          className="w-full py-3 px-6 rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-105 bg-gradient-to-r from-blue-500 to-blue-900 text-white"
           disabled={!inStock || !selectedSize || !selectedColor || isAddingToCart}
           onClick={handleAddToCart}
         >
@@ -474,11 +471,6 @@ const ProductInfo = memo(({ product }) => {
             <>
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
               Adding to Cart...
-            </>
-          ) : isInCart ? (
-            <>
-              <Check className="w-4 h-4 mr-2" />
-              Added to Cart
             </>
           ) : (
             <>

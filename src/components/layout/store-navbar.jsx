@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Search, ShoppingCart, User, Menu, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/common/search-input";
-import { CartService } from "@/lib/cart-service";
+import CartService from "@/services/cart-service";
 import useAuthStore from "@/stores/auth-store";
 import { useLogout } from "@/hooks/auth/use-auth";
 import {
@@ -50,13 +50,19 @@ export default function StoreNavbar() {
     ? categoriesData.data.categories.filter((cat) => !cat.parent_id)
     : [];
 
+  // Update cart count from API
+  const updateCartCount = async () => {
+    try {
+      const summary = await CartService.getCartSummary();
+      setCartItemCount(summary.itemCount);
+    } catch (error) {
+      console.error('Error fetching cart count:', error);
+      setCartItemCount(0);
+    }
+  };
+
   // Update cart count on component mount
   useEffect(() => {
-    const updateCartCount = () => {
-      const { itemCount } = CartService.getCartSummary();
-      setCartItemCount(itemCount);
-    };
-
     updateCartCount();
 
     const handleCartUpdate = () => {
@@ -64,7 +70,6 @@ export default function StoreNavbar() {
     };
 
     window.addEventListener('cartUpdated', handleCartUpdate);
-    
     
     return () => {
       window.removeEventListener('cartUpdated', handleCartUpdate);

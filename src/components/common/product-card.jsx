@@ -3,12 +3,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Star, ChevronLeft, ChevronRight, Play, ShoppingCart, Check } from "lucide-react";
+import { Heart, Star, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo, memo } from "react";
-import Link from "next/link";
 import Image from "next/image";
-import { CartService, WishlistService } from "@/lib/cart-service";
-import { Router } from "next/router";
+import { useRouter } from "next/navigation";
 
 // Skeleton loader component
 const ImageSkeleton = memo(() => (
@@ -61,12 +59,9 @@ const OptimizedImage = memo(({ src, alt, className, currentIndex, isActive }) =>
 OptimizedImage.displayName = "OptimizedImage";
 
 const ProductCard = memo(({ product, className = "" }) => {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const router = useRouter();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const [isInCart, setIsInCart] = useState(false);
-  const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
 
   // Memoize product destructuring
   const {
@@ -76,12 +71,10 @@ const ProductCard = memo(({ product, className = "" }) => {
     originalPrice,
     discount,
     category,
-    gradient = "from-purple-400 to-indigo-500",
     rating = 4.8,
     reviewCount = 0,
     image,
     images = [],
-    slug
   } = useMemo(() => product, [product]);
 
   // Memoize processed images
@@ -140,31 +133,6 @@ const ProductCard = memo(({ product, className = "" }) => {
     }
   }, [productImages]);
 
-  // Check if product is in cart and wishlist on mount
-  useEffect(() => {
-    setIsInCart(CartService.isInCart(id));
-    setIsWishlisted(WishlistService.isInWishlist(id));
-  }, [id]);
-
-  // Listen for cart and wishlist updates
-  useEffect(() => {
-    const handleCartUpdate = () => {
-      setIsInCart(CartService.isInCart(id));
-    };
-
-    const handleWishlistUpdate = () => {
-      setIsWishlisted(WishlistService.isInWishlist(id));
-    };
-
-    window.addEventListener('cartUpdated', handleCartUpdate);
-    window.addEventListener('wishlistUpdated', handleWishlistUpdate);
-
-    return () => {
-      window.removeEventListener('cartUpdated', handleCartUpdate);
-      window.removeEventListener('wishlistUpdated', handleWishlistUpdate);
-    };
-  }, [id]);
-
   // Memoized event handlers
   const nextImage = useCallback((e) => {
     e.preventDefault();
@@ -178,21 +146,11 @@ const ProductCard = memo(({ product, className = "" }) => {
     setCurrentImageIndex((prev) => (prev - 1 + productImages.length) % productImages.length);
   }, [productImages.length]);
 
-  // Add to cart handler
-  const handleAddToCart =  (e) => {
-      e.preventDefault();
-  e.stopPropagation();
-  router.push(`/product/${id}`);
-  }
-
-
   const goToImage = useCallback((index, e) => {
     e.preventDefault();
     e.stopPropagation();
     setCurrentImageIndex(index);
   }, []);
-
-
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -206,158 +164,152 @@ const ProductCard = memo(({ product, className = "" }) => {
     setCurrentImageIndex(0);
   }, []);
 
-  // Memoize the product link - use id only so product page receives product id
-  const productLink = useMemo(() => `/product/${id}`, [id]);
+  // Navigate to product page
+  const handleCardClick = useCallback(() => {
+    router.push(`/product/${id}`);
+  }, [id, router]);
 
   return (
-    <Link href={productLink} className="block">
-      <Card 
-        className={`group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-primary/10 cursor-pointer ${className}`}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        <div className="relative h-64 overflow-hidden">
-          {/* Image Container */}
-          <div className="relative w-full h-full">
-            {productImages.length > 0 ? (
-              <div className="relative w-full h-full">
-                <OptimizedImage
-                  src={productImages[currentImageIndex]}
-                  alt={name}
-                  currentIndex={currentImageIndex}
-                  isActive={true}
-                />
-                
-                {/* Navigation Arrows - Only show if multiple images and hovered */}
-                {hasMultipleImages && isHovered && (
-                  <>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg transition-all duration-200 hover:scale-110 z-10"
-                      onClick={prevImage}
+    <Card 
+      className={`group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-primary/10 cursor-pointer ${className}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={handleCardClick}
+    >
+      <div className="relative h-64 overflow-hidden">
+        {/* Image Container */}
+        <div className="relative w-full h-full">
+          {productImages.length > 0 ? (
+            <div className="relative w-full h-full">
+              <OptimizedImage
+                src={productImages[currentImageIndex]}
+                alt={name}
+                currentIndex={currentImageIndex}
+                isActive={true}
+              />
+              
+              {/* Navigation Arrows - Only show if multiple images and hovered */}
+              {hasMultipleImages && isHovered && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg transition-all duration-200 hover:scale-110 z-10"
+                    onClick={prevImage}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onMouseUp={(e) => e.stopPropagation()}
+                  >
+                    <ChevronLeft className="w-4 h-4 text-primary" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg transition-all duration-200 hover:scale-110 z-10"
+                    onClick={nextImage}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onMouseUp={(e) => e.stopPropagation()}
+                  >
+                    <ChevronRight className="w-4 h-4 text-primary" />
+                  </Button>
+                </>
+              )}
+
+              {/* Image Dots - Only show if multiple images */}
+              {hasMultipleImages && (
+                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1 z-10">
+                  {productImages.map((_, index) => (
+                    <button
+                      key={index}
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        index === currentImageIndex 
+                          ? `bg-white w-6 shadow-md ${isHovered ? 'animate-pulse' : ''}` 
+                          : 'bg-white/60 hover:bg-white/80 w-2'
+                      }`}
+                      onClick={(e) => goToImage(index, e)}
                       onMouseDown={(e) => e.stopPropagation()}
                       onMouseUp={(e) => e.stopPropagation()}
-                    >
-                      <ChevronLeft className="w-4 h-4 text-primary" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg transition-all duration-200 hover:scale-110 z-10"
-                      onClick={nextImage}
-                      onMouseDown={(e) => e.stopPropagation()}
-                      onMouseUp={(e) => e.stopPropagation()}
-                    >
-                      <ChevronRight className="w-4 h-4 text-primary" />
-                    </Button>
-                  </>
-                )}
+                    />
+                  ))}
+                </div>
+              )}
 
-                {/* Image Dots - Only show if multiple images */}
-                {hasMultipleImages && (
-                  <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1 z-10">
-                    {productImages.map((_, index) => (
-                      <button
-                        key={index}
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                          index === currentImageIndex 
-                            ? `bg-white w-6 shadow-md ${isHovered ? 'animate-pulse' : ''}` 
-                            : 'bg-white/60 hover:bg-white/80 w-2'
-                        }`}
-                        onClick={(e) => goToImage(index, e)}
-                        onMouseDown={(e) => e.stopPropagation()}
-                        onMouseUp={(e) => e.stopPropagation()}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {/* Image Counter */}
-                {hasMultipleImages && (
-                  <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1">
-                    {isHovered && (
-                      <Play className="w-3 h-3 fill-current animate-pulse" />
-                    )}
-                    <span>{currentImageIndex + 1} / {productImages.length}</span>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className={`w-full h-full bg-gradient-to-br from-primary/40 to-primary/60`} />
-            )}
-            
-            {/* Overlay - less opaque to not interfere with buttons */}
-            <div className="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors pointer-events-none"></div>
-          </div>
-          
-          {/* Discount Badge */}
-          {discount && (
-            <Badge variant="destructive" className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold z-10">
-              {discount}% OFF
-            </Badge>
-          )}
-          
-          {/* Category Badge */}
-          {category && (
-            <Badge variant="secondary" className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-semibold text-gray-700 z-10">
-              {category}
-            </Badge>
-          )}
-  
-        </div>
-        
-        <CardContent className="p-5 text-left">
-          <h4 className="font-bold text-lg mb-2 text-gray-900 group-hover:text-primary transition-colors">
-            {name}
-          </h4>
-          
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl font-bold text-primary">
-                ₹{price}
-              </span>
-              {originalPrice && originalPrice > price && (
-                <span className="text-sm text-gray-500 line-through">
-                  ₹{originalPrice}
-                </span>
+              {/* Image Counter */}
+              {hasMultipleImages && (
+                <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1">
+                  {isHovered && (
+                    <Play className="w-3 h-3 fill-current animate-pulse" />
+                  )}
+                  <span>{currentImageIndex + 1} / {productImages.length}</span>
+                </div>
               )}
             </div>
-            
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/40 to-primary/60" />
+          )}
           
-          </div>
-          
-            <Link 
-            className={`w-full py-2.5 px-4 rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-105 ${
-              isInCart 
-                ? 'bg-green-600 hover:bg-green-700 text-white' 
-                : 'bg-primary hover:bg-primary/90 text-white'
-            }`}
-            href={productLink}
-          >
-          Show product
-            </Link>
-
-          {/* Display price and image URL */}
-          <div className="mt-4 text-sm text-gray-700">
-            
-            {images?.[0] && (
-              <div className="mt-2">
-                <span className="font-medium">Image URL:</span>
-                <a
-                  href={images[0]}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 underline"
-                >
-                  {images[0]}
-                </a>
-              </div>
+          {/* Overlay - less opaque to not interfere with buttons */}
+          <div className="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors pointer-events-none"></div>
+        </div>
+        
+        {/* Discount Badge */}
+        {discount && (
+          <Badge variant="destructive" className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold z-10">
+            {discount}% OFF
+          </Badge>
+        )}
+        
+        {/* Category Badge */}
+        {category && (
+          <Badge variant="secondary" className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-semibold text-gray-700 z-10">
+            {category}
+          </Badge>
+        )}
+      </div>
+      
+      <CardContent className="p-5 text-left">
+        <h4 className="font-bold text-lg mb-2 text-gray-900 group-hover:text-primary transition-colors">
+          {name}
+        </h4>
+        
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-2xl font-bold text-primary">
+              ₹{price}
+            </span>
+            {originalPrice && originalPrice > price && (
+              <span className="text-sm text-gray-500 line-through">
+                ₹{originalPrice}
+              </span>
             )}
           </div>
-        </CardContent>
-      </Card>
-    </Link>
+        </div>
+        
+        <Button 
+          className="w-full py-2.5 px-4 rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-105 bg-primary hover:bg-primary/90 text-white"
+          onClick={handleCardClick}
+        >
+          View Product
+        </Button>
+
+        {/* Display image URL */}
+        <div className="mt-4 text-sm text-gray-700">
+          {images?.[0] && (
+            <div className="mt-2">
+              <span className="font-medium">Image URL:</span>
+              <a
+                href={images[0]}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 underline block truncate"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {images[0]}
+              </a>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 });
 
