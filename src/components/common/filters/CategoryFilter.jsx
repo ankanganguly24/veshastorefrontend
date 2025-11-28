@@ -47,7 +47,9 @@ export default function CategoryFilter({
     else onChange([...selected, childId]);
   };
 
-  const visible = showAll ? categories : categories.slice(0, 5);
+  // Ensure categories is always an array
+  const categoriesArray = Array.isArray(categories) ? categories : [];
+  const visible = showAll ? categoriesArray : categoriesArray.slice(0, 5);
 
   return (
     <div>
@@ -106,7 +108,7 @@ export default function CategoryFilter({
         })}
       </ul>
 
-      {categories.length > 5 && (
+      {categoriesArray.length > 5 && (
         <button
           onClick={() => setShowAll((s) => !s)}
           className="text-sm text-primary font-medium hover:underline"

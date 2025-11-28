@@ -53,9 +53,11 @@ const CartService = {
    */
   async updateQuantity(cart_item_id, quantity) {
     try {
+      console.log(`Updating cart item ${cart_item_id} to quantity ${quantity}`);
       const response = await api.put(`/cart/items/${cart_item_id}`, {
         quantity,
       });
+      console.log('Cart update response:', response.data);
       // Dispatch cart update event
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new Event("cartUpdated"));
@@ -63,7 +65,15 @@ const CartService = {
       return response.data;
     } catch (error) {
       console.error("Error updating quantity:", error);
-      throw new Error(handleApiError(error, "Failed to update quantity"));
+      console.error("Error details:", {
+        cart_item_id,
+        quantity,
+        endpoint: `/cart/items/${cart_item_id}`,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data
+      });
+      throw error; // Throw original error instead of wrapping it
     }
   },
 
@@ -74,7 +84,9 @@ const CartService = {
    */
   async removeFromCart(cart_item_id) {
     try {
+      console.log(`Removing cart item ${cart_item_id}`);
       const response = await api.delete(`/cart/items/${cart_item_id}`);
+      console.log('Cart remove response:', response.data);
       // Dispatch cart update event
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new Event("cartUpdated"));
@@ -82,7 +94,14 @@ const CartService = {
       return response.data;
     } catch (error) {
       console.error("Error removing from cart:", error);
-      throw new Error(handleApiError(error, "Failed to remove item from cart"));
+      console.error("Error details:", {
+        cart_item_id,
+        endpoint: `/cart/items/${cart_item_id}`,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data
+      });
+      throw error; // Throw original error instead of wrapping it
     }
   },
 

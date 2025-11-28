@@ -42,7 +42,7 @@ export const useLogin = () => {
         
         success('Login successful! Welcome back!');
         queryClient.invalidateQueries({ queryKey: ['user'] });
-        router.push('/profile');
+        router.push('/'); // Redirect to homepage
       } else {
         console.error('Unexpected login response structure:', response.data);
         error('Login response format error');
