@@ -9,6 +9,7 @@ import { NavbarCategories } from "@/components/storefront/navbar/navbar-categori
 import { NavbarSearch } from "@/components/storefront/navbar/navbar-search";
 import { NavbarUserMenu } from "@/components/storefront/navbar/navbar-user-menu";
 import { NavbarCartIcon } from "@/components/storefront/navbar/navbar-cart-icon";
+import { MobileNavbarCategories } from "@/components/storefront/navbar/mobile-navbar-categories";
 
 /**
  * StoreNavbar Component
@@ -78,10 +79,26 @@ export default function StoreNavbar() {
         </div>
       </div>
 
-      {/* Mobile Menu - Simplified for now */}
+      {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="lg:hidden bg-white/95 backdrop-blur-md border-t border-gray-100 shadow-lg p-4">
-          <p className="text-sm text-muted-foreground">Mobile menu - categories will appear here</p>
+        <div className="lg:hidden bg-white/95 backdrop-blur-md border-t border-gray-100 shadow-lg p-4 max-h-[80vh] overflow-y-auto">
+          <div className="flex flex-col space-y-4">
+            <Link href="/" className="text-sm font-medium text-gray-900 hover:text-primary" onClick={toggleMenu}>
+              Home
+            </Link>
+            <div className="border-t border-gray-100 pt-4">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Categories</p>
+              <div className="flex flex-col space-y-3 pl-2">
+                {/* We use a separate component for mobile categories to handle data fetching */}
+                <MobileNavbarCategories onSelect={toggleMenu} />
+              </div>
+            </div>
+            <div className="border-t border-gray-100 pt-4">
+              <Link href="/cart" className="flex items-center text-sm font-medium text-gray-900 hover:text-primary" onClick={toggleMenu}>
+                Cart
+              </Link>
+            </div>
+          </div>
         </div>
       )}
     </nav>
