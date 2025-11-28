@@ -1,9 +1,11 @@
 import StoreNavbar from "@/components/layout/store-navbar";
 import Footer from "@/components/layout/footer";
 import HeroCarousel from "@/components/common/hero-carousel";
+import FeaturesSection from "@/components/common/features-section";
 import CategorySection from "@/components/common/category-section";
+import WhyChooseSection from "@/components/common/why-choose-section";
 import ProductSections from "@/components/common/product-sections";
-import CuratedCollections from "@/components/common/curated-collections";
+import SocialProofSection from "@/components/common/social-proof-section";
 import TestimonialsCarousel from "@/components/common/testimonials-carousel";
 
 export default function Home() {
@@ -14,16 +16,25 @@ export default function Home() {
         {/* Hero Carousel */}
         <HeroCarousel />
         
-        {/* Category Section */}
+        {/* Features - SSR, No API */}
+        <FeaturesSection />
+        
+        {/* Category Section - Has API */}
         <CategorySection />
         
-        {/* Product Collections */}
+        {/* Why Choose Us - SSR, No API */}
+        <WhyChooseSection />
+        
+        {/* Product Collections - Has API */}
         <ProductSections />
-      
+        
+        {/* Social Proof (Instagram + Newsletter) - SSR, No API */}
+        <SocialProofSection />
+        
+        {/* Testimonials - Has API */}
         <TestimonialsCarousel />
       </main>
       <Footer />
     </div>
   );
 }
-    

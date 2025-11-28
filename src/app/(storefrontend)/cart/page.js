@@ -9,8 +9,7 @@ import { CartEmptyState } from "@/components/storefront/cart/cart-empty-state";
 
 /**
  * Cart Page
- * Main cart page that orchestrates cart display
- * Refactored to use React Query and component separation
+ * Main cart page with minimal, sophisticated design
  */
 export default function CartPage() {
   // Fetch cart with React Query
@@ -20,28 +19,30 @@ export default function CartPage() {
       const res = await CartService.getCart();
       return res?.data?.cart || res?.data?.data?.cart || { items: [] };
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 2 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 
   if (isLoading) {
     return (
-      <div className="p-10 text-center flex items-center justify-center gap-2 text-lg min-h-screen">
-        <Loader2 className="animate-spin" />
-        Loading cart...
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex items-center gap-3 text-gray-600">
+          <Loader2 className="w-5 h-5 animate-spin" strokeWidth={1.5} />
+          <span className="text-sm">Loading cart...</span>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Error Loading Cart</h2>
-          <p className="text-gray-600 mb-4">{error.message}</p>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <h2 className="text-xl font-medium text-gray-900 mb-2">Error Loading Cart</h2>
+          <p className="text-sm text-gray-600 mb-6">{error.message}</p>
           <button 
             onClick={() => refetch()}
-            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+            className="px-6 py-2 bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors"
           >
             Try Again
           </button>
@@ -62,19 +63,20 @@ export default function CartPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-white">
+      <div className="container mx-auto px-4 py-12">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
+        <div className="mb-12">
+          <h1 className="text-3xl font-light mb-2 text-gray-900 tracking-tight">
             Shopping Cart
           </h1>
-          <p className="text-gray-600">{items.length} item(s) in your cart</p>
+          <div className="w-12 h-px bg-primary mb-3"></div>
+          <p className="text-sm text-gray-600">{items.length} item{items.length !== 1 ? 's' : ''}</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Items */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-6">
             {items.map((item) => (
               <CartItemCard key={item.id} item={item} onUpdate={refetch} />
             ))}
