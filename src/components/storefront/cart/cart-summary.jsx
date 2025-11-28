@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
  */
 export function CartSummary({ items, subtotal }) {
   const [isProcessing, setIsProcessing] = useState(false);
-  const { toast } = useToast();
+  const toast = useToast();
 
   const handleCheckout = async () => {
     setIsProcessing(true);
@@ -34,10 +34,7 @@ export function CartSummary({ items, subtotal }) {
           description: `Order for ${items.length} item(s)`,
           image: '/logo.png', // Your logo
           handler: function (response) {
-            toast({
-              title: "Payment Successful!",
-              description: `Payment ID: ${response.razorpay_payment_id}`,
-            });
+            toast.success(`Payment Successful! ID: ${response.razorpay_payment_id}`);
             // Handle successful payment - call your backend API
             console.log('Payment successful:', response);
           },
@@ -62,20 +59,12 @@ export function CartSummary({ items, subtotal }) {
       };
 
       script.onerror = () => {
-        toast({
-          title: "Error",
-          description: "Failed to load payment gateway",
-          variant: "destructive"
-        });
+        toast.error("Failed to load payment gateway");
         setIsProcessing(false);
       };
     } catch (error) {
       console.error('Checkout error:', error);
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive"
-      });
+      toast.error("Something went wrong. Please try again.");
       setIsProcessing(false);
     }
   };

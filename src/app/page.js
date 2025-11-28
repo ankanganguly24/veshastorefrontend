@@ -5,7 +5,7 @@ import FeaturesSection from "@/components/common/features-section";
 import CategorySection from "@/components/common/category-section";
 import WhyChooseSection from "@/components/common/why-choose-section";
 import ProductSections from "@/components/common/product-sections";
-import SocialProofSection from "@/components/common/social-proof-section";
+import StyleEditSection from "@/components/common/style-edit-section";
 import TestimonialsCarousel from "@/components/common/testimonials-carousel";
 
 export default function Home() {
@@ -28,8 +28,8 @@ export default function Home() {
         {/* Product Collections - Has API */}
         <ProductSections />
         
-        {/* Social Proof (Instagram + Newsletter) - SSR, No API */}
-        <SocialProofSection />
+        {/* Editorial / Style Edit Section */}
+        <StyleEditSection />
         
         {/* Testimonials - Has API */}
         <TestimonialsCarousel />

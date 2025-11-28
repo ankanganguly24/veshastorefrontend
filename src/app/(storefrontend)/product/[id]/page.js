@@ -3,11 +3,11 @@
 import React, { useEffect, useState } from "react";
 import ImageCarousel from "@/components/common/image-carousel";
 import ProductInfo from "@/components/common/product-info";
-import TrustBadges from "@/components/common/trust-badges";
 import ProductTabs from "@/components/common/product-tabs";
 import { ProductService } from "@/services/product-service";
 import api from "@/utils/axios";
 import Link from "next/link";
+import { ArrowLeft, Loader2 } from "lucide-react";
 
 export default function ProductPage({ params }) {
   const resolvedParams = React.use(params);
@@ -37,26 +37,19 @@ export default function ProductPage({ params }) {
           res = fallback.data;
         }
 
-        // Extract product from response
         const productData = res?.data?.product || res?.product || res?.data || res;
-
-        // Get default variant
         const defaultVariant = productData.variants?.find(v => v.is_default) || productData.variants?.[0];
 
-        // Extract all images with proper preference for quality
         const images = productData.media?.map(mediaItem => {
-          // Prefer medium 720p, then thumbnail 720p, then original
           const medium720p = mediaItem.media?.variants?.find(
             v => v.variant_key === 'medium' && v.metadata?.resolution === '720p'
           );
           const thumbnail720p = mediaItem.media?.variants?.find(
             v => v.variant_key === 'thumbnail' && v.metadata?.resolution === '720p'
           );
-          
           return medium720p?.url || thumbnail720p?.url || mediaItem.media?.url;
         }).filter(Boolean) || [];
 
-        // Extract sizes and colors from all variants
         const sizes = [...new Set(
           productData.variants?.flatMap(v =>
             v.variantOptions
@@ -73,20 +66,18 @@ export default function ProductPage({ params }) {
           ).filter(Boolean)
         )] || ["Default"];
 
-        // Calculate price details
         const price = defaultVariant?.price || 0;
         const compareAt = defaultVariant?.compare_at_price || null;
         const discount = (compareAt && price) 
           ? Math.round(((compareAt - price) / compareAt) * 100) 
           : null;
 
-        // Map to UI-friendly format
         const mapped = {
           id: productData.id,
           slug: productData.slug || String(productData.id),
           title: productData.title,
           name: productData.title,
-          brand: productData.brands?.[0]?.name || "Premium Brand",
+          brand: productData.brands?.[0]?.name || "Vesha",
           price,
           originalPrice: compareAt,
           discount,
@@ -112,7 +103,6 @@ export default function ProductPage({ params }) {
             "Easy care and maintenance",
             "Available in multiple sizes and colors"
           ],
-          // Pass raw data for advanced features
           variants: productData.variants || [],
           availableSizes: sizes,
           availableColors: colors,
@@ -136,10 +126,10 @@ export default function ProductPage({ params }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 font-medium">Loading product...</p>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex items-center gap-3 text-gray-500">
+          <Loader2 className="w-5 h-5 animate-spin" />
+          <span className="text-sm font-medium">Loading product...</span>
         </div>
       </div>
     );
@@ -147,55 +137,41 @@ export default function ProductPage({ params }) {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100">
-        <div className="text-center bg-white p-8 rounded-xl shadow-lg">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">Error Loading Product</h3>
-          <p className="text-red-600 mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center max-w-md px-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Product Unavailable</h3>
+          <p className="text-sm text-gray-500 mb-6">{error}</p>
+          <Link
+            href="/"
+            className="inline-flex items-center text-sm font-medium text-primary hover:underline"
           >
-            Try Again
-          </button>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Home
+          </Link>
         </div>
       </div>
     );
   }
 
-if (!product) {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="text-center bg-white p-8 rounded-xl shadow-lg">
-        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-          </svg>
-        </div>
-        <h3 className="text-xl font-bold text-gray-900 mb-2">Product Not Found</h3>
-        <p className="text-gray-600 mb-4">The product you&apos;re looking for doesn&apos;t exist.</p>
-        <Link
-          href="/"
-          className="inline-block px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
-        >
-          Go to Home
-        </Link>
-      </div>
-    </div>
-  );
-}
+  if (!product) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-primary/10">
-      <div className="container mx-auto px-4 py-8">
-        {/* Main Product Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+    <div className="min-h-screen bg-white">
+      <div className="container mx-auto px-4 py-8 lg:py-12">
+        {/* Breadcrumb */}
+        <div className="flex items-center text-xs text-gray-500 mb-8">
+          <Link href="/" className="hover:text-gray-900 transition-colors">Home</Link>
+          <span className="mx-2">/</span>
+          <Link href={`/category/${product.categories?.[0]?.category?.id}`} className="hover:text-gray-900 transition-colors">
+            {product.category}
+          </Link>
+          <span className="mx-2">/</span>
+          <span className="text-gray-900 truncate max-w-[200px]">{product.name}</span>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 mb-20">
           {/* Left - Image Carousel */}
-          <div className="lg:sticky lg:top-8 lg:h-fit">
+          <div className="lg:sticky lg:top-24 lg:h-fit">
             <ImageCarousel images={product.images} productName={product.name} />
           </div>
 
@@ -205,13 +181,8 @@ if (!product) {
           </div>
         </div>
 
-        {/* Trust Badges */}
-        {/* <div className="mb-12">
-          <TrustBadges />
-        </div> */}
-
         {/* Product Details Tabs */}
-        <div className="mb-12">
+        <div className="max-w-4xl mx-auto border-t border-gray-100 pt-16">
           <ProductTabs
             description={product.description}
             washCare={product.washCare}

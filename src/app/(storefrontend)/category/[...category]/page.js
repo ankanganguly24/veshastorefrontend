@@ -7,33 +7,30 @@ import api from "@/utils/axios";
 import PriceFilter, { PRICE_RANGES } from "@/components/common/filters/PriceFilter";
 import CategoryFilter from "@/components/common/filters/CategoryFilter";
 import { getProductCardImages } from "@/lib/image-utils";
+import { Loader2, SlidersHorizontal } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-/**
- * Product Skeleton Loader
- */
 function ProductSkeletonLoader() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-10">
       {Array.from({ length: 6 }).map((_, index) => (
-        <div
-          key={index}
-          className="w-full h-96 bg-gray-200 animate-pulse rounded-lg"
-        />
+        <div key={index} className="space-y-4">
+          <div className="aspect-[3/4] bg-gray-50 animate-pulse" />
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-50 w-3/4 animate-pulse" />
+            <div className="h-4 bg-gray-50 w-1/4 animate-pulse" />
+          </div>
+        </div>
       ))}
     </div>
   );
 }
 
-/**
- * Transform API product data to component format
- */
 function transformProduct(product) {
   const variant = product.variants?.[0] || {};
-  
-  // Extract images using utility function
   const images = getProductCardImages(product.media || []);
   
-  // Extract colors from variant options
   const colors = [];
   if (Array.isArray(product.variants)) {
     product.variants.forEach((v) => {
@@ -76,16 +73,10 @@ function transformProduct(product) {
   };
 }
 
-/**
- * Category Page Component
- * Displays products filtered by category with proper loading states
- * Uses React Query for caching and responsive images
- */
 export default function CategoryPage({ params }) {
   const resolvedParams = React.use(params);
   const { category } = resolvedParams || {};
 
-  // Determine category ids from route params
   const categoryIdsArray = useMemo(() => {
     if (!category) return [];
     return Array.isArray(category) ? category : [category];
@@ -93,11 +84,9 @@ export default function CategoryPage({ params }) {
 
   const categoryPath = categoryIdsArray.join(',');
 
-  // Filters state
   const [selectedPriceRanges, setSelectedPriceRanges] = useState([]);
   const [selectedCategoryFilters, setSelectedCategoryFilters] = useState([]);
 
-  // Fetch parent categories for sidebar with caching
   const { data: parentCategories = [], isLoading: categoriesLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
@@ -105,32 +94,24 @@ export default function CategoryPage({ params }) {
       const all = res?.data?.data?.categories || [];
       return Array.isArray(all) ? all.filter((c) => !c.parent_id) : [];
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    cacheTime: 15 * 60 * 1000, // 15 minutes
+    staleTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 
-  // Fetch category names with caching
   const { data: categoryNames = [] } = useQuery({
     queryKey: ["category-names", categoryIdsArray],
     queryFn: async () => {
       if (categoryIdsArray.length === 0) return [];
-      
       const res = await api.get("/product/category");
       const allCategories = res?.data?.data?.categories || [];
-
-      // Create a map of id to category
       const categoryMap = {};
       const buildMap = (cats) => {
         cats.forEach((cat) => {
           categoryMap[cat.id] = cat.name;
-          if (cat.children && cat.children.length > 0) {
-            buildMap(cat.children);
-          }
+          if (cat.children?.length > 0) buildMap(cat.children);
         });
       };
       buildMap(allCategories);
-
       return categoryIdsArray.map((id) => categoryMap[id] || id);
     },
     enabled: categoryIdsArray.length > 0,
@@ -138,7 +119,6 @@ export default function CategoryPage({ params }) {
     refetchOnWindowFocus: false,
   });
 
-  // Fetch products with caching - ONLY when we have category IDs
   const { data: products = [], isLoading: productsLoading, error } = useQuery({
     queryKey: ["products", "category", categoryPath],
     queryFn: async () => {
@@ -146,19 +126,15 @@ export default function CategoryPage({ params }) {
       const fetched = res?.data?.data?.products || [];
       return fetched.map(transformProduct);
     },
-    enabled: categoryIdsArray.length > 0, // Only fetch when we have categories
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    enabled: categoryIdsArray.length > 0,
+    staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 
-  // Display name
   const categoryName = categoryNames.length === 0 ? 'All Products' : categoryNames.join(' / ');
 
-  // Apply client-side filters
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
-      // Category filter
       if (selectedCategoryFilters.length > 0) {
         const intersects = p.categoryIds && p.categoryIds.some((cid) => 
           selectedCategoryFilters.includes(cid)
@@ -166,7 +142,6 @@ export default function CategoryPage({ params }) {
         if (!intersects) return false;
       }
 
-      // Price filter
       if (selectedPriceRanges.length > 0) {
         const matchesPrice = selectedPriceRanges.some((rid) => {
           const range = PRICE_RANGES.find((r) => r.id === rid);
@@ -180,38 +155,62 @@ export default function CategoryPage({ params }) {
     });
   }, [products, selectedCategoryFilters, selectedPriceRanges]);
 
-  // Show loading state while fetching
   const isLoading = productsLoading || categoriesLoading;
 
+  const FiltersContent = () => (
+    <div className="space-y-8">
+      <CategoryFilter
+        categories={parentCategories}
+        selected={selectedCategoryFilters}
+        onChange={setSelectedCategoryFilters}
+      />
+      <div className="pt-8 border-t border-gray-100">
+        <PriceFilter 
+          selected={selectedPriceRanges} 
+          onChange={setSelectedPriceRanges} 
+        />
+      </div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-primary/10">
+    <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-12">
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 capitalize text-primary">
-            {categoryName}
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Discover our curated collection of premium fashion items
-          </p>
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6 border-b border-gray-100 pb-8">
+          <div>
+            <h1 className="text-3xl font-light text-gray-900 tracking-tight mb-2 capitalize">
+              {categoryName}
+            </h1>
+            <p className="text-sm text-gray-500">
+              {filteredProducts.length} Products Found
+            </p>
+          </div>
+
+          {/* Mobile Filter Trigger */}
+          <div className="lg:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <SlidersHorizontal className="w-4 h-4" />
+                  Filters
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                <SheetHeader className="mb-6">
+                  <SheetTitle>Filters</SheetTitle>
+                </SheetHeader>
+                <FiltersContent />
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-primary/10 sticky top-24">
-              <CategoryFilter
-                categories={parentCategories}
-                selected={selectedCategoryFilters}
-                onChange={setSelectedCategoryFilters}
-              />
-
-              <div className="mt-6">
-                <PriceFilter 
-                  selected={selectedPriceRanges} 
-                  onChange={setSelectedPriceRanges} 
-                />
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+          {/* Desktop Sidebar */}
+          <div className="hidden lg:block lg:col-span-1">
+            <div className="sticky top-24">
+              <FiltersContent />
             </div>
           </div>
           
@@ -220,15 +219,22 @@ export default function CategoryPage({ params }) {
             {isLoading ? (
               <ProductSkeletonLoader />
             ) : error ? (
-              <div className="text-center py-12 text-red-600">
-                Failed to load products. Please try again.
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <p className="text-gray-900 font-medium mb-2">Failed to load products</p>
+                <p className="text-sm text-gray-500 mb-4">Please try again later</p>
+                <Button variant="outline" onClick={() => window.location.reload()}>
+                  Retry
+                </Button>
               </div>
             ) : filteredProducts.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                No products found for the selected filters.
+              <div className="flex flex-col items-center justify-center py-20 text-center bg-gray-50 rounded-lg">
+                <p className="text-gray-900 font-medium mb-2">No products found</p>
+                <p className="text-sm text-gray-500">
+                  Try adjusting your filters or check back later
+                </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-10">
                 {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

@@ -2,20 +2,16 @@
 
 import { useState, useCallback, useMemo, memo, useEffect } from "react";
 import CartService from "@/services/cart-service";
-import ProductHeader from "@/components/product/product-header";
-import ProductPriceCard from "@/components/product/product-price-card";
-import ProductOffers from "@/components/product/product-offers";
-import ProductSizeSelector from "@/components/product/product-size-selector";
-import ProductColorSelector from "@/components/product/product-color-selector";
-import ProductQuantitySelector from "@/components/product/product-quantity-selector";
-import ProductActions from "@/components/product/product-actions";
+import { Button } from "@/components/ui/button";
+import { Star, Heart, Share2, Check, Minus, Plus, ShoppingBag } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const ProductInfo = memo(({ product }) => {
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
+  const { toast } = useToast();
 
   const {
     id: productId,
@@ -26,10 +22,9 @@ const ProductInfo = memo(({ product }) => {
     reviewCount,
     offers,
     variants = [],
-    media = []
   } = useMemo(() => product, [product]);
 
-  // Extract unique sizes and colors from variants
+  // Extract unique sizes and colors
   const { availableSizes, availableColors } = useMemo(() => {
     const sizes = new Set();
     const colors = new Set();
@@ -37,11 +32,8 @@ const ProductInfo = memo(({ product }) => {
     variants.forEach(variant => {
       variant.variantOptions?.forEach(option => {
         const optionName = option.optionValue?.optionDefinition?.name?.toLowerCase();
-        if (optionName === 'size') {
-          sizes.add(option.optionValue.value);
-        } else if (optionName === 'color') {
-          colors.add(option.optionValue.value);
-        }
+        if (optionName === 'size') sizes.add(option.optionValue.value);
+        else if (optionName === 'color') colors.add(option.optionValue.value);
       });
     });
 
@@ -51,17 +43,13 @@ const ProductInfo = memo(({ product }) => {
     };
   }, [variants]);
 
-  // Set default selections on mount
+  // Set defaults
   useEffect(() => {
-    if (!selectedSize && availableSizes.length > 0) {
-      setSelectedSize(availableSizes[0]);
-    }
-    if (!selectedColor && availableColors.length > 0) {
-      setSelectedColor(availableColors[0]);
-    }
+    if (!selectedSize && availableSizes.length > 0) setSelectedSize(availableSizes[0]);
+    if (!selectedColor && availableColors.length > 0) setSelectedColor(availableColors[0]);
   }, [availableSizes, availableColors, selectedSize, selectedColor]);
 
-  // Find current variant based on selections
+  // Find current variant
   const currentVariant = useMemo(() => {
     if (!selectedSize && !selectedColor) return variants[0];
     
@@ -79,48 +67,6 @@ const ProductInfo = memo(({ product }) => {
     }) || variants[0];
   }, [variants, selectedSize, selectedColor]);
 
-  // Get stock info for each size with current color
-  const sizeStockMap = useMemo(() => {
-    const stockMap = {};
-    availableSizes.forEach(size => {
-      const variant = variants.find(v => {
-        const options = v.variantOptions || [];
-        const sizeMatch = options.some(opt => 
-          opt.optionValue?.optionDefinition?.name?.toLowerCase() === 'size' && 
-          opt.optionValue?.value === size
-        );
-        const colorMatch = !selectedColor || options.some(opt => 
-          opt.optionValue?.optionDefinition?.name?.toLowerCase() === 'color' && 
-          opt.optionValue?.value === selectedColor
-        );
-        return sizeMatch && colorMatch;
-      });
-      stockMap[size] = variant?.stock_quantity || 0;
-    });
-    return stockMap;
-  }, [variants, availableSizes, selectedColor]);
-
-  // Get stock info for each color with current size
-  const colorStockMap = useMemo(() => {
-    const stockMap = {};
-    availableColors.forEach(color => {
-      const variant = variants.find(v => {
-        const options = v.variantOptions || [];
-        const colorMatch = options.some(opt => 
-          opt.optionValue?.optionDefinition?.name?.toLowerCase() === 'color' && 
-          opt.optionValue?.value === color
-        );
-        const sizeMatch = !selectedSize || options.some(opt => 
-          opt.optionValue?.optionDefinition?.name?.toLowerCase() === 'size' && 
-          opt.optionValue?.value === selectedSize
-        );
-        return colorMatch && sizeMatch;
-      });
-      stockMap[color] = variant?.stock_quantity || 0;
-    });
-    return stockMap;
-  }, [variants, availableColors, selectedSize]);
-
   const price = currentVariant?.price || 0;
   const originalPrice = currentVariant?.compare_at_price || null;
   const discount = (originalPrice && price) 
@@ -129,126 +75,165 @@ const ProductInfo = memo(({ product }) => {
   const inStock = (currentVariant?.stock_quantity || 0) > 0;
   const stockCount = currentVariant?.stock_quantity || 0;
 
-  const increaseQuantity = useCallback(() => {
-    if (quantity < stockCount) {
-      setQuantity(prev => prev + 1);
-    }
-  }, [quantity, stockCount]);
-
-  const decreaseQuantity = useCallback(() => {
-    if (quantity > 1) {
-      setQuantity(prev => prev - 1);
-    }
-  }, [quantity]);
-
   const handleAddToCart = useCallback(async () => {
     if (!selectedSize || !selectedColor) {
-      console.warn('Please select size and color');
+      toast.error("Please select size and color");
       return;
     }
 
-    if (!currentVariant?.id) {
-      console.warn('Variant ID not found');
-      return;
-    }
-
+    if (!currentVariant?.id) return;
     if (isAddingToCart) return;
 
     setIsAddingToCart(true);
     
     try {
-      const cartPayload = {
+      await CartService.addToCart({
         variant_id: currentVariant.id,
         product_id: productId,
         quantity: quantity
-      };
-
-      await CartService.addToCart(cartPayload);
-      console.log(`${name} added to cart successfully!`);
+      });
+      toast.success(`${name} has been added to your cart.`);
       setIsAddingToCart(false);
     } catch (error) {
       console.error('Error adding to cart:', error);
+      toast.error("Failed to add to cart");
       setIsAddingToCart(false);
     }
-  }, [selectedSize, selectedColor, quantity, productId, currentVariant, name]);
-
-  const toggleWishlist = useCallback(() => {
-    setIsAddingToWishlist(true);
-    
-    try {
-      // Wishlist logic would go here
-      console.log('Wishlist toggled');
-      setIsAddingToWishlist(false);
-    } catch (error) {
-      console.error('Error updating wishlist:', error);
-      setIsAddingToWishlist(false);
-    }
-  }, []);
-
-  const handleShare = useCallback(() => {
-    if (navigator.share) {
-      navigator.share({
-        title: name,
-        text: `Check out this amazing ${category}`,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      console.log('Link copied to clipboard!');
-    }
-  }, [name, category]);
+  }, [selectedSize, selectedColor, quantity, productId, currentVariant, name, isAddingToCart, toast]);
 
   return (
-    <div className="space-y-6">
-      <ProductHeader
-        brand={brand}
-        category={category}
-        name={name}
-        rating={rating}
-        reviewCount={reviewCount}
-        isAddingToWishlist={isAddingToWishlist}
-        onToggleWishlist={toggleWishlist}
-        onShare={handleShare}
-      />
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-primary uppercase tracking-wider">{brand}</span>
+          <div className="flex items-center gap-4">
+            <button className="text-gray-400 hover:text-gray-900 transition-colors">
+              <Share2 className="w-5 h-5" strokeWidth={1.5} />
+            </button>
+            <button className="text-gray-400 hover:text-red-500 transition-colors">
+              <Heart className="w-5 h-5" strokeWidth={1.5} />
+            </button>
+          </div>
+        </div>
+        
+        <h1 className="text-3xl font-light text-gray-900 tracking-tight">{name}</h1>
+        
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl font-medium text-gray-900">₹{price.toLocaleString()}</span>
+            {originalPrice && originalPrice > price && (
+              <span className="text-lg text-gray-400 line-through font-light">₹{originalPrice.toLocaleString()}</span>
+            )}
+          </div>
+          {discount && (
+            <span className="bg-red-50 text-red-600 text-xs font-medium px-2 py-1 rounded-sm uppercase tracking-wider">
+              {discount}% OFF
+            </span>
+          )}
+        </div>
+      </div>
 
-      <ProductPriceCard
-        price={price}
-        originalPrice={originalPrice}
-        discount={discount}
-        inStock={inStock}
-        stockCount={stockCount}
-      />
+      <div className="h-px bg-gray-100" />
 
-      <ProductOffers offers={offers} />
+      {/* Selectors */}
+      <div className="space-y-6">
+        {/* Colors */}
+        <div>
+          <span className="text-sm font-medium text-gray-900 mb-3 block">Color: <span className="text-gray-500 font-normal">{selectedColor}</span></span>
+          <div className="flex flex-wrap gap-3">
+            {availableColors.map((color) => (
+              <button
+                key={color}
+                onClick={() => setSelectedColor(color)}
+                className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all ${
+                  selectedColor === color 
+                    ? "border-primary ring-1 ring-primary ring-offset-2" 
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+                style={{ backgroundColor: color.toLowerCase() }}
+                title={color}
+              >
+                {selectedColor === color && (
+                  <Check className={`w-4 h-4 ${['white', '#ffffff', '#fff'].includes(color.toLowerCase()) ? 'text-black' : 'text-white'}`} />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
 
-      <ProductSizeSelector
-        availableSizes={availableSizes}
-        selectedSize={selectedSize}
-        sizeStockMap={sizeStockMap}
-        onSelectSize={setSelectedSize}
-      />
+        {/* Sizes */}
+        <div>
+          <span className="text-sm font-medium text-gray-900 mb-3 block">Size: <span className="text-gray-500 font-normal">{selectedSize}</span></span>
+          <div className="flex flex-wrap gap-3">
+            {availableSizes.map((size) => (
+              <button
+                key={size}
+                onClick={() => setSelectedSize(size)}
+                className={`h-10 min-w-[40px] px-3 rounded-sm border text-sm font-medium transition-all ${
+                  selectedSize === size 
+                    ? "border-primary bg-primary text-white" 
+                    : "border-gray-200 text-gray-600 hover:border-gray-900 hover:text-gray-900"
+                }`}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+        </div>
 
-      <ProductColorSelector
-        availableColors={availableColors}
-        selectedColor={selectedColor}
-        colorStockMap={colorStockMap}
-        onSelectColor={setSelectedColor}
-      />
+        {/* Quantity */}
+        <div>
+          <span className="text-sm font-medium text-gray-900 mb-3 block">Quantity</span>
+          <div className="flex items-center border border-gray-200 rounded-sm w-fit">
+            <button 
+              onClick={() => quantity > 1 && setQuantity(q => q - 1)}
+              className="p-3 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              disabled={quantity <= 1}
+            >
+              <Minus className="w-4 h-4 text-gray-600" />
+            </button>
+            <span className="w-12 text-center text-sm font-medium">{quantity}</span>
+            <button 
+              onClick={() => quantity < stockCount && setQuantity(q => q + 1)}
+              className="p-3 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              disabled={quantity >= stockCount}
+            >
+              <Plus className="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
+        </div>
+      </div>
 
-      <ProductQuantitySelector
-        quantity={quantity}
-        stockCount={stockCount}
-        onIncrease={increaseQuantity}
-        onDecrease={decreaseQuantity}
-      />
+      {/* Actions */}
+      <div className="flex gap-4 pt-4">
+        <Button 
+          onClick={handleAddToCart}
+          disabled={!inStock || isAddingToCart}
+          className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white rounded-sm font-medium text-sm uppercase tracking-wide"
+        >
+          {isAddingToCart ? (
+            "Adding..."
+          ) : !inStock ? (
+            "Out of Stock"
+          ) : (
+            <span className="flex items-center gap-2">
+              <ShoppingBag className="w-4 h-4" />
+              Add to Cart
+            </span>
+          )}
+        </Button>
+      </div>
 
-      <ProductActions
-        inStock={inStock}
-        selectedSize={selectedSize}
-        selectedColor={selectedColor}
-        isAddingToCart={isAddingToCart}
-        onAddToCart={handleAddToCart}
-      />
+      {/* Offers */}
+      <div className="bg-gray-50 p-4 rounded-sm space-y-3">
+        {offers?.map((offer, i) => (
+          <div key={i} className="flex items-start gap-3 text-sm text-gray-600">
+            <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+            <span>{offer}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 });
