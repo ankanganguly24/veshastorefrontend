@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Plus, Minus, Trash2, Heart, Loader2 } from "lucide-react";
+import { Plus, Minus, Trash2, Heart, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import CartService from "@/services/cart-service";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -55,102 +54,81 @@ export function CartItemCard({ item, onUpdate }) {
   };
 
   return (
-    <Card
-      className={`p-6 bg-white/80 backdrop-blur-sm border-purple-100 shadow-lg transition-all duration-300 ${
-        isUpdating || isRemoving ? "opacity-60" : "opacity-100"
-      }`}
-    >
-      <div className="flex flex-col md:flex-row gap-4">
-        {/* Image */}
-        <div className="w-full md:w-32 h-32 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
-          {item.thumbnail_media?.url ? (
-            <img
-              src={item.thumbnail_media.url}
-              alt={item.title_snapshot}
-              className="object-cover w-full h-full"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400">
-              No image
-            </div>
-          )}
-        </div>
-
-        {/* Info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex justify-between items-start mb-2 gap-2">
-            <div className="min-w-0">
-              <h3 className="text-lg font-bold text-gray-900 truncate">{item.title_snapshot}</h3>
-              <p className="text-sm text-gray-500 truncate">
-                SKU: {item.sku_snapshot}
-              </p>
-            </div>
-
-            <button
-              onClick={removeItem}
-              disabled={isRemoving}
-              className="text-red-500 hover:text-red-700 p-2 flex-shrink-0"
-              title="Remove item"
-            >
-              {isRemoving ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Trash2 className="w-5 h-5" />
-              )}
-            </button>
+    <div className={`flex gap-6 py-6 border-b border-gray-100 last:border-0 transition-opacity duration-200 ${
+      isUpdating || isRemoving ? "opacity-50" : "opacity-100"
+    }`}>
+      {/* Image */}
+      <div className="w-24 h-32 md:w-32 md:h-40 bg-gray-50 relative flex-shrink-0">
+        {item.thumbnail_media?.url ? (
+          <Image
+            src={item.thumbnail_media.url}
+            alt={item.title_snapshot}
+            fill
+            className="object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">
+            No image
           </div>
+        )}
+      </div>
 
-          <p className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
-            ₹{price.toLocaleString()}
-          </p>
+      {/* Info */}
+      <div className="flex-1 flex flex-col justify-between">
+        <div className="flex justify-between items-start gap-4">
+          <div>
+            <h3 className="text-base font-medium text-gray-900 mb-1">{item.title_snapshot}</h3>
+            <p className="text-sm text-gray-500 mb-2">SKU: {item.sku_snapshot}</p>
+            <p className="text-sm font-medium text-gray-900">₹{price.toLocaleString()}</p>
+          </div>
+          
+          <button
+            onClick={removeItem}
+            disabled={isRemoving}
+            className="text-gray-400 hover:text-red-500 transition-colors p-1"
+            title="Remove item"
+          >
+            {isRemoving ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <X className="w-4 h-4" />
+            )}
+          </button>
         </div>
 
-        {/* Quantity and Total */}
-        <div className="flex flex-col items-end space-y-3">
-          <div className="flex items-center border border-purple-200 rounded-lg">
+        <div className="flex items-center justify-between mt-4">
+          {/* Quantity */}
+          <div className="flex items-center border border-gray-200 w-fit">
             <button
               onClick={() => updateQuantity(item.quantity - 1)}
               disabled={isUpdating || item.quantity <= 1}
-              className="p-2 hover:bg-purple-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="p-2 hover:bg-gray-50 disabled:opacity-30 transition-colors"
             >
-              <Minus className="w-4 h-4" />
+              <Minus className="w-3 h-3" />
             </button>
-
-            <span className="px-4 py-2 border-x border-purple-200 min-w-[3rem] text-center font-semibold">
+            <span className="w-8 text-center text-sm font-medium">
               {isUpdating ? (
-                <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                <Loader2 className="w-3 h-3 animate-spin mx-auto" />
               ) : (
                 item.quantity
               )}
             </span>
-
             <button
               onClick={() => updateQuantity(item.quantity + 1)}
               disabled={isUpdating}
-              className="p-2 hover:bg-purple-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="p-2 hover:bg-gray-50 disabled:opacity-30 transition-colors"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3 h-3" />
             </button>
           </div>
 
           <div className="text-right">
-            <p className="text-sm text-gray-500">Total</p>
-            <p className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            <p className="text-sm font-medium text-gray-900">
               ₹{(price * item.quantity).toLocaleString()}
             </p>
           </div>
-
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="border-purple-200 hover:bg-purple-50 w-full"
-            disabled={isRemoving}
-          >
-            <Heart className="w-4 h-4 mr-1" />
-            Save for Later
-          </Button>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }
