@@ -2,51 +2,58 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import ProductCard from "@/components/common/product-card";
 import api from "@/utils/axios";
 
 function SkeletonLoader() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
       {Array.from({ length: 4 }).map((_, index) => (
-        <div
-          key={index}
-          className="h-64 bg-gray-200 animate-pulse rounded-lg"
-        ></div>
+        <div key={index} className="space-y-4">
+          <div className="aspect-[3/4] bg-gray-100 animate-pulse" />
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-100 w-3/4 animate-pulse" />
+            <div className="h-4 bg-gray-100 w-1/4 animate-pulse" />
+          </div>
+        </div>
       ))}
     </div>
   );
 }
 
-function ProductSection({ title, products, linkHref, bgColor = "bg-white", textColor = "text-gray-900" }) {
+function ProductSection({ title, products, linkHref }) {
   return (
-    <section className={`py-16 ${bgColor} text-center`}>
+    <section className="py-24 border-t border-gray-100">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center justify-center mb-12">
-          <h2 className={`text-3xl md:text-4xl font-bold ${textColor} mb-2`}>
-            {title}
-          </h2>
+        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+          <div>
+            <h2 className="text-3xl font-light text-gray-900 tracking-tight mb-3">
+              {title}
+            </h2>
+            <div className="w-12 h-px bg-primary mb-4"></div>
+          </div>
+          
           <Link href={linkHref}>
             <Button 
-              variant="outline" 
-              className="group hover:bg-gray-900 hover:text-white border-gray-300"
+              variant="ghost" 
+              className="group text-gray-900 hover:text-primary hover:bg-transparent p-0 font-medium"
             >
-              Show More
-              <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+              View Collection
+              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
           {products.length > 0 ? (
             products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))
           ) : (
-            <div className="col-span-full text-gray-500">
-              Products coming soon for this category.
+            <div className="col-span-full text-center py-12 text-gray-500">
+              New arrivals coming soon.
             </div>
           )}
         </div>
@@ -89,16 +96,14 @@ export default function ProductSections() {
       try {
         const categoryRes = await api.get("/product/category");
         const allCategories = categoryRes?.data?.data?.categories || [];
-        const topCategories = allCategories.slice(0, 3);
+        // Get top 2 categories for homepage to keep it clean
+        const topCategories = allCategories.slice(0, 2);
 
         const categoryData = await Promise.all(
           topCategories.map(async (category) => {
             const productRes = await api.get(`/product?category_ids=${category.id}&limit=4`);
             const products = productRes?.data?.data?.products || [];
-            
-            // Transform products to include image and price at the root level
             const transformedProducts = products.map(transformProduct);
-            
             return { ...category, products: transformedProducts };
           })
         );
@@ -116,21 +121,20 @@ export default function ProductSections() {
 
   if (loading) {
     return (
-      <div className="text-center py-12">
+      <div className="container mx-auto px-4 py-24">
         <SkeletonLoader />
       </div>
     );
   }
 
   return (
-    <div className="text-center">
+    <div>
       {memoizedCategories.map((category) => (
         <ProductSection
           key={category.id}
           title={category.name}
           products={category.products}
           linkHref={`/category/${category.id}`}
-          bgColor="bg-white"
         />
       ))}
     </div>
