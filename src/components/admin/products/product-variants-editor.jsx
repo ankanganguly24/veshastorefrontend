@@ -123,17 +123,19 @@ export default function ProductVariantsEditor({ options, variants, setVariants }
   };
 
   const handleAddVariant = () => {
-    if (variant.option_value_ids.length !== options.length) {
+    // Make option selection optional - only validate if options exist
+    if (options && options.length > 0 && variant.option_value_ids.length !== options.length) {
       setErrors({ option_value_ids: "Please select a value for all options." });
       return;
     }
+    
     try {
       const parsedVariant = variantSchema.parse(variant);
       setVariants([...variants, parsedVariant]);
       setVariant(defaultVariantFields);
       setErrors({});
     } catch (err) {
-      if (err instanceof z.ZodError) {
+      if (err instanceof z.ZodError && err.errors && Array.isArray(err.errors)) {
         const fieldErrors = {};
         err.errors.forEach(e => {
           if (e.path && e.path.length > 0) {
@@ -141,6 +143,9 @@ export default function ProductVariantsEditor({ options, variants, setVariants }
           }
         });
         setErrors(fieldErrors);
+      } else {
+        console.error("Validation error:", err);
+        setErrors({ general: "Failed to add variant. Please check all fields." });
       }
     }
   };
@@ -189,21 +194,42 @@ export default function ProductVariantsEditor({ options, variants, setVariants }
           {isLoadingUnits ? (
             <div className="text-muted-foreground mb-4">Loading units...</div>
           ) : (
-            <div className="mb-4 p-4 border rounded-lg space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                {options.map((option) => {
-                  const selectedValue = option.values.find(val => variant.option_value_ids.includes(val.id));
-                  return (
-                    <div key={option.id}>
-                      <Button type="button" variant="outline" className="w-full justify-between" onClick={() => handleOpenOptionModal(option)}>
-                        <span>{option.display_name}</span>
-                        <span className="text-primary">{selectedValue?.value || "Select"}</span>
-                      </Button>
-                    </div>
-                  );
-                })}
+            <div className="mb-4 p-4 border rounded-lg space-y-4 bg-muted/20">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold">Product Options</h3>
+                <span className="text-xs text-muted-foreground">
+                  {options && options.length > 0 ? "Optional" : "No options available"}
+                </span>
               </div>
-              {errors.option_value_ids && <div className="text-destructive text-xs mt-1 col-span-2">{errors.option_value_ids}</div>}
+              
+              {options && options.length > 0 && (
+                <div className="grid gap-3 md:grid-cols-2">
+                  {options.map((option) => {
+                    const selectedValue = option.values.find(val => variant.option_value_ids.includes(val.id));
+                    return (
+                      <div key={option.id} className="space-y-1">
+                        <label className="text-sm font-medium text-muted-foreground">
+                          {option.display_name}
+                        </label>
+                        <Button 
+                          type="button" 
+                          variant={selectedValue ? "default" : "outline"}
+                          className="w-full justify-between h-10"
+                          onClick={() => handleOpenOptionModal(option)}
+                        >
+                          <span>{selectedValue?.value || "Select..."}</span>
+                          {selectedValue && (
+                            <span className="ml-2 px-2 py-0.5 bg-background/20 rounded text-xs">
+                              Selected
+                            </span>
+                          )}
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              {errors.option_value_ids && <div className="text-destructive text-sm">{errors.option_value_ids}</div>}
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
