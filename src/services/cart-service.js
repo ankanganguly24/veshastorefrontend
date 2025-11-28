@@ -93,9 +93,15 @@ const CartService = {
   async getCartSummary() {
     try {
       const cartData = await this.getCart();
-      const items = cartData?.data?.items || [];
+      // Handle different response structures
+      const cart = cartData?.data?.cart || cartData?.data?.data?.cart || cartData?.cart;
+      const items = cart?.items || [];
+      
       const itemCount = items.reduce((count, item) => count + (item.quantity || 0), 0);
-      const total = items.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0);
+      const total = items.reduce((sum, item) => {
+        const price = item.price_snapshot || item.price || 0;
+        return sum + (price * (item.quantity || 0));
+      }, 0);
 
       return {
         itemCount,

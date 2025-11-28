@@ -1,192 +1,148 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import ProductCard from "@/components/common/product-card";
 import api from "@/utils/axios";
 import PriceFilter, { PRICE_RANGES } from "@/components/common/filters/PriceFilter";
-import ColorFilter from "@/components/common/filters/ColorFilter";
 import CategoryFilter from "@/components/common/filters/CategoryFilter";
+import { useState } from "react";
 
+/**
+ * Product Skeleton Loader
+ */
 function ProductSkeletonLoader() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-      {Array.from({ length: 2 }).map((_, index) => (
+      {Array.from({ length: 6 }).map((_, index) => (
         <div
           key={index}
           className="w-full h-64 bg-gray-200 animate-pulse rounded-lg"
-          style={{ minWidth: "200px", maxWidth: "300px" }} 
-        ></div>
+        />
       ))}
     </div>
   );
 }
 
+/**
+ * Category Page Component
+ * Displays products filtered by category with proper loading states
+ * Uses React Query for caching
+ */
 export default function CategoryPage({ params }) {
-  // Unwrap params which may be a Promise in newer Next.js versions
-  // React.use will resolve the promise so we can safely access properties.
   const resolvedParams = React.use(params);
   const { category } = resolvedParams || {};
 
-  // Determine category ids from route params (could be array or string)
+  // Determine category ids from route params
   const categoryIdsArray = useMemo(() => {
     if (!category) return [];
     return Array.isArray(category) ? category : [category];
   }, [category]);
 
-  const categoryPath = useMemo(() => (categoryIdsArray.length ? categoryIdsArray.join('/') : ''), [categoryIdsArray]);
-
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(Boolean(categoryIdsArray.length));
-  const [error, setError] = useState(null);
-
-  // Parent categories state for sidebar
-  const [parentCategories, setParentCategories] = useState([]);
-  const [parentsLoading, setParentsLoading] = useState(false);
-
-  // State to store category names
-  const [categoryNames, setCategoryNames] = useState([]);
+  const categoryPath = categoryIdsArray.join(',');
 
   // Filters state
   const [selectedPriceRanges, setSelectedPriceRanges] = useState([]);
-  const [selectedColors, setSelectedColors] = useState([]);
   const [selectedCategoryFilters, setSelectedCategoryFilters] = useState([]);
 
-  // Fetch parent categories (top-level) for sidebar
-  useEffect(() => {
-    let mounted = true;
-    const fetchParentCategories = async () => {
-      setParentsLoading(true);
-      try {
-        const res = await api.get("/product/category");
-        const all = res?.data?.data?.categories || [];
-        const parents = Array.isArray(all) ? all.filter((c) => !c.parent_id) : [];
-        if (mounted) setParentCategories(parents);
-      } catch (err) {
-        console.error("Failed to fetch categories:", err);
-      } finally {
-        if (mounted) setParentsLoading(false);
-      }
-    };
-    fetchParentCategories();
-    return () => { mounted = false; };
-  }, []);
+  // Fetch parent categories for sidebar with caching
+  const { data: parentCategories = [], isLoading: categoriesLoading } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const res = await api.get("/product/category");
+      const all = res?.data?.data?.categories || [];
+      return Array.isArray(all) ? all.filter((c) => !c.parent_id) : [];
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    cacheTime: 15 * 60 * 1000, // 15 minutes
+  });
 
-  // Fetch category names from IDs
-  useEffect(() => {
-    if (categoryIdsArray.length === 0) {
-      setCategoryNames([]);
-      return;
-    }
+  // Fetch category names with caching
+  const { data: categoryNames = [] } = useQuery({
+    queryKey: ["category-names", categoryIdsArray],
+    queryFn: async () => {
+      if (categoryIdsArray.length === 0) return [];
+      
+      const res = await api.get("/product/category");
+      const allCategories = res?.data?.data?.categories || [];
 
-    let mounted = true;
+      // Create a map of id to category
+      const categoryMap = {};
+      const buildMap = (cats) => {
+        cats.forEach((cat) => {
+          categoryMap[cat.id] = cat.name;
+          if (cat.children && cat.children.length > 0) {
+            buildMap(cat.children);
+          }
+        });
+      };
+      buildMap(allCategories);
 
-    const fetchCategoryNames = async () => {
-      try {
-        const res = await api.get("/product/category");
-        const allCategories = res?.data?.data?.categories || [];
+      return categoryIdsArray.map((id) => categoryMap[id] || id);
+    },
+    enabled: categoryIdsArray.length > 0,
+    staleTime: 10 * 60 * 1000,
+  });
 
-        // Create a map of id to category for quick lookup
-        const categoryMap = {};
-        const buildMap = (cats) => {
-          cats.forEach((cat) => {
-            categoryMap[cat.id] = cat.name;
-            if (cat.children && cat.children.length > 0) {
-              buildMap(cat.children);
+  // Fetch products with caching - ONLY when we have category IDs
+  const { data: products = [], isLoading: productsLoading, error } = useQuery({
+    queryKey: ["products", "category", categoryPath],
+    queryFn: async () => {
+      const res = await api.get(`/product?category_ids=${encodeURIComponent(categoryPath)}`);
+      const fetched = res?.data?.data?.products || [];
+
+      return fetched.map((p) => {
+        const variant = p.variants && p.variants.length ? p.variants[0] : {};
+        const images = (p.media && Array.isArray(p.media) && p.media.length)
+          ? p.media.map((m) => m.media?.url || m.url || m.path || null)
+          : (p.images || []);
+
+        const colors = [];
+        if (Array.isArray(p.variants)) {
+          p.variants.forEach((v) => {
+            if (Array.isArray(v.variantOptions)) {
+              v.variantOptions.forEach((vo) => {
+                const opt = vo.optionValue;
+                const def = opt?.optionDefinition;
+                const key = (def?.name || def?.display_name || "").toLowerCase();
+                if (key.includes("color") || key.includes("colour")) {
+                  const val = opt?.metadata?.hex || opt?.value || opt?.label;
+                  if (val && !colors.includes(val)) colors.push(val);
+                }
+              });
             }
           });
+        }
+
+        const categoryNameFromProduct = (p.categories && p.categories.length) ? p.categories[0].name : '';
+        const categoryIdsFromProduct = (p.categories && p.categories.length) ? p.categories.map(c => c.id) : [];
+
+        const price = variant?.price ?? 0;
+        const compareAt = variant?.compare_at_price ?? null;
+        const discount = (compareAt && price) ? Math.round((1 - price / compareAt) * 100) : null;
+
+        return {
+          ...p,
+          name: p.title || p.name || p.slug,
+          price,
+          originalPrice: compareAt,
+          discount,
+          category: categoryNameFromProduct,
+          categoryIds: categoryIdsFromProduct,
+          image: images[0] || null,
+          rating: 4.5,
+          reviewCount: p.reviewCount || 0,
+          colors,
         };
-        buildMap(allCategories);
+      });
+    },
+    enabled: categoryIdsArray.length > 0, // Only fetch when we have categories
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000, // 10 minutes
+  });
 
-        // Get names for the requested category IDs
-        const names = categoryIdsArray.map((id) => categoryMap[id] || id);
-        if (mounted) setCategoryNames(names);
-      } catch (err) {
-        console.error("Failed to fetch category names:", err);
-      }
-    };
-
-    fetchCategoryNames();
-    return () => { mounted = false; };
-  }, [categoryIdsArray]);
-
-  // Display name using fetched category names
-  const categoryName = useMemo(() => {
-    if (categoryNames.length === 0) return 'All Products';
-    return categoryNames.join(' / ');
-  }, [categoryNames]);
-
-  useEffect(() => {
-    if (categoryIdsArray.length === 0) {
-      setProducts([]);
-      setLoading(false);
-      return;
-    }
-
-    const fetchProducts = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const idsParam = categoryIdsArray.join(',');
-        const res = await api.get(`/product?category_ids=${encodeURIComponent(idsParam)}`);
-        const fetched = res?.data?.data?.products || [];
-
-        const mapped = fetched.map((p) => {
-          const variant = p.variants && p.variants.length ? p.variants[0] : {};
-          const images = (p.media && Array.isArray(p.media) && p.media.length)
-            ? p.media.map((m) => m.media?.url || m.url || m.path || m.src || null)
-            : (p.images || []);
-
-          const colors = [];
-          if (Array.isArray(p.variants)) {
-            p.variants.forEach((v) => {
-              if (Array.isArray(v.variantOptions)) {
-                v.variantOptions.forEach((vo) => {
-                  const opt = vo.optionValue;
-                  const def = opt?.optionDefinition;
-                  const key = (def?.name || def?.display_name || "").toLowerCase();
-                  if (key.includes("color") || key.includes("colour")) {
-                    const val = opt?.metadata?.hex || opt?.value || opt?.label;
-                    if (val && !colors.includes(val)) colors.push(val);
-                  }
-                });
-              }
-            });
-          }
-
-          const categoryNameFromProduct = (p.categories && p.categories.length) ? p.categories[0].name : '';
-          const categoryIdsFromProduct = (p.categories && p.categories.length) ? p.categories.map(c => c.id) : [];
-
-          const price = variant?.price ?? 0;
-          const compareAt = variant?.compare_at_price ?? null;
-          const discount = (compareAt && price) ? Math.round((1 - price / compareAt) * 100) : null;
-
-          return {
-            ...p,
-            name: p.title || p.name || p.slug,
-            price: price,
-            originalPrice: compareAt,
-            discount: discount,
-            category: categoryNameFromProduct,
-            categoryIds: categoryIdsFromProduct,
-            image: images[0] || null, // Use the first image or null
-            gradient: undefined,
-            rating: 4.5,
-            reviewCount: p.reviewCount || 0,
-            colors,
-          };
-        });
-
-        setProducts(mapped);
-      } catch (err) {
-        console.error("Failed to fetch products:", err);
-        setError("Failed to load products.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, [categoryIdsArray]);
+  // Display name
+  const categoryName = categoryNames.length === 0 ? 'All Products' : categoryNames.join(' / ');
 
   // Apply client-side filters
   const filteredProducts = useMemo(() => {
@@ -205,17 +161,12 @@ export default function CategoryPage({ params }) {
         if (!matchesPrice) return false;
       }
 
-      if (selectedColors.length > 0) {
-        const matchesColor = (p.colors || []).some((c) => {
-          const norm = String(c || "").toLowerCase();
-          return selectedColors.some((sel) => String(sel || "").toLowerCase() === norm);
-        });
-        if (!matchesColor) return false;
-      }
-
       return true;
     });
-  }, [products, selectedCategoryFilters, selectedPriceRanges, selectedColors]);
+  }, [products, selectedCategoryFilters, selectedPriceRanges]);
+
+  // Show loading state while fetching
+  const isLoading = productsLoading || categoriesLoading;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-primary/10">
@@ -248,21 +199,23 @@ export default function CategoryPage({ params }) {
           
           {/* Products Grid */}
           <div className="lg:col-span-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-              {loading ? (
-                <ProductSkeletonLoader />
-              ) : error ? (
-                <div className="col-span-full text-center py-12 text-red-600">{error}</div>
-              ) : filteredProducts.length === 0 ? (
-                <div className="col-span-full text-center py-12 text-muted-foreground">No products found for the selected filters.</div>
-              ) : (
-                filteredProducts.map((product) => (
+            {isLoading ? (
+              <ProductSkeletonLoader />
+            ) : error ? (
+              <div className="text-center py-12 text-red-600">
+                Failed to load products. Please try again.
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                No products found for the selected filters.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
-                ))
-              )}
-            </div>
-
-          
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
