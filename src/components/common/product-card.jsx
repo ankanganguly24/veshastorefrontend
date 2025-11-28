@@ -45,7 +45,7 @@ const OptimizedImage = memo(({ src, alt, className, currentIndex, isActive }) =>
         src={src}
         alt={alt}
         fill
-        className={`object-cover transition-all duration-1000 ease-in-out ${className} ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+        className={`object-contain transition-all duration-1000 ease-in-out ${className} ${isLoading ? 'opacity-0' : 'opacity-100'}`}
         onLoad={handleLoad}
         onError={handleError}
         priority={currentIndex === 0} // Prioritize first image

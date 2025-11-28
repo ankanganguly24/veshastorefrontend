@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ProductCard from "@/components/common/product-card";
 import api from "@/utils/axios";
 import PriceFilter, { PRICE_RANGES } from "@/components/common/filters/PriceFilter";
 import CategoryFilter from "@/components/common/filters/CategoryFilter";
-import { useState } from "react";
+import { getProductCardImages } from "@/lib/image-utils";
 
 /**
  * Product Skeleton Loader
@@ -17,7 +17,7 @@ function ProductSkeletonLoader() {
       {Array.from({ length: 6 }).map((_, index) => (
         <div
           key={index}
-          className="w-full h-64 bg-gray-200 animate-pulse rounded-lg"
+          className="w-full h-96 bg-gray-200 animate-pulse rounded-lg"
         />
       ))}
     </div>
@@ -25,9 +25,61 @@ function ProductSkeletonLoader() {
 }
 
 /**
+ * Transform API product data to component format
+ */
+function transformProduct(product) {
+  const variant = product.variants?.[0] || {};
+  
+  // Extract images using utility function
+  const images = getProductCardImages(product.media || []);
+  
+  // Extract colors from variant options
+  const colors = [];
+  if (Array.isArray(product.variants)) {
+    product.variants.forEach((v) => {
+      if (Array.isArray(v.variantOptions)) {
+        v.variantOptions.forEach((vo) => {
+          const opt = vo.optionValue;
+          const def = opt?.optionDefinition;
+          const key = (def?.name || def?.display_name || "").toLowerCase();
+          if (key.includes("color") || key.includes("colour")) {
+            const val = opt?.metadata?.hex || opt?.value || opt?.label;
+            if (val && !colors.includes(val)) colors.push(val);
+          }
+        });
+      }
+    });
+  }
+
+  const categoryName = product.categories?.[0]?.category?.name || '';
+  const categoryIds = product.categories?.map(c => c.category?.id || c.category_id) || [];
+
+  const price = variant?.price ?? 0;
+  const compareAt = variant?.compare_at_price ?? null;
+  const discount = (compareAt && price && compareAt > price) 
+    ? Math.round((1 - price / compareAt) * 100) 
+    : null;
+
+  return {
+    ...product,
+    name: product.title || product.name || product.slug,
+    price,
+    originalPrice: compareAt,
+    discount,
+    category: categoryName,
+    categoryIds,
+    images,
+    image: images[0] || null,
+    rating: 4.5,
+    reviewCount: product.reviewCount || 0,
+    colors,
+  };
+}
+
+/**
  * Category Page Component
  * Displays products filtered by category with proper loading states
- * Uses React Query for caching
+ * Uses React Query for caching and responsive images
  */
 export default function CategoryPage({ params }) {
   const resolvedParams = React.use(params);
@@ -55,6 +107,7 @@ export default function CategoryPage({ params }) {
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
     cacheTime: 15 * 60 * 1000, // 15 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Fetch category names with caching
@@ -82,6 +135,7 @@ export default function CategoryPage({ params }) {
     },
     enabled: categoryIdsArray.length > 0,
     staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   // Fetch products with caching - ONLY when we have category IDs
@@ -90,55 +144,12 @@ export default function CategoryPage({ params }) {
     queryFn: async () => {
       const res = await api.get(`/product?category_ids=${encodeURIComponent(categoryPath)}`);
       const fetched = res?.data?.data?.products || [];
-
-      return fetched.map((p) => {
-        const variant = p.variants && p.variants.length ? p.variants[0] : {};
-        const images = (p.media && Array.isArray(p.media) && p.media.length)
-          ? p.media.map((m) => m.media?.url || m.url || m.path || null)
-          : (p.images || []);
-
-        const colors = [];
-        if (Array.isArray(p.variants)) {
-          p.variants.forEach((v) => {
-            if (Array.isArray(v.variantOptions)) {
-              v.variantOptions.forEach((vo) => {
-                const opt = vo.optionValue;
-                const def = opt?.optionDefinition;
-                const key = (def?.name || def?.display_name || "").toLowerCase();
-                if (key.includes("color") || key.includes("colour")) {
-                  const val = opt?.metadata?.hex || opt?.value || opt?.label;
-                  if (val && !colors.includes(val)) colors.push(val);
-                }
-              });
-            }
-          });
-        }
-
-        const categoryNameFromProduct = (p.categories && p.categories.length) ? p.categories[0].name : '';
-        const categoryIdsFromProduct = (p.categories && p.categories.length) ? p.categories.map(c => c.id) : [];
-
-        const price = variant?.price ?? 0;
-        const compareAt = variant?.compare_at_price ?? null;
-        const discount = (compareAt && price) ? Math.round((1 - price / compareAt) * 100) : null;
-
-        return {
-          ...p,
-          name: p.title || p.name || p.slug,
-          price,
-          originalPrice: compareAt,
-          discount,
-          category: categoryNameFromProduct,
-          categoryIds: categoryIdsFromProduct,
-          image: images[0] || null,
-          rating: 4.5,
-          reviewCount: p.reviewCount || 0,
-          colors,
-        };
-      });
+      return fetched.map(transformProduct);
     },
     enabled: categoryIdsArray.length > 0, // Only fetch when we have categories
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Display name
@@ -147,11 +158,15 @@ export default function CategoryPage({ params }) {
   // Apply client-side filters
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
+      // Category filter
       if (selectedCategoryFilters.length > 0) {
-        const intersects = p.categoryIds && p.categoryIds.some((cid) => selectedCategoryFilters.includes(cid));
+        const intersects = p.categoryIds && p.categoryIds.some((cid) => 
+          selectedCategoryFilters.includes(cid)
+        );
         if (!intersects) return false;
       }
 
+      // Price filter
       if (selectedPriceRanges.length > 0) {
         const matchesPrice = selectedPriceRanges.some((rid) => {
           const range = PRICE_RANGES.find((r) => r.id === rid);
@@ -192,7 +207,10 @@ export default function CategoryPage({ params }) {
               />
 
               <div className="mt-6">
-                <PriceFilter selected={selectedPriceRanges} onChange={setSelectedPriceRanges} />
+                <PriceFilter 
+                  selected={selectedPriceRanges} 
+                  onChange={setSelectedPriceRanges} 
+                />
               </div>
             </div>
           </div>
