@@ -7,6 +7,7 @@ import WhyChooseSection from "@/components/common/why-choose-section";
 import ProductSections from "@/components/common/product-sections";
 import StyleEditSection from "@/components/common/style-edit-section";
 import TestimonialsCarousel from "@/components/common/testimonials-carousel";
+import ProductShowcase from "@/components/common/product-showcase";
 
 export default function Home() {
   return (
@@ -27,6 +28,9 @@ export default function Home() {
         
         {/* Product Collections - Has API */}
         <ProductSections />
+
+        {/* New Product Showcase - Fetches from /product */}
+        <ProductShowcase />
         
         {/* Editorial / Style Edit Section */}
         <StyleEditSection />

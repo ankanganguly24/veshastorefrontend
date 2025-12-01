@@ -8,6 +8,7 @@ import { ProductService } from "@/services/product-service";
 import api from "@/utils/axios";
 import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
+import SimilarProducts from "@/components/storefront/products/similar-products";
 
 export default function ProductPage({ params }) {
   const resolvedParams = React.use(params);
@@ -182,7 +183,7 @@ export default function ProductPage({ params }) {
         </div>
 
         {/* Product Details Tabs */}
-        <div className="max-w-4xl mx-auto border-t border-gray-100 pt-16">
+        <div className="max-w-4xl mx-auto border-t border-gray-100 pt-16 mb-16">
           <ProductTabs
             description={product.description}
             washCare={product.washCare}
@@ -191,6 +192,12 @@ export default function ProductPage({ params }) {
             productName={product.name}
           />
         </div>
+
+        {/* Similar Products */}
+        <SimilarProducts 
+          currentProductId={product.id} 
+          categoryId={product.categories?.[0]?.category?.id} 
+        />
       </div>
     </div>
   );

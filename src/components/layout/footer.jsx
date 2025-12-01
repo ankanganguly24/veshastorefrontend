@@ -44,7 +44,7 @@ export default function Footer() {
     <footer className="bg-primary text-white">
       {/* Main Footer */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           
           {/* Brand Section */}
           <div className="lg:col-span-2">
@@ -137,6 +137,46 @@ export default function Footer() {
                   </Link>
                 </li>
               ))}
+            </ul>
+          </div>
+
+          {/* Popular Searches & Collections */}
+          <div className="lg:col-span-1">
+            <h4 className="text-lg font-semibold mb-6">Popular Searches</h4>
+            <div className="flex flex-wrap gap-2 mb-8">
+              {["Kurtas", "Sarees", "Lehengas", "Festive Wear", "Cotton Suits", "Silk Sarees"].map((tag) => (
+                <Link 
+                  key={tag}
+                  href={`/search?q=${tag}`}
+                  className="text-xs bg-white/10 hover:bg-white/20 text-white/80 px-3 py-1 rounded-full transition-colors"
+                >
+                  {tag}
+                </Link>
+              ))}
+            </div>
+
+            <h4 className="text-lg font-semibold mb-6">From the Blog</h4>
+            <ul className="space-y-4">
+              <li>
+                <Link href="/blogs/art-of-indian-attire" className="group block">
+                  <span className="text-white/90 font-medium group-hover:text-white transition-colors block mb-1">
+                    The Art of Indian Attire
+                  </span>
+                  <span className="text-xs text-white/60 block">
+                    Dec 1, 2025
+                  </span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/blogs/choosing-right-fabric" className="group block">
+                  <span className="text-white/90 font-medium group-hover:text-white transition-colors block mb-1">
+                    Choosing the Right Fabric
+                  </span>
+                  <span className="text-xs text-white/60 block">
+                    Nov 28, 2025
+                  </span>
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

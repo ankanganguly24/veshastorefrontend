@@ -27,16 +27,18 @@ export default function BlogsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {blogPosts.map((post) => (
             <Link key={post.id} href={`/blogs/${post.slug}`} className="group">
-              <Card className="h-full border-none shadow-none hover:shadow-lg transition-all duration-300 overflow-hidden bg-gray-50">
-                <div className="relative h-64 w-full overflow-hidden">
+              <Card className="h-full border-none shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden bg-white">
+                <div className="relative h-80 w-full overflow-hidden">
                   <Image
                     src={post.image}
                     alt={post.title}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    unoptimized
                   />
+                  <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-500" />
                   <div className="absolute top-4 left-4">
-                    <Badge className="bg-white/90 text-black hover:bg-white border-none backdrop-blur-sm">
+                    <Badge className="bg-white/95 text-black hover:bg-white border-none backdrop-blur-md px-3 py-1 text-xs tracking-wide uppercase">
                       {post.tags[0]}
                     </Badge>
                   </div>
