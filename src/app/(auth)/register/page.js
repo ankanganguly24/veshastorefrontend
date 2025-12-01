@@ -73,6 +73,18 @@ export default function Register() {
 
   return (
     <div className="space-y-6">
+      {/* Error Alert */}
+      {registerMutation.isError && (
+        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+          <p className="font-medium">Registration Failed</p>
+          <p className="text-sm mt-1">
+            {registerMutation.error?.response?.data?.message || 
+             registerMutation.error?.message || 
+             'Registration failed. Please check your information and try again.'}
+          </p>
+        </div>
+      )}
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
           {/* Name Fields */}

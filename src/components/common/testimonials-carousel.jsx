@@ -1,296 +1,195 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Card } from "@/components/ui/card";
-import { ChevronLeft, ChevronRight, Star, Quote } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Star, Quote, Check, X, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 const testimonials = [
   {
     id: 1,
     name: "Priya Sharma",
-    location: "Mumbai, Maharashtra",
+    location: "Mumbai",
     rating: 5,
     review: "Absolutely love my outfit! The detailing and craftsmanship are beyond expectations. The fabric feels luxurious, and the fit was spot on.",
     product: "Embroidered Kurta Set",
-    image: "https://images.unsplash.com/photo-1494790108755-2616b612b442?w=100&h=100&fit=crop&crop=face",
-    purchaseDate: "2 weeks ago",
+    image: "https://images.unsplash.com/photo-1494790108755-2616b612b442?w=400&h=400&fit=crop&crop=face",
     verified: true
   },
   {
     id: 2,
     name: "Rahul Mehta",
-    location: "Delhi, India",
+    location: "Delhi",
     rating: 5,
-    review: "The festive collection is simply stunning. The outfit looked even better in person and made me stand out at the event. Excellent finish and comfort.",
+    review: "The festive collection is simply stunning. The outfit looked even better in person and made me stand out at the event. Excellent finish.",
     product: "Classic Festive Sherwani",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-    purchaseDate: "1 month ago",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
     verified: true
   },
   {
     id: 3,
     name: "Anita Desai",
-    location: "Bangalore, Karnataka",
+    location: "Bangalore",
     rating: 5,
-    review: "Quick delivery and flawless design. The outfit was elegant yet modern — received so many compliments. Highly recommend ordering from here!",
+    review: "Quick delivery and flawless design. The outfit was elegant yet modern — received so many compliments. Highly recommend!",
     product: "Designer Peplum Jacket",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-    purchaseDate: "3 weeks ago",
+    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
     verified: true
   },
   {
     id: 4,
     name: "Vikram Singh",
-    location: "Jaipur, Rajasthan",
+    location: "Jaipur",
     rating: 5,
-    review: "The craftsmanship is exceptional — feels tailor-made. Perfect balance of traditional charm and modern styling. Worth every penny.",
+    review: "The craftsmanship is exceptional — feels tailor-made. Perfect balance of traditional charm and modern styling.",
     product: "Regal Sherwani Set",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-    purchaseDate: "2 months ago",
+    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face",
     verified: true
   },
   {
     id: 5,
     name: "Sneha Patel",
-    location: "Ahmedabad, Gujarat",
+    location: "Ahmedabad",
     rating: 5,
     review: "Loved the fabric quality and subtle elegance. The silhouette and color were exactly as shown. It made me feel effortlessly beautiful.",
     product: "Vintage Silk Saree",
-    image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=100&h=100&fit=crop&crop=face",
-    purchaseDate: "1 week ago",
+    image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=400&h=400&fit=crop&crop=face",
     verified: true
   },
   {
     id: 6,
-    name: "Arjun Kumar",
-    location: "Chennai, Tamil Nadu",
+    name: "Meera Reddy",
+    location: "Hyderabad",
     rating: 5,
-    review: "Ordered for my wife’s birthday — she loved it! The fit, finish, and packaging were all premium. Thank you for making the day special.",
-    product: "Starlight Evening Gown",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
-    purchaseDate: "3 weeks ago",
+    review: "The attention to detail is amazing. The embroidery is intricate and the fit is perfect. Will definitely shop here again!",
+    product: "Royal Anarkali Suit",
+    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=face",
     verified: true
   },
   {
     id: 7,
-    name: "Riya Kapoor",
-    location: "Pune, Maharashtra",
+    name: "Arjun Kapoor",
+    location: "Pune",
     rating: 5,
-    review: "Elegant designs and amazing comfort! I wore this outfit to a family function, and everyone kept asking where I got it from.",
-    product: "Pastel Lehenga Set",
-    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=face",
-    purchaseDate: "3 weeks ago",
+    review: "Bought a kurta for my brother's wedding. The quality is top-notch and the delivery was super fast. Highly recommended!",
+    product: "Festive Kurta Pajama",
+    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop&crop=face",
     verified: true
   },
   {
     id: 8,
-    name: "Manish Verma",
-    location: "Lucknow, Uttar Pradesh",
+    name: "Sanya Malhotra",
+    location: "Chandigarh",
     rating: 5,
-    review: "I appreciate the attention to detail and quality finish. It arrived beautifully packed and looked even better in person.",
-    product: "Handwoven Kurta Set",
-    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop&crop=face",
-    purchaseDate: "1 month ago",
+    review: "Beautiful collection! The colors are vibrant and the fabric is so comfortable. I received so many compliments.",
+    product: "Georgette Saree",
+    image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=400&fit=crop&crop=face",
     verified: true
-  },
-  {
-    id: 9,
-    name: "Aditi Nair",
-    location: "Kochi, Kerala",
-    rating: 5,
-    review: "It’s rare to find something that feels luxurious yet so comfortable. Loved how timeless the piece feels — definitely shopping again.",
-    product: "Velvet Heritage Gown",
-    image: "https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=100&h=100&fit=crop&crop=face",
-    purchaseDate: "2 weeks ago",
-    verified: true
-  },
+  }
 ];
 
 export default function TestimonialsCarousel() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAutoPlay, setIsAutoPlay] = useState(true);
-  const [itemsPerView, setItemsPerView] = useState(3);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [direction, setDirection] = useState(null); // 'left' or 'right'
 
-  // Responsive items per view
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setItemsPerView(1);
-      } else if (window.innerWidth < 1024) {
-        setItemsPerView(2);
-      } else {
-        setItemsPerView(3);
-      }
-    };
+  const handleSwipe = (dir) => {
+    setDirection(dir);
+    setTimeout(() => {
+      setActiveIndex((prev) => (prev + 1) % testimonials.length);
+      setDirection(null);
+    }, 300); // Match transition duration
+  };
 
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const maxIndex = Math.max(0, Math.ceil(testimonials.length / itemsPerView) - 1);
-
-  const nextSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-  }, [maxIndex]);
-
-  const prevSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
-  }, [maxIndex]);
-
-  useEffect(() => {
-    if (!isAutoPlay) return;
-    const interval = setInterval(nextSlide, 4000);
-    return () => clearInterval(interval);
-  }, [nextSlide, isAutoPlay]);
-
-  const handleMouseEnter = () => setIsAutoPlay(false);
-  const handleMouseLeave = () => setIsAutoPlay(true);
+  // Get current, next, and next-next cards
+  const currentCard = testimonials[activeIndex];
+  const nextIndex = (activeIndex + 1) % testimonials.length;
+  const nextCard = testimonials[nextIndex];
+  const nextNextIndex = (activeIndex + 2) % testimonials.length;
+  const nextNextCard = testimonials[nextNextIndex];
 
   return (
-    <section className="py-16 bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-24 bg-gradient-to-b from-white to-gray-50 overflow-hidden">
+      <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            What Our Customers Say
+          <h2 className="text-3xl font-light text-gray-900 tracking-tight mb-3">
+            Customer Love
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Real stories from people who chose timeless elegance
-          </p>
-          <div className="flex items-center justify-center mt-6">
-            <div className="flex items-center space-x-2">
-              <div className="flex">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                ))}
-              </div>
-              <span className="text-gray-600 font-medium">4.9 out of 5</span>
-              <span className="text-gray-500">• 1,200+ happy customers</span>
-            </div>
-          </div>
+          <div className="w-12 h-px bg-primary mx-auto mb-4"></div>
+          <p className="text-gray-500">See what our community is saying about Vesha.</p>
         </div>
 
-        <div className="relative">
+        <div className="relative max-w-md mx-auto h-[460px] flex items-center justify-center">
+          {/* Background Card (Next Next) */}
+          <div className="absolute top-0 w-full transform scale-90 translate-y-8 opacity-40 z-0">
+            <TestimonialCard testimonial={nextNextCard} />
+          </div>
+
+          {/* Middle Card (Next) */}
+          <div className="absolute top-0 w-full transform scale-95 translate-y-4 opacity-70 z-10 transition-all duration-500">
+            <TestimonialCard testimonial={nextCard} />
+          </div>
+
+          {/* Front Card (Current) */}
           <div 
-            className="overflow-hidden"
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            className={`absolute top-0 w-full z-20 transition-all duration-500 ease-in-out transform ${
+              direction === 'right' ? 'translate-x-[20%] translate-y-[10%] rotate-6 opacity-0 scale-90' : 
+              direction === 'left' ? '-translate-x-[20%] translate-y-[10%] -rotate-6 opacity-0 scale-90' : 
+              'translate-x-0 translate-y-0 rotate-0 opacity-100 scale-100'
+            }`}
           >
-            <div 
-              className="flex transition-transform duration-500 ease-in-out"
-              style={{ 
-                transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
-                width: `${(testimonials.length / itemsPerView) * 100}%`
-              }}
-            >
-              {testimonials.map((testimonial) => (
-                <div 
-                  key={testimonial.id} 
-                  className="px-3"
-                  style={{ width: `${100 / testimonials.length}%` }}
-                >
-                  <Card className="p-6 h-full bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
-                    <div className="mb-4">
-                      <Quote className="w-8 h-8 text-blue-500 opacity-60" />
-                    </div>
-
-                    <p className="text-gray-700 mb-6 leading-relaxed text-sm lg:text-base">
-                      "{testimonial.review}"
-                    </p>
-
-                    <div className="mb-4">
-                      <p className="text-xs text-gray-500 mb-1">Purchased:</p>
-                      <p className="text-sm font-medium text-gray-900">{testimonial.product}</p>
-                    </div>
-
-                    <div className="flex items-center mb-4">
-                      {[...Array(5)].map((_, i) => (
-                        <Star 
-                          key={i} 
-                          className={`w-4 h-4 ${
-                            i < testimonial.rating 
-                              ? 'fill-yellow-400 text-yellow-400' 
-                              : 'text-gray-300'
-                          }`} 
-                        />
-                      ))}
-                    </div>
-
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                      <div className="flex items-center space-x-3">
-                        <img
-                          src={testimonial.image}
-                          alt={testimonial.name}
-                          className="w-10 h-10 rounded-full object-cover"
-                        />
-                        <div>
-                          <p className="font-semibold text-gray-900 text-sm">{testimonial.name}</p>
-                          <p className="text-xs text-gray-500">{testimonial.location}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-gray-500">{testimonial.purchaseDate}</p>
-                        {testimonial.verified && (
-                          <div className="flex items-center mt-1">
-                            <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
-                            <span className="text-xs text-green-600 font-medium">Verified</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </Card>
-                </div>
-              ))}
+            <TestimonialCard testimonial={currentCard} isFront />
+            
+            {/* Swipe Controls Overlay */}
+            <div className="absolute -bottom-20 left-0 right-0 flex justify-center gap-6">
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-14 w-14 rounded-full border-2 border-red-100 text-red-500 hover:bg-red-50 hover:border-red-200 hover:text-red-600 shadow-sm transition-all hover:scale-110"
+                onClick={() => handleSwipe('left')}
+              >
+                <X className="w-6 h-6" />
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-14 w-14 rounded-full border-2 border-green-100 text-green-500 hover:bg-green-50 hover:border-green-200 hover:text-green-600 shadow-sm transition-all hover:scale-110"
+                onClick={() => handleSwipe('right')}
+              >
+                <Heart className="w-6 h-6 fill-current" />
+              </Button>
             </div>
           </div>
-
-          {/* Navigation Arrows */}
-          {maxIndex > 0 && (
-            <>
-              <Button
-                variant="outline"
-                size="icon"
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white shadow-lg hover:shadow-xl z-10"
-                onClick={prevSlide}
-                disabled={currentIndex === 0}
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              
-              <Button
-                variant="outline"
-                size="icon"
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white shadow-lg hover:shadow-xl z-10"
-                onClick={nextSlide}
-                disabled={currentIndex >= maxIndex}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </>
-          )}
         </div>
-
-        {/* Dots Indicator */}
-        {maxIndex > 0 && (
-          <div className="flex justify-center mt-8">
-            <div className="flex space-x-2">
-              {Array.from({ length: maxIndex + 1 }).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    currentIndex === index 
-                      ? "bg-blue-600 w-6" 
-                      : "bg-gray-300 hover:bg-gray-400"
-                  }`}
-                  aria-label={`Go to testimonial group ${index + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </section>
+  );
+}
+
+function TestimonialCard({ testimonial, isFront }) {
+  return (
+    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden h-[380px] flex flex-col relative">
+      <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-primary/40 to-primary"></div>
+      
+      <div className="p-8 flex-1 flex flex-col items-center text-center justify-center">
+        <div className="mb-6 text-primary/20">
+          <Quote className="w-12 h-12" />
+        </div>
+
+        <div className="flex gap-1 mb-6">
+          {[...Array(5)].map((_, i) => (
+            <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+          ))}
+        </div>
+
+        <p className="text-gray-700 text-xl leading-relaxed mb-8 italic font-light">
+          "{testimonial.review}"
+        </p>
+
+        <div className="mt-auto">
+          <h4 className="font-semibold text-gray-900 text-lg">{testimonial.name}</h4>
+          <p className="text-sm text-gray-500">{testimonial.location}</p>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -2,281 +2,119 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Plus, Package, ExternalLink } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SearchAndFilters } from "@/components/common/search-and-filters";
-import { StatusBadge } from "@/components/common/status-badge";
-import { PageHeader } from "@/components/common/page-header";
-import { DataTable } from "@/components/common/data-table";
-import { TableActions } from "@/components/common/table-actions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ProductService } from "@/services/product-service";
+import { ProductsTable } from "@/components/admin/products/products-table";
+import { ProductsSearch } from "@/components/admin/products/products-search";
 import { ProductDetailsDialog } from "@/components/admin/products/product-details-dialogue";
+import { toast } from "sonner";
 
+/**
+ * Products Page
+ * Main page for managing products
+ * Refactored to be under 200 lines with proper separation of concerns
+ */
 export default function ProductsPage() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const queryClient = useQueryClient();
 
-  // Fetch products
-  const { data, isLoading } = useQuery({
+  // Fetch products with caching
+  const { data: products = [], isLoading, error } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
       const res = await ProductService.getAll();
       return res.data?.products || [];
     },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
-  // Filtered list
+  // Filter products based on search
   const filteredProducts = useMemo(() => {
-    if (!data) return [];
-    return data.filter(
+    if (!searchTerm) return products;
+    
+    const term = searchTerm.toLowerCase();
+    return products.filter(
       (product) =>
-        product.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (product.categories?.[0]?.category?.name || "")
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        product.variants?.[0]?.sku?.toLowerCase().includes(searchTerm.toLowerCase())
+        product.title?.toLowerCase().includes(term) ||
+        product.categories?.[0]?.category?.name?.toLowerCase().includes(term) ||
+        product.variants?.[0]?.sku?.toLowerCase().includes(term)
     );
-  }, [searchTerm, data]);
+  }, [searchTerm, products]);
 
-  // View product
+  // Handlers
   const handleViewProduct = (product) => {
     setSelectedProduct(product);
     setIsDialogOpen(true);
   };
 
-  // Open in new tab
+  const handleEditProduct = (productId) => {
+    router.push(`/admin/products/edit/${productId}`);
+  };
+
+  const handleDeleteProduct = async (product) => {
+    if (!confirm(`Delete "${product.title}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      await ProductService.delete(product.id);
+      queryClient.invalidateQueries(["products"]);
+      toast.success("Product deleted successfully");
+    } catch (error) {
+      console.error("Delete failed:", error);
+      toast.error("Failed to delete product");
+    }
+  };
+
   const handleOpenInNewTab = (productId) => {
     window.open(`/product/${productId}`, "_blank");
   };
 
-  // 🧹 Delete product (with confirmation)
-  const handleDeleteProduct = async (product) => {
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete "${product.title}" and its images?`
-    );
-    if (!confirmDelete) return;
-
-    try {
-      // Delete the product
-      await ProductService.delete(product.id);
-
-      // Optional: if you want to delete media separately
-      // for (const media of product.media || []) {
-      //   await api.delete(`/media/${media.id}`);
-      // }
-
-      // Refetch product list
-      queryClient.invalidateQueries(["products"]);
-
-      alert("Product and associated images deleted successfully.");
-    } catch (error) {
-      console.error("Delete failed:", error);
-      alert("Failed to delete the product. Please try again.");
-    }
-  };
-
-  const columns = useMemo(
-    () => [
-      {
-        accessorKey: "title",
-        header: "Product",
-        cell: ({ row }) => {
-          const product = row.original;
-          const primaryImage = product.media?.find((m) => m.is_primary)?.media?.url;
-          return (
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center overflow-hidden">
-                {primaryImage ? (
-                  <img
-                    src={primaryImage}
-                    alt={product.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <Package className="h-6 w-6 text-muted-foreground" />
-                )}
-              </div>
-              <div>
-                <p className="font-medium text-foreground">{product.title}</p>
-                <p className="text-sm text-muted-foreground">
-                  SKU: {product.variants?.[0]?.sku || "-"}
-                </p>
-              </div>
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "categories",
-        header: "Category",
-        cell: ({ row }) => {
-          const product = row.original;
-          return (
-            <span>
-              {product.categories && product.categories.length > 0
-                ? product.categories
-                    .map((cat) => cat.category?.name || cat.name)
-                    .join(", ")
-                : "-"}
-            </span>
-          );
-        },
-      },
-      {
-        id: "price",
-        header: "Price",
-        cell: ({ row }) => {
-          const product = row.original;
-          const price = product.variants?.[0]?.price;
-          const comparePrice = product.variants?.[0]?.compare_at_price;
-          return (
-            <div>
-              <span className="font-medium">{price ? `₹${price}` : "-"}</span>
-              {comparePrice && comparePrice > price && (
-                <span className="text-xs text-muted-foreground line-through ml-2">
-                  ₹{comparePrice}
-                </span>
-              )}
-            </div>
-          );
-        },
-      },
-      {
-        id: "stock",
-        header: "Stock",
-        cell: ({ row }) => {
-          const product = row.original;
-          const stock = product.variants?.[0]?.stock_quantity;
-          return (
-            <span className={stock === 0 ? "text-red-500 font-medium" : ""}>
-              {stock ?? "-"}
-            </span>
-          );
-        },
-      },
-      {
-        id: "variantDetails",
-        header: "Variants",
-        cell: ({ row }) => {
-          const product = row.original;
-          const variantCount = product.variants?.length || 0;
-          const sizes = [
-            ...new Set(
-              product.variants
-                ?.flatMap((v) =>
-                  v.variantOptions
-                    ?.filter(
-                      (opt) =>
-                        opt.optionValue?.optionDefinition?.name === "size"
-                    )
-                    .map((opt) => opt.optionValue?.value)
-                )
-                .filter(Boolean)
-            ),
-          ];
-          const colors = [
-            ...new Set(
-              product.variants
-                ?.flatMap((v) =>
-                  v.variantOptions
-                    ?.filter(
-                      (opt) =>
-                        opt.optionValue?.optionDefinition?.name === "color"
-                    )
-                    .map((opt) => opt.optionValue?.value)
-                )
-                .filter(Boolean)
-            ),
-          ];
-          return (
-            <div>
-              <p className="text-sm font-medium text-foreground">
-                {variantCount} variant{variantCount !== 1 ? "s" : ""}
-              </p>
-              {sizes.length > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  Sizes: {sizes.slice(0, 3).join(", ")}
-                  {sizes.length > 3 && ` +${sizes.length - 3}`}
-                </p>
-              )}
-              {colors.length > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  Colors: {colors.slice(0, 3).join(", ")}
-                  {colors.length > 3 && ` +${colors.length - 3}`}
-                </p>
-              )}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "is_active",
-        header: "Status",
-        cell: ({ getValue }) => (
-          <StatusBadge status={getValue() ? "active" : "inactive"} />
-        ),
-      },
-      {
-        id: "actions",
-        header: "Actions",
-        cell: ({ row }) => {
-          const product = row.original;
-          return (
-            <div className="flex items-center gap-2">
-              <TableActions
-                editHref={`/admin/products/edit/${product.id}`}
-                onView={() => handleViewProduct(product)}
-                onDelete={() => handleDeleteProduct(product)} // 🧩 connected delete
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => handleOpenInNewTab(product.id)}
-                title="Open in new tab"
-              >
-                <ExternalLink className="h-4 w-4" />
-              </Button>
-            </div>
-          );
-        },
-      },
-    ],
-    []
-  );
-
   return (
     <div className="space-y-6">
       {/* Header */}
-      <PageHeader title="Products" description="Manage your clothing inventory">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Products</h1>
+          <p className="text-muted-foreground mt-1">
+            Manage your product catalog
+          </p>
+        </div>
         <Button asChild>
           <Link href="/admin/products/add">
             <Plus className="h-4 w-4 mr-2" />
             Add Product
           </Link>
         </Button>
-      </PageHeader>
+      </div>
 
       {/* Search */}
-      <SearchAndFilters
-        searchValue={searchTerm}
-        onSearchChange={(e) => setSearchTerm(e.target.value)}
-        searchPlaceholder="Search products, categories, or SKU..."
-        centered
+      <ProductsSearch
+        value={searchTerm}
+        onChange={setSearchTerm}
+        onClear={() => setSearchTerm("")}
       />
 
-      {/* Table */}
-      <DataTable
-        data={filteredProducts}
-        columns={columns}
-        title="All Products"
-        loading={isLoading}
+      {/* Products Table */}
+      <ProductsTable
+        products={filteredProducts}
+        isLoading={isLoading}
+        onView={handleViewProduct}
+        onEdit={handleEditProduct}
+        onDelete={handleDeleteProduct}
+        onOpenInNewTab={handleOpenInNewTab}
       />
 
-      {/* Details dialog */}
+      {/* Product Details Dialog */}
       <ProductDetailsDialog
         product={selectedProduct}
         open={isDialogOpen}

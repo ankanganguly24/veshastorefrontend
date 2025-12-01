@@ -1,10 +1,13 @@
 import StoreNavbar from "@/components/layout/store-navbar";
 import Footer from "@/components/layout/footer";
 import HeroCarousel from "@/components/common/hero-carousel";
+import FeaturesSection from "@/components/common/features-section";
 import CategorySection from "@/components/common/category-section";
+import WhyChooseSection from "@/components/common/why-choose-section";
 import ProductSections from "@/components/common/product-sections";
-import CuratedCollections from "@/components/common/curated-collections";
+import StyleEditSection from "@/components/common/style-edit-section";
 import TestimonialsCarousel from "@/components/common/testimonials-carousel";
+import ProductShowcase from "@/components/common/product-showcase";
 
 export default function Home() {
   return (
@@ -14,16 +17,28 @@ export default function Home() {
         {/* Hero Carousel */}
         <HeroCarousel />
         
-        {/* Category Section */}
+        {/* Features - SSR, No API */}
+        <FeaturesSection />
+        
+        {/* Category Section - Has API */}
         <CategorySection />
         
-        {/* Product Collections */}
+        {/* Why Choose Us - SSR, No API */}
+        <WhyChooseSection />
+        
+        {/* Product Collections - Has API */}
         <ProductSections />
-      
+
+        {/* New Product Showcase - Fetches from /product */}
+        <ProductShowcase />
+        
+        {/* Editorial / Style Edit Section */}
+        <StyleEditSection />
+        
+        {/* Testimonials - Has API */}
         <TestimonialsCarousel />
       </main>
       <Footer />
     </div>
   );
 }
-    

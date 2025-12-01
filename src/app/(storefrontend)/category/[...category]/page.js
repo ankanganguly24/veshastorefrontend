@@ -1,198 +1,144 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import ProductCard from "@/components/common/product-card";
 import api from "@/utils/axios";
 import PriceFilter, { PRICE_RANGES } from "@/components/common/filters/PriceFilter";
-import ColorFilter from "@/components/common/filters/ColorFilter";
 import CategoryFilter from "@/components/common/filters/CategoryFilter";
+import { getProductCardImages } from "@/lib/image-utils";
+import { Loader2, SlidersHorizontal } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 function ProductSkeletonLoader() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-      {Array.from({ length: 2 }).map((_, index) => (
-        <div
-          key={index}
-          className="w-full h-64 bg-gray-200 animate-pulse rounded-lg"
-          style={{ minWidth: "200px", maxWidth: "300px" }} 
-        ></div>
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-10">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div key={index} className="space-y-4">
+          <div className="aspect-[3/4] bg-gray-50 animate-pulse" />
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-50 w-3/4 animate-pulse" />
+            <div className="h-4 bg-gray-50 w-1/4 animate-pulse" />
+          </div>
+        </div>
       ))}
     </div>
   );
 }
 
+function transformProduct(product) {
+  const variant = product.variants?.[0] || {};
+  const images = getProductCardImages(product.media || []);
+  
+  const colors = [];
+  if (Array.isArray(product.variants)) {
+    product.variants.forEach((v) => {
+      if (Array.isArray(v.variantOptions)) {
+        v.variantOptions.forEach((vo) => {
+          const opt = vo.optionValue;
+          const def = opt?.optionDefinition;
+          const key = (def?.name || def?.display_name || "").toLowerCase();
+          if (key.includes("color") || key.includes("colour")) {
+            const val = opt?.metadata?.hex || opt?.value || opt?.label;
+            if (val && !colors.includes(val)) colors.push(val);
+          }
+        });
+      }
+    });
+  }
+
+  const categoryName = product.categories?.[0]?.category?.name || '';
+  const categoryIds = product.categories?.map(c => c.category?.id || c.category_id) || [];
+
+  const price = variant?.price ?? 0;
+  const compareAt = variant?.compare_at_price ?? null;
+  const discount = (compareAt && price && compareAt > price) 
+    ? Math.round((1 - price / compareAt) * 100) 
+    : null;
+
+  return {
+    ...product,
+    name: product.title || product.name || product.slug,
+    price,
+    originalPrice: compareAt,
+    discount,
+    category: categoryName,
+    categoryIds,
+    images,
+    image: images[0] || null,
+    rating: 4.5,
+    reviewCount: product.reviewCount || 0,
+    colors,
+  };
+}
+
 export default function CategoryPage({ params }) {
-  // Unwrap params which may be a Promise in newer Next.js versions
-  // React.use will resolve the promise so we can safely access properties.
   const resolvedParams = React.use(params);
   const { category } = resolvedParams || {};
 
-  // Determine category ids from route params (could be array or string)
   const categoryIdsArray = useMemo(() => {
     if (!category) return [];
     return Array.isArray(category) ? category : [category];
   }, [category]);
 
-  const categoryPath = useMemo(() => (categoryIdsArray.length ? categoryIdsArray.join('/') : ''), [categoryIdsArray]);
+  const categoryPath = categoryIdsArray.join(',');
 
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(Boolean(categoryIdsArray.length));
-  const [error, setError] = useState(null);
-
-  // Parent categories state for sidebar
-  const [parentCategories, setParentCategories] = useState([]);
-  const [parentsLoading, setParentsLoading] = useState(false);
-
-  // State to store category names
-  const [categoryNames, setCategoryNames] = useState([]);
-
-  // Filters state
   const [selectedPriceRanges, setSelectedPriceRanges] = useState([]);
-  const [selectedColors, setSelectedColors] = useState([]);
   const [selectedCategoryFilters, setSelectedCategoryFilters] = useState([]);
 
-  // Fetch parent categories (top-level) for sidebar
-  useEffect(() => {
-    let mounted = true;
-    const fetchParentCategories = async () => {
-      setParentsLoading(true);
-      try {
-        const res = await api.get("/product/category");
-        const all = res?.data?.data?.categories || [];
-        const parents = Array.isArray(all) ? all.filter((c) => !c.parent_id) : [];
-        if (mounted) setParentCategories(parents);
-      } catch (err) {
-        console.error("Failed to fetch categories:", err);
-      } finally {
-        if (mounted) setParentsLoading(false);
-      }
-    };
-    fetchParentCategories();
-    return () => { mounted = false; };
-  }, []);
+  const { data: parentCategories = [], isLoading: categoriesLoading } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const res = await api.get("/product/category");
+      const all = res?.data?.data?.categories || [];
+      return Array.isArray(all) ? all.filter((c) => !c.parent_id) : [];
+    },
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
 
-  // Fetch category names from IDs
-  useEffect(() => {
-    if (categoryIdsArray.length === 0) {
-      setCategoryNames([]);
-      return;
-    }
-
-    let mounted = true;
-
-    const fetchCategoryNames = async () => {
-      try {
-        const res = await api.get("/product/category");
-        const allCategories = res?.data?.data?.categories || [];
-
-        // Create a map of id to category for quick lookup
-        const categoryMap = {};
-        const buildMap = (cats) => {
-          cats.forEach((cat) => {
-            categoryMap[cat.id] = cat.name;
-            if (cat.children && cat.children.length > 0) {
-              buildMap(cat.children);
-            }
-          });
-        };
-        buildMap(allCategories);
-
-        // Get names for the requested category IDs
-        const names = categoryIdsArray.map((id) => categoryMap[id] || id);
-        if (mounted) setCategoryNames(names);
-      } catch (err) {
-        console.error("Failed to fetch category names:", err);
-      }
-    };
-
-    fetchCategoryNames();
-    return () => { mounted = false; };
-  }, [categoryIdsArray]);
-
-  // Display name using fetched category names
-  const categoryName = useMemo(() => {
-    if (categoryNames.length === 0) return 'All Products';
-    return categoryNames.join(' / ');
-  }, [categoryNames]);
-
-  useEffect(() => {
-    if (categoryIdsArray.length === 0) {
-      setProducts([]);
-      setLoading(false);
-      return;
-    }
-
-    const fetchProducts = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const idsParam = categoryIdsArray.join(',');
-        const res = await api.get(`/product?category_ids=${encodeURIComponent(idsParam)}`);
-        const fetched = res?.data?.data?.products || [];
-
-        const mapped = fetched.map((p) => {
-          const variant = p.variants && p.variants.length ? p.variants[0] : {};
-          const images = (p.media && Array.isArray(p.media) && p.media.length)
-            ? p.media.map((m) => m.media?.url || m.url || m.path || m.src || null)
-            : (p.images || []);
-
-          const colors = [];
-          if (Array.isArray(p.variants)) {
-            p.variants.forEach((v) => {
-              if (Array.isArray(v.variantOptions)) {
-                v.variantOptions.forEach((vo) => {
-                  const opt = vo.optionValue;
-                  const def = opt?.optionDefinition;
-                  const key = (def?.name || def?.display_name || "").toLowerCase();
-                  if (key.includes("color") || key.includes("colour")) {
-                    const val = opt?.metadata?.hex || opt?.value || opt?.label;
-                    if (val && !colors.includes(val)) colors.push(val);
-                  }
-                });
-              }
-            });
-          }
-
-          const categoryNameFromProduct = (p.categories && p.categories.length) ? p.categories[0].name : '';
-          const categoryIdsFromProduct = (p.categories && p.categories.length) ? p.categories.map(c => c.id) : [];
-
-          const price = variant?.price ?? 0;
-          const compareAt = variant?.compare_at_price ?? null;
-          const discount = (compareAt && price) ? Math.round((1 - price / compareAt) * 100) : null;
-
-          return {
-            ...p,
-            name: p.title || p.name || p.slug,
-            price: price,
-            originalPrice: compareAt,
-            discount: discount,
-            category: categoryNameFromProduct,
-            categoryIds: categoryIdsFromProduct,
-            image: images[0] || null, // Use the first image or null
-            gradient: undefined,
-            rating: 4.5,
-            reviewCount: p.reviewCount || 0,
-            colors,
-          };
+  const { data: categoryNames = [] } = useQuery({
+    queryKey: ["category-names", categoryIdsArray],
+    queryFn: async () => {
+      if (categoryIdsArray.length === 0) return [];
+      const res = await api.get("/product/category");
+      const allCategories = res?.data?.data?.categories || [];
+      const categoryMap = {};
+      const buildMap = (cats) => {
+        cats.forEach((cat) => {
+          categoryMap[cat.id] = cat.name;
+          if (cat.children?.length > 0) buildMap(cat.children);
         });
+      };
+      buildMap(allCategories);
+      return categoryIdsArray.map((id) => categoryMap[id] || id);
+    },
+    enabled: categoryIdsArray.length > 0,
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
 
-        setProducts(mapped);
-      } catch (err) {
-        console.error("Failed to fetch products:", err);
-        setError("Failed to load products.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { data: products = [], isLoading: productsLoading, error } = useQuery({
+    queryKey: ["products", "category", categoryPath],
+    queryFn: async () => {
+      const res = await api.get(`/product?category_ids=${encodeURIComponent(categoryPath)}`);
+      const fetched = res?.data?.data?.products || [];
+      return fetched.map(transformProduct);
+    },
+    enabled: categoryIdsArray.length > 0,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
 
-    fetchProducts();
-  }, [categoryIdsArray]);
+  const categoryName = categoryNames.length === 0 ? 'All Products' : categoryNames.join(' / ');
 
-  // Apply client-side filters
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       if (selectedCategoryFilters.length > 0) {
-        const intersects = p.categoryIds && p.categoryIds.some((cid) => selectedCategoryFilters.includes(cid));
+        const intersects = p.categoryIds && p.categoryIds.some((cid) => 
+          selectedCategoryFilters.includes(cid)
+        );
         if (!intersects) return false;
       }
 
@@ -205,64 +151,95 @@ export default function CategoryPage({ params }) {
         if (!matchesPrice) return false;
       }
 
-      if (selectedColors.length > 0) {
-        const matchesColor = (p.colors || []).some((c) => {
-          const norm = String(c || "").toLowerCase();
-          return selectedColors.some((sel) => String(sel || "").toLowerCase() === norm);
-        });
-        if (!matchesColor) return false;
-      }
-
       return true;
     });
-  }, [products, selectedCategoryFilters, selectedPriceRanges, selectedColors]);
+  }, [products, selectedCategoryFilters, selectedPriceRanges]);
+
+  const isLoading = productsLoading || categoriesLoading;
+
+  const FiltersContent = () => (
+    <div className="space-y-8">
+      <CategoryFilter
+        categories={parentCategories}
+        selected={selectedCategoryFilters}
+        onChange={setSelectedCategoryFilters}
+      />
+      <div className="pt-8 border-t border-gray-100">
+        <PriceFilter 
+          selected={selectedPriceRanges} 
+          onChange={setSelectedPriceRanges} 
+        />
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-primary/10">
+    <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-12">
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 capitalize text-primary">
-            {categoryName}
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Discover our curated collection of premium fashion items
-          </p>
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6 border-b border-gray-100 pb-8">
+          <div>
+            <h1 className="text-3xl font-light text-gray-900 tracking-tight mb-2 capitalize">
+              {categoryName}
+            </h1>
+            <p className="text-sm text-gray-500">
+              {filteredProducts.length} Products Found
+            </p>
+          </div>
+
+          {/* Mobile Filter Trigger */}
+          <div className="lg:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <SlidersHorizontal className="w-4 h-4" />
+                  Filters
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                <SheetHeader className="mb-6">
+                  <SheetTitle>Filters</SheetTitle>
+                </SheetHeader>
+                <FiltersContent />
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-primary/10 sticky top-24">
-              <CategoryFilter
-                categories={parentCategories}
-                selected={selectedCategoryFilters}
-                onChange={setSelectedCategoryFilters}
-              />
-
-              <div className="mt-6">
-                <PriceFilter selected={selectedPriceRanges} onChange={setSelectedPriceRanges} />
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+          {/* Desktop Sidebar */}
+          <div className="hidden lg:block lg:col-span-1">
+            <div className="sticky top-24">
+              <FiltersContent />
             </div>
           </div>
           
           {/* Products Grid */}
           <div className="lg:col-span-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-              {loading ? (
-                <ProductSkeletonLoader />
-              ) : error ? (
-                <div className="col-span-full text-center py-12 text-red-600">{error}</div>
-              ) : filteredProducts.length === 0 ? (
-                <div className="col-span-full text-center py-12 text-muted-foreground">No products found for the selected filters.</div>
-              ) : (
-                filteredProducts.map((product) => (
+            {isLoading ? (
+              <ProductSkeletonLoader />
+            ) : error ? (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <p className="text-gray-900 font-medium mb-2">Failed to load products</p>
+                <p className="text-sm text-gray-500 mb-4">Please try again later</p>
+                <Button variant="outline" onClick={() => window.location.reload()}>
+                  Retry
+                </Button>
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-center bg-gray-50 rounded-lg">
+                <p className="text-gray-900 font-medium mb-2">No products found</p>
+                <p className="text-sm text-gray-500">
+                  Try adjusting your filters or check back later
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-10">
+                {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
-                ))
-              )}
-            </div>
-
-          
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
