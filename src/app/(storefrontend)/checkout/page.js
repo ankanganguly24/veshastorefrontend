@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ShieldCheck, Loader2, CheckCircle, XCircle } from "lucide-react";
@@ -15,19 +15,19 @@ const RAZORPAY_KEY = "rzp_test_RgrblFTsE8id5O";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(null); // 'success' | 'failed' | null
-  const [orderData, setOrderData] = useState(null);
 
-  // Get cart_id and address_id from session storage (set by address modal)
+  // Get checkout data from session storage (set by address modal after /payment/checkout)
   const [checkoutData, setCheckoutData] = useState(null);
 
   useEffect(() => {
     // Retrieve checkout data from session storage
     const storedData = sessionStorage.getItem("checkoutData");
     if (storedData) {
-      setCheckoutData(JSON.parse(storedData));
+      const data = JSON.parse(storedData);
+      console.log("Checkout data from session:", data);
+      setCheckoutData(data);
     } else {
       // If no checkout data, redirect to cart
       toast.error("Please select an address to continue");
@@ -60,47 +60,42 @@ export default function CheckoutPage() {
     document.body.appendChild(script);
 
     return () => {
-      document.body.removeChild(script);
+      // Cleanup
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
     };
   }, []);
 
   const handlePayment = async () => {
-    if (!checkoutData || !cart?.id) {
-      toast.error("Missing checkout information");
+    if (!checkoutData || !checkoutData.razorpay_order_id) {
+      toast.error("Missing payment information");
+      return;
+    }
+
+    if (!window.Razorpay) {
+      toast.error("Payment gateway not loaded. Please refresh the page.");
       return;
     }
 
     setIsProcessing(true);
 
     try {
-      // Get order details from backend
-      const checkoutResponse = await PaymentService.checkout({
-        cart_id: checkoutData.cart_id,
-        address_id: checkoutData.address_id,
-      });
-
-      console.log("Checkout response:", checkoutResponse);
-
-      // Extract Razorpay order details from response
-      const razorpayOrderId = checkoutResponse?.data?.razorpay_order_id || 
-                              checkoutResponse?.razorpay_order_id;
-      const amount = checkoutResponse?.data?.amount || subtotal * 100;
-
-      if (!razorpayOrderId) {
-        throw new Error("Failed to create payment order");
-      }
+      console.log("Opening Razorpay with order_id:", checkoutData.razorpay_order_id);
 
       // Configure Razorpay options
       const options = {
         key: RAZORPAY_KEY,
-        amount: amount,
-        currency: "INR",
+        amount: checkoutData.amount,
+        currency: checkoutData.currency || "INR",
         name: "Vesha",
         description: `Order for ${items.length} item(s)`,
-        order_id: razorpayOrderId,
-        image: "/logo.png", // Make sure you have a logo in public folder
+        order_id: checkoutData.razorpay_order_id,
+        image: "/logo.png",
         handler: async function (response) {
           // Payment successful, verify with backend
+          console.log("Payment successful, response:", response);
+          
           try {
             const verificationData = {
               razorpay_order_id: response.razorpay_order_id,
@@ -109,6 +104,8 @@ export default function CheckoutPage() {
               cart_id: checkoutData.cart_id,
               address_id: checkoutData.address_id,
             };
+
+            console.log("Calling /payment/verify-payment with:", verificationData);
 
             const verifyResponse = await PaymentService.verifyPayment(verificationData);
             
@@ -119,7 +116,6 @@ export default function CheckoutPage() {
             
             // Set success status
             setPaymentStatus("success");
-            setOrderData(verifyResponse?.data);
             
             toast.success("Payment successful!");
             
@@ -138,6 +134,9 @@ export default function CheckoutPage() {
           email: "",
           contact: "",
         },
+        notes: {
+          address: "Vesha Store",
+        },
         theme: {
           color: "#000000", // Vesha brand color (black)
         },
@@ -151,6 +150,7 @@ export default function CheckoutPage() {
 
       // Open Razorpay checkout
       const razorpay = new window.Razorpay(options);
+      
       razorpay.on("payment.failed", function (response) {
         console.error("Payment failed:", response.error);
         setPaymentStatus("failed");
@@ -161,7 +161,7 @@ export default function CheckoutPage() {
       razorpay.open();
       setIsProcessing(false);
     } catch (error) {
-      console.error("Checkout error:", error);
+      console.error("Payment error:", error);
       toast.error(error.message || "Failed to initiate payment");
       setIsProcessing(false);
     }
@@ -321,6 +321,7 @@ export default function CheckoutPage() {
               </div>
 
               <Button
+                id="rzp-button1"
                 onClick={handlePayment}
                 disabled={isProcessing}
                 className="w-full h-12 bg-black hover:bg-gray-800 text-white font-medium"
@@ -331,7 +332,7 @@ export default function CheckoutPage() {
                     Processing...
                   </>
                 ) : (
-                  `Pay ₹${subtotal.toLocaleString()}`
+                  `Pay ₹${(checkoutData.amount / 100).toLocaleString()}`
                 )}
               </Button>
 

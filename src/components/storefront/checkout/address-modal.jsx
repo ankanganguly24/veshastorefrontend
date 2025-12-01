@@ -91,15 +91,17 @@ export function AddressModal({ isOpen, onClose, onCheckoutSuccess, cartId }) {
     },
   });
 
-  // Checkout mutation
+  // Checkout mutation - call /payment/checkout API
   const checkoutMutation = useMutation({
     mutationFn: (checkoutData) => PaymentService.checkout(checkoutData),
     onSuccess: (response, variables) => {
-      // Store checkout data in session storage for checkout page
+      // Store checkout data including razorpay order details in session storage
       const checkoutData = {
         cart_id: variables.cart_id,
         address_id: variables.address_id,
-        order_data: response?.data,
+        razorpay_order_id: response?.data?.razorpayOrderDetails?.id,
+        amount: response?.data?.razorpayOrderDetails?.amount,
+        currency: response?.data?.razorpayOrderDetails?.currency || "INR",
       };
       
       sessionStorage.setItem("checkoutData", JSON.stringify(checkoutData));
@@ -116,6 +118,25 @@ export function AddressModal({ isOpen, onClose, onCheckoutSuccess, cartId }) {
       toast.error(error.message || "Failed to initiate checkout");
     },
   });
+
+  // Handle continue to checkout - call API
+  const handleContinueToCheckout = () => {
+    if (!selectedAddressId) {
+      toast.error("Please select a delivery address");
+      return;
+    }
+
+    if (!cartId) {
+      toast.error("Cart ID not found");
+      return;
+    }
+
+    // Call /payment/checkout API
+    checkoutMutation.mutate({
+      cart_id: cartId,
+      address_id: selectedAddressId,
+    });
+  };
 
   const handleAddAddress = (data) => {
     // Add latitude and longitude with default values
@@ -145,23 +166,6 @@ export function AddressModal({ isOpen, onClose, onCheckoutSuccess, cartId }) {
     if (confirm("Are you sure you want to delete this address?")) {
       deleteAddressMutation.mutate(addressId);
     }
-  };
-
-  const handleContinueToCheckout = () => {
-    if (!selectedAddressId) {
-      toast.error("Please select a delivery address");
-      return;
-    }
-
-    if (!cartId) {
-      toast.error("Cart ID not found");
-      return;
-    }
-
-    checkoutMutation.mutate({
-      cart_id: cartId,
-      address_id: selectedAddressId,
-    });
   };
 
   const handleCancel = () => {
