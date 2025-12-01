@@ -17,7 +17,19 @@ export default function CartPage() {
     queryKey: ['cart'],
     queryFn: async () => {
       const res = await CartService.getCart();
-      return res?.data?.cart || res?.data?.data?.cart || { items: [] };
+      const cartData = res?.data?.cart || res?.data?.data?.cart || { items: [] };
+      
+      // Call preflight API if cart_id exists
+      if (cartData?.id) {
+        try {
+          await CartService.cartPreflight(cartData.id);
+        } catch (error) {
+          console.error("Preflight call failed:", error);
+          // Don't throw - allow cart to load even if preflight fails
+        }
+      }
+      
+      return cartData;
     },
     staleTime: 2 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -84,7 +96,7 @@ export default function CartPage() {
 
           {/* Summary */}
           <div className="lg:col-span-1">
-            <CartSummary items={items} subtotal={subtotal} />
+            <CartSummary items={items} subtotal={subtotal} cartId={cart?.id} />
           </div>
         </div>
       </div>

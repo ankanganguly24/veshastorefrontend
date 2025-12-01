@@ -132,6 +132,23 @@ const CartService = {
       return { itemCount: 0, total: 0, items: [] };
     }
   },
+
+  /**
+   * Cart preflight - Call before displaying cart
+   * @param {string} cart_id - Cart ID
+   * @returns {Promise<Object>} Preflight response
+   */
+  async cartPreflight(cart_id) {
+    try {
+      const response = await api.post("/cart/preflight", {
+        cart_id,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error calling cart preflight:", error);
+      throw new Error(handleApiError(error, "Failed to call cart preflight"));
+    }
+  },
 };
 
 export default CartService;

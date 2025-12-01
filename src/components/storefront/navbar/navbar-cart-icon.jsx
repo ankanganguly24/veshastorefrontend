@@ -36,6 +36,22 @@ export function NavbarCartIcon() {
 
   const cartItemCount = cartData?.itemCount || 0;
 
+  // Handle cart icon click - call preflight
+  const handleCartClick = async (e) => {
+    // Get cart_id from cart data
+    try {
+      const res = await CartService.getCart();
+      const cart = res?.data?.cart || res?.data?.data?.cart;
+      
+      if (cart?.id) {
+        await CartService.cartPreflight(cart.id);
+      }
+    } catch (error) {
+      console.error("Preflight call failed:", error);
+      // Don't prevent navigation even if preflight fails
+    }
+  };
+
   // Listen for cart updates
   useEffect(() => {
     const handleCartUpdate = () => {
@@ -53,7 +69,7 @@ export function NavbarCartIcon() {
   }, [queryClient, refetch]);
 
   return (
-    <Link href="/cart">
+    <Link href="/cart" onClick={handleCartClick}>
       <Button variant="ghost" size="icon" className="relative hover:bg-primary/5 hover:text-primary transition-colors cursor-pointer">
         <ShoppingCart className="h-5 w-5" />
         {cartItemCount > 0 && (
