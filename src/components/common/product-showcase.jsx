@@ -39,7 +39,7 @@ export default function ProductShowcase() {
   return (
     <section className="py-24 bg-gray-50">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
           <div>
             <span className="text-sm font-medium text-primary uppercase tracking-widest mb-2 block">
               New Arrivals

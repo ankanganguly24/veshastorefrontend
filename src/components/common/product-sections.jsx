@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -27,7 +27,7 @@ function ProductSection({ title, products, linkHref }) {
   return (
     <section className="py-24 border-t border-gray-100">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
           <div>
             <h2 className="text-3xl font-light text-gray-900 tracking-tight mb-3">
               {title}
@@ -84,40 +84,28 @@ function transformProduct(product) {
 }
 
 export default function ProductSections() {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { data: categories = [], isLoading: loading } = useQuery({
+    queryKey: ["product-sections"],
+    queryFn: async () => {
+      const categoryRes = await api.get("/product/category");
+      const allCategories = categoryRes?.data?.data?.categories || [];
+      // Get top 2 categories for homepage to keep it clean
+      const topCategories = allCategories.slice(0, 2);
 
-  const memoizedCategories = useMemo(() => categories, [categories]);
-
-  useEffect(() => {
-    if (categories.length > 0) return;
-
-    const fetchCategoriesAndProducts = async () => {
-      try {
-        const categoryRes = await api.get("/product/category");
-        const allCategories = categoryRes?.data?.data?.categories || [];
-        // Get top 2 categories for homepage to keep it clean
-        const topCategories = allCategories.slice(0, 2);
-
-        const categoryData = await Promise.all(
-          topCategories.map(async (category) => {
-            const productRes = await api.get(`/product?category_ids=${category.id}&limit=4`);
-            const products = productRes?.data?.data?.products || [];
-            const transformedProducts = products.map(transformProduct);
-            return { ...category, products: transformedProducts };
-          })
-        );
-
-        setCategories(categoryData);
-      } catch (error) {
-        console.error("Failed to fetch categories or products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCategoriesAndProducts();
-  }, [categories]);
+      const categoryData = await Promise.all(
+        topCategories.map(async (category) => {
+          const productRes = await api.get(`/product?category_ids=${category.id}&limit=4`);
+          const products = productRes?.data?.data?.products || [];
+          const transformedProducts = products.map(transformProduct);
+          return { ...category, products: transformedProducts };
+        })
+      );
+      return categoryData;
+    },
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+  });
 
   if (loading) {
     return (
@@ -129,7 +117,7 @@ export default function ProductSections() {
 
   return (
     <div>
-      {memoizedCategories.map((category) => (
+      {categories.map((category) => (
         <ProductSection
           key={category.id}
           title={category.name}

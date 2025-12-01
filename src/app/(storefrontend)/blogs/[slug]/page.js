@@ -4,7 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, User, ArrowLeft, Share2 } from "lucide-react";
+import { Calendar, Clock, User, ArrowLeft } from "lucide-react";
+import ShareButton from "@/components/common/share-button";
 
 export async function generateMetadata({ params }) {
   const post = blogPosts.find((p) => p.slug === params.slug);
@@ -102,9 +103,7 @@ export default function BlogPostPage({ params }) {
               Share this article
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="icon" className="rounded-full">
-                <Share2 className="w-4 h-4" />
-              </Button>
+              <ShareButton title={post.title} text={post.excerpt || post.seo.description} />
             </div>
           </div>
         </div>

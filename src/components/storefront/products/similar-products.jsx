@@ -8,6 +8,25 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import api from "@/lib/api";
 
+function SkeletonLoader() {
+  return (
+    <section className="py-16 border-t border-gray-100">
+      <div className="h-8 w-48 bg-gray-100 animate-pulse mb-8 rounded-md" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="space-y-4">
+            <div className="aspect-[3/4] bg-gray-100 animate-pulse rounded-sm" />
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-100 w-3/4 animate-pulse rounded-md" />
+              <div className="h-4 bg-gray-100 w-1/4 animate-pulse rounded-md" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function SimilarProducts({ currentProductId, categoryId }) {
   const { data: productsData, isLoading } = useQuery({
     queryKey: ["similar-products", categoryId],
@@ -22,7 +41,7 @@ export default function SimilarProducts({ currentProductId, categoryId }) {
     enabled: !!categoryId || true, // Always fetch for now if no category logic
   });
 
-  if (isLoading) return null;
+  if (isLoading) return <SkeletonLoader />;
 
   const allProducts = productsData || [];
   
