@@ -17,7 +17,7 @@ export default function AdminNotFound() {
             <CardTitle>Page Not Found</CardTitle>
           </div>
           <CardDescription>
-            The admin page you're looking for doesn't exist.
+            The admin page you&apos;re looking for doesn&apos;t exist.
           </CardDescription>
         </CardHeader>
         <CardContent>

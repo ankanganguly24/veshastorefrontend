@@ -57,18 +57,18 @@ export default function CategoryForm({ category = null, onSuccess = () => {} }) 
   });
 
   // Auto-generate slug from name if enabled
+  const watchedName = form.watch("name");
   useEffect(() => {
     if (autoGenerateSlug) {
-      const name = form.watch("name");
-      if (name) {
-        const slug = name
+      if (watchedName) {
+        const slug = watchedName
           .toLowerCase()
           .replace(/[^\w\s-]/g, "")
           .replace(/\s+/g, "-");
         form.setValue("slug", slug);
       }
     }
-  }, [form.watch("name"), autoGenerateSlug, form]);
+  }, [watchedName, autoGenerateSlug, form]);
 
   const onSubmit = async (data) => {
     try {

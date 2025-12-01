@@ -39,7 +39,7 @@ export default function OurStoryPage() {
         <div className="space-y-12 text-lg leading-relaxed font-light text-gray-800">
           <div className="border-l-2 border-primary pl-6 py-2">
             <p className="text-2xl font-light text-gray-900 italic">
-              "Vesha is not just an attire — it’s The Art of Indian Attire."
+              &quot;Vesha is not just an attire — it’s The Art of Indian Attire.&quot;
             </p>
           </div>
 

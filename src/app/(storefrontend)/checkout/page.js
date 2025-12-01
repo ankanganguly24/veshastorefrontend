@@ -342,7 +342,7 @@ export default function CheckoutPage() {
               </div>
 
               <p className="text-xs text-gray-500 text-center mt-4">
-                By completing this purchase, you agree to Vesha's terms and conditions
+                By completing this purchase, you agree to Vesha&apos;s terms and conditions
               </p>
             </div>
           </div>

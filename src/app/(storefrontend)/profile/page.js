@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { User, Edit, Package, LogOut, MapPin, Plus, Home, Briefcase, Trash2, Edit2 } from "lucide-react";
+import { User, Package, LogOut, MapPin, Plus, Home, Briefcase, Trash2, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -189,12 +189,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-3">
-                <Link href="/profile/edit">
-                  <Button className="w-full bg-black hover:bg-gray-800 text-white">
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit Profile
-                  </Button>
-                </Link>
+
                 
                 <Link href="/orders">
                   <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-50">
