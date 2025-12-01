@@ -51,7 +51,7 @@ export default function HeroCarousel() {
         {banners.map((image, index) => (
           <div
             key={index}
-            className="min-w-full h-full relative bg-black flex items-center justify-center"
+            className="min-w-full h-full relative flex items-center justify-center"
           >
             {/* Show full image without cropping */}
             <Image
@@ -60,6 +60,8 @@ export default function HeroCarousel() {
               fill
               className="object-contain"
               priority={index === 0}
+              quality={100}
+              unoptimized
             />
 
             {/* ✅ Subtle dark overlay (no blur) */}
