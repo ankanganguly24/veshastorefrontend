@@ -12,7 +12,8 @@ export function MobileNavbarCategories({ onSelect }) {
       const res = await api.get("/product/category");
       return res.data;
     },
-    staleTime: 10 * 60 * 1000,
+    staleTime: Infinity,
+    gcTime: Infinity,
     refetchOnWindowFocus: false,
   });
 

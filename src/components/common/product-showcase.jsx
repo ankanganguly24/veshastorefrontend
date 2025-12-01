@@ -16,7 +16,8 @@ export default function ProductShowcase() {
       const response = await api.get("/product");
       return response.data.data.products;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: Infinity, // Cache indefinitely during session
+    gcTime: Infinity, // Keep in cache indefinitely
   });
 
   const products = productsData || [];

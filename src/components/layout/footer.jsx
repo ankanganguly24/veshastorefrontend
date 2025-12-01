@@ -142,19 +142,6 @@ export default function Footer() {
 
           {/* Popular Searches & Collections */}
           <div className="lg:col-span-1">
-            <h4 className="text-lg font-semibold mb-6">Popular Searches</h4>
-            <div className="flex flex-wrap gap-2 mb-8">
-              {["Kurtas", "Sarees", "Lehengas", "Festive Wear", "Cotton Suits", "Silk Sarees"].map((tag) => (
-                <Link 
-                  key={tag}
-                  href={`/search?q=${tag}`}
-                  className="text-xs bg-white/10 hover:bg-white/20 text-white/80 px-3 py-1 rounded-full transition-colors"
-                >
-                  {tag}
-                </Link>
-              ))}
-            </div>
-
             <h4 className="text-lg font-semibold mb-6">From the Blog</h4>
             <ul className="space-y-4">
               <li>

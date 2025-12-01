@@ -17,7 +17,8 @@ export default function SimilarProducts({ currentProductId, categoryId }) {
       const response = await api.get("/product");
       return response.data.data.products;
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: Infinity,
+    gcTime: Infinity,
     enabled: !!categoryId || true, // Always fetch for now if no category logic
   });
 
@@ -26,8 +27,9 @@ export default function SimilarProducts({ currentProductId, categoryId }) {
   const allProducts = productsData || [];
   
   // Filter out current product and randomise
+  // If we have less than 5 products total, show what we have (excluding current)
   const similarProducts = allProducts
-    .filter(p => p.id !== currentProductId)
+    .filter(p => String(p.id) !== String(currentProductId))
     .sort(() => 0.5 - Math.random())
     .slice(0, 4);
 

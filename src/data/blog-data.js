@@ -108,7 +108,7 @@ export const blogPosts = [
 
       <p>Remember, trends are just guidelines. The best outfit is one that makes you feel confident and happy. At Vesha, our festive collection is designed to help you find that perfect balance between trendy and timeless. Happy festivities!</p>
     `,
-    image: "https://images.unsplash.com/photo-1583391733958-e026b14192f1?q=80&w=1000&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?q=80&w=1000&auto=format&fit=crop",
     author: "Riya Kapoor",
     date: "Nov 25, 2025",
     readTime: "5 min read",
@@ -149,7 +149,7 @@ export const blogPosts = [
 
       <p>At Vesha, we are committed to this journey. We are constantly exploring ways to reduce our footprint and support our artisan community. Join us in making fashion a force for good.</p>
     `,
-    image: "https://images.unsplash.com/photo-1596462502278-27bfdd403348?q=80&w=1000&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1585909695284-32d2985ac9c0?q=80&w=1000&auto=format&fit=crop",
     author: "Meera Reddy",
     date: "Nov 20, 2025",
     readTime: "7 min read",

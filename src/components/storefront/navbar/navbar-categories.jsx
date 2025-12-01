@@ -25,8 +25,8 @@ export function NavbarCategories() {
       const res = await api.get("/product/category");
       return res.data;
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    cacheTime: 15 * 60 * 1000, // 15 minutes
+    staleTime: Infinity, // Cache indefinitely
+    gcTime: Infinity, // Keep in cache indefinitely
     refetchOnWindowFocus: false,
   });
 
