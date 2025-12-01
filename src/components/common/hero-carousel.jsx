@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 import header1 from "../../../public/assessts/header1.jpeg";
 import header2 from "../../../public/assessts/header2.jpeg";
@@ -39,7 +40,7 @@ export default function HeroCarousel() {
 
   return (
     <section
-      className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden"
+      className="relative w-full h-[30vh] sm:h-[40vh] md:h-[70vh] lg:h-[80vh] overflow-hidden"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -53,19 +54,21 @@ export default function HeroCarousel() {
             key={index}
             className="min-w-full h-full relative flex items-center justify-center"
           >
-            {/* Show full image without cropping */}
-            <Image
-              src={image}
-              alt={`Banner ${index + 1}`}
-              fill
-              className="object-contain"
-              priority={index === 0}
-              quality={100}
-              unoptimized
-            />
+            <Link href="/products" className="relative w-full h-full">
+              {/* Show full image without cropping */}
+              <Image
+                src={image}
+                alt={`Banner ${index + 1}`}
+                fill
+                className="object-contain"
+                priority={index === 0}
+                quality={100}
+                unoptimized
+              />
 
-            {/* ✅ Subtle dark overlay (no blur) */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/40 pointer-events-none" />
+              {/* ✅ Subtle dark overlay (no blur) */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/40 pointer-events-none" />
+            </Link>
           </div>
         ))}
       </div>
