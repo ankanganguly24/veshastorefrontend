@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -8,26 +9,18 @@ import api from "@/utils/axios";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 export default function CategorySection() {
-	const [categories, setCategories] = useState([]);
-	const [isLoading, setIsLoading] = useState(true);
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const { data: categoriesData, isLoading } = useQuery({
+		queryKey: ["categories"],
+		queryFn: async () => {
+			const response = await api.get("/product/category");
+			return response.data;
+		},
+		staleTime: Infinity,
+		gcTime: Infinity,
+	});
 
-	useEffect(() => {
-		const fetchCategories = async () => {
-			try {
-				const response = await api.get("/product/category");
-				if (response.data?.data?.categories) {
-					setCategories(response.data.data.categories);
-				}
-			} catch (error) {
-				console.error("Failed to fetch categories:", error);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchCategories();
-	}, []);
+	const categories = categoriesData?.data?.categories || [];
 
 	// Display top 8 categories for a balanced grid
 	const displayedCategories = categories.slice(0, 8);

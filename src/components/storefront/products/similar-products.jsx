@@ -26,10 +26,22 @@ export default function SimilarProducts({ currentProductId, categoryId }) {
 
   const allProducts = productsData || [];
   
-  // Filter out current product and randomise
-  // If we have less than 5 products total, show what we have (excluding current)
-  const similarProducts = allProducts
-    .filter(p => String(p.id) !== String(currentProductId))
+  // Filter out current product
+  let filtered = allProducts.filter(p => String(p.id) !== String(currentProductId));
+  
+  // If we have a categoryId, try to filter by it first
+  if (categoryId) {
+    const categoryFiltered = filtered.filter(p => 
+      p.categories?.some(c => String(c.category?.id) === String(categoryId))
+    );
+    // If we have enough products in the category, use them
+    if (categoryFiltered.length >= 4) {
+      filtered = categoryFiltered;
+    }
+  }
+
+  // Randomize and slice
+  const similarProducts = filtered
     .sort(() => 0.5 - Math.random())
     .slice(0, 4);
 
