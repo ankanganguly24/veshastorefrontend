@@ -25,7 +25,25 @@ export default function ShareButton({ title, text }) {
     } else {
       // Fallback to clipboard
       try {
-        await navigator.clipboard.writeText(url);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(url);
+        } else {
+          // Fallback for older browsers or non-secure contexts
+          const textArea = document.createElement("textarea");
+          textArea.value = url;
+          textArea.style.position = "fixed";
+          textArea.style.left = "-9999px";
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          try {
+            document.execCommand('copy');
+          } catch (err) {
+            console.error('Fallback: Oops, unable to copy', err);
+            throw new Error("Clipboard copy failed");
+          }
+          document.body.removeChild(textArea);
+        }
         setCopied(true);
         toast.success("Link copied to clipboard!");
         setTimeout(() => setCopied(false), 2000);

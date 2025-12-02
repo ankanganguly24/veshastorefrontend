@@ -183,7 +183,7 @@ export default function OrdersPage() {
                     </div>
                     <div className="text-right">
                       <p className="text-lg font-semibold text-gray-900">
-                        ₹{(order.total / 100).toLocaleString()}
+                        ₹{order.total.toLocaleString()}
                       </p>
                       <p className="text-sm text-gray-600">
                         {order.items.length} item
@@ -226,7 +226,7 @@ export default function OrdersPage() {
                         </p>
                       </div>
                       <p className="font-semibold text-gray-900 text-sm">
-                        ₹{(item.total_price_snapshot / 100).toLocaleString()}
+                        ₹{item.total_price_snapshot.toLocaleString()}
                       </p>
                     </div>
                   ))}

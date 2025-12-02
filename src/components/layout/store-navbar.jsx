@@ -9,6 +9,7 @@ import { NavbarCategories } from "@/components/storefront/navbar/navbar-categori
 import { NavbarSearch } from "@/components/storefront/navbar/navbar-search";
 import { NavbarUserMenu } from "@/components/storefront/navbar/navbar-user-menu";
 import { NavbarCartIcon } from "@/components/storefront/navbar/navbar-cart-icon";
+import { NavbarWishlistIcon } from "@/components/storefront/navbar/navbar-wishlist-icon";
 import { MobileNavbarCategories } from "@/components/storefront/navbar/mobile-navbar-categories";
 
 /**
@@ -56,6 +57,9 @@ export default function StoreNavbar() {
 
             {/* User Menu */}
             <NavbarUserMenu />
+
+            {/* Wishlist */}
+            <NavbarWishlistIcon />
 
             {/* Shopping Cart */}
             <NavbarCartIcon />

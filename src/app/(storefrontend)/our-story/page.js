@@ -11,7 +11,7 @@ export default function OurStoryPage() {
       {/* Hero Section */}
       <div className="relative h-[60vh] w-full overflow-hidden">
         <Image
-          src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2000&auto=format&fit=crop"
+          src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=2000&auto=format&fit=crop"
           alt="Vesha Story"
           fill
           className="object-cover"
@@ -61,7 +61,7 @@ export default function OurStoryPage() {
 
           <div className="my-12 relative h-96 w-full rounded-sm overflow-hidden">
             <Image
-              src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop"
+              src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=2000&auto=format&fit=crop"
               alt="Fabric details"
               fill
               className="object-cover"

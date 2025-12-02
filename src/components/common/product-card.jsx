@@ -3,10 +3,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight, ShoppingBag, Heart } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import useWishlistStore from "@/stores/wishlist-store";
 
 // Skeleton loader component
 const ImageSkeleton = memo(() => (
@@ -60,6 +61,7 @@ const ProductCard = memo(({ product, className = "" }) => {
   const router = useRouter();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const { toggleWishlist, isInWishlist } = useWishlistStore();
 
   // Memoize product destructuring
   const {
@@ -219,6 +221,17 @@ const ProductCard = memo(({ product, className = "" }) => {
             </span>
           )}
         </div>
+
+        {/* Wishlist Button */}
+        <button
+          className="absolute top-3 right-3 p-2 rounded-full bg-white/80 hover:bg-white text-gray-400 hover:text-red-500 transition-all z-20"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleWishlist(product);
+          }}
+        >
+          <Heart className={`w-4 h-4 ${isInWishlist(id) ? "fill-red-500 text-red-500" : ""}`} />
+        </button>
 
         {/* Quick Add Button - Appears on Hover */}
         <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">

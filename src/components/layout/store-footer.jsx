@@ -29,16 +29,17 @@ export default function StoreFooter() {
               </h3>
               <div className="space-y-3">
                 <div className="text-sm text-gray-300">
-                  <p className="font-medium text-white mb-1">Legal Name</p>
-                  <p>Rinaura Fashion Private Limited</p>
+                  <p className="font-medium text-white mb-1">Address</p>
+                  <p>H.I.G, Uttorayon</p>
+                  <p>Siliguri, West Bengal 734010</p>
                 </div>
                 
                 <div className="flex items-center space-x-2 text-sm text-gray-300">
                   <Phone className="h-4 w-4 flex-shrink-0 text-blue-400" />
                   <div>
                     <p className="font-medium text-white">Phone Support</p>
-                    <a href="tel:+919351774585" className="hover:text-blue-400 transition-colors">
-                      +91 93517 74585
+                    <a href="tel:+919239000677" className="hover:text-blue-400 transition-colors">
+                      +91 92390 00677
                     </a>
                   </div>
                 </div>
@@ -47,8 +48,8 @@ export default function StoreFooter() {
                   <Mail className="h-4 w-4 flex-shrink-0 text-green-400" />
                   <div>
                     <p className="font-medium text-white">Email Support</p>
-                    <a href="mailto:rinauraindia@gmail.com" className="hover:text-green-400 transition-colors">
-                      rinauraindia@gmail.com
+                    <a href="mailto:myvesha2025@gmail.com" className="hover:text-green-400 transition-colors">
+                      myvesha2025@gmail.com
                     </a>
                   </div>
                 </div>
@@ -67,14 +68,11 @@ export default function StoreFooter() {
                 <Link href="/shipping-policy" className="block text-sm text-gray-300 hover:text-blue-400 transition-colors hover:translate-x-1 transform duration-200">
                   Shipping Policy
                 </Link>
-                <Link href="/return-exchange-policy" className="block text-sm text-gray-300 hover:text-blue-400 transition-colors hover:translate-x-1 transform duration-200">
-                  Return & Exchange Policy
+                <Link href="/refund-policy" className="block text-sm text-gray-300 hover:text-blue-400 transition-colors hover:translate-x-1 transform duration-200">
+                  Refund Policy
                 </Link>
-                <Link href="/terms-of-service" className="block text-sm text-gray-300 hover:text-blue-400 transition-colors hover:translate-x-1 transform duration-200">
-                  Terms of Service
-                </Link>
-                <Link href="/terms-of-use" className="block text-sm text-gray-300 hover:text-blue-400 transition-colors hover:translate-x-1 transform duration-200">
-                  Terms of Use
+                <Link href="/termsandcondition" className="block text-sm text-gray-300 hover:text-blue-400 transition-colors hover:translate-x-1 transform duration-200">
+                  Terms & Conditions
                 </Link>
               </nav>
             </div>
@@ -128,12 +126,12 @@ export default function StoreFooter() {
                 </p>
                 <div className="flex space-x-3">
                   <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/20 hover:bg-white/30 text-white hover:text-white/90 transition-all duration-200 hover:scale-110" asChild>
-                    <a href="#" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
+                    <a href="https://facebook.com/vesha" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
                       <Facebook className="h-4 w-4" />
                     </a>
                   </Button>
                   <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/20 hover:bg-white/30 text-white hover:text-white/90 transition-all duration-200 hover:scale-110" asChild>
-                    <a href="#" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+                    <a href="https://www.instagram.com/vesha_official_" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
                       <Instagram className="h-4 w-4" />
                     </a>
                   </Button>
@@ -157,17 +155,14 @@ export default function StoreFooter() {
         <div className="border-t border-white/10 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-sm text-gray-300">
-              © {new Date().getFullYear()} Rinaura Fashion Private Limited. All rights reserved.
+              © {new Date().getFullYear()} VESHA. All rights reserved.
             </div>
             <div className="flex items-center space-x-6">
-              <Link href="/privacy" className="text-sm text-gray-300 hover:text-white transition-colors">
+              <Link href="/privacy-policy" className="text-sm text-gray-300 hover:text-white transition-colors">
                 Privacy
               </Link>
-              <Link href="/terms" className="text-sm text-gray-300 hover:text-white transition-colors">
+              <Link href="/termsandcondition" className="text-sm text-gray-300 hover:text-white transition-colors">
                 Terms
-              </Link>
-              <Link href="/cookies" className="text-sm text-gray-300 hover:text-white transition-colors">
-                Cookies
               </Link>
             </div>
           </div>

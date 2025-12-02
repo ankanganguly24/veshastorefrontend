@@ -22,12 +22,6 @@ export default function ProfilePage() {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
 
-  // Handle authentication redirect
-  useEffect(() => {
-    if (!isAuthenticated || !user) {
-      router.push('/login');
-    }
-  }, [isAuthenticated, user, router]);
 
   // Fetch addresses
   const { data: addressData } = useQuery({

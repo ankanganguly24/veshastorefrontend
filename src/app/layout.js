@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  metadataBase: new URL('https://vesha.in'),
+  metadataBase: new URL('https://myvesha.com'),
   title: {
     default: 'Vesha | Premium Ethnic Wear for Women',
     template: '%s | Vesha'
@@ -20,23 +20,6 @@ export const metadata = {
   authors: [{ name: 'Vesha' }],
   creator: 'Vesha',
   openGraph: {
-    type: 'website',
-    locale: 'en_IN',
-    url: 'https://vesha.in',
-    title: 'Vesha | Premium Ethnic Wear for Women',
-    description: 'Discover the finest collection of Indian ethnic wear. Handcrafted sarees, kurtas, and lehengas.',
-    siteName: 'Vesha',
-    images: [
-      {
-        url: '/veshalogo.png',
-        width: 800,
-        height: 600,
-        alt: 'Vesha Logo',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
     title: 'Vesha | Premium Ethnic Wear',
     description: 'Discover the finest collection of Indian ethnic wear.',
     images: ['/veshalogo.png'],
@@ -52,6 +35,11 @@ export const metadata = {
       'max-snippet': -1,
     },
   },
+  icons: {
+    icon: '/assessts/veshalogo.png',
+    shortcut: '/assessts/veshalogo.png',
+    apple: '/assessts/veshalogo.png',
+  },
 };
 
 export default function RootLayout({ children }) {
@@ -59,8 +47,8 @@ export default function RootLayout({ children }) {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Vesha',
-    url: 'https://vesha.in',
-    logo: 'https://vesha.in/veshalogo.png',
+    url: 'https://myvesha.com',
+    logo: 'https://myvesha.com/veshalogo.png',
     sameAs: [
       'https://facebook.com/vesha',
       'https://instagram.com/vesha',

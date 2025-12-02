@@ -1,257 +1,101 @@
 import Link from "next/link";
-import { ArrowLeft, Shield, Phone, Mail, MapPin, Clock, Lock, Eye, Database, Users, FileText, AlertCircle } from "lucide-react";
+import { ArrowLeft, Lock, Eye, Database, Shield } from "lucide-react";
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen bg-white font-sans text-gray-900">
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative max-w-7xl mx-auto px-4 py-24">
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-white/10 backdrop-blur-md rounded-full border border-white/20 mb-6">
-              <Shield className="w-10 h-10 text-white" />
-            </div>
-            <h1 className="text-5xl font-bold text-white mb-4">
-              Privacy Policy
-            </h1>
-            <p className="text-xl text-purple-100 max-w-2xl mx-auto">
-              Your privacy matters to us. Learn how Rinaura Fashion protects your personal information.
-            </p>
-            <div className="flex items-center justify-center mt-6 text-purple-200">
-              <Clock className="w-4 h-4 mr-2" />
-              <span>Last updated: January 1, 2024</span>
-            </div>
-          </div>
+      <div className="relative bg-black text-white py-20 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-light mb-6 tracking-wide">
+            Privacy Policy
+          </h1>
+          <p className="text-lg md:text-xl font-light text-gray-300 max-w-2xl mx-auto">
+            Your privacy is important to us. This policy outlines how we collect, use, and protect your personal information.
+          </p>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-16">
+      <div className="max-w-4xl mx-auto px-4 py-16">
         {/* Back Navigation */}
-        <div className="mb-8">
+        <div className="mb-12">
           <Link
             href="/"
-            className="inline-flex items-center text-purple-600 hover:text-purple-500 font-medium transition-colors group"
+            className="inline-flex items-center text-gray-600 hover:text-black transition-colors group"
           >
             <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
             Back to Home
           </Link>
         </div>
 
-        {/* Company Contact Info Card */}
-        <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl border border-white/50 p-8 mb-12">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Rinaura Fashion Private Limited</h2>
-            <p className="text-gray-600">Your trusted fashion partner</p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-100">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
-                  <Phone className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">Phone Support</h3>
-                  <p className="text-gray-600">Call us anytime</p>
-                </div>
-              </div>
-              <a href="tel:+919351774585" className="text-lg font-semibold text-blue-600 hover:text-blue-500 transition-colors">
-                +91 93517 74585
-              </a>
-            </div>
-
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
-                  <Mail className="w-6 h-6 text-purple-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">Email Support</h3>
-                  <p className="text-gray-600">24/7 assistance</p>
-                </div>
-              </div>
-              <a href="mailto:rinauraindia@gmail.com" className="text-lg font-semibold text-purple-600 hover:text-purple-500 transition-colors">
-                rinauraindia@gmail.com
-              </a>
-            </div>
-          </div>
+        {/* Introduction */}
+        <div className="mb-16 text-center">
+          <h2 className="text-3xl font-light mb-6">At VESHA</h2>
+          <p className="text-gray-600 leading-relaxed max-w-3xl mx-auto">
+            We are committed to maintaining the trust and confidence of our visitors to our web site. In this Privacy Policy, we’ve provided detailed information on when and why we collect your personal information, how we use it, the limited conditions under which we may disclose it to others and how we keep it secure.
+          </p>
         </div>
 
-        {/* Privacy Content */}
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Introduction */}
-            <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl border border-white/50 p-8">
-              <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-6 mb-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-3 flex items-center">
-                  <AlertCircle className="w-5 h-5 text-green-600 mr-2" />
-                  Important Notice
-                </h3>
-                <p className="text-gray-700 leading-relaxed">
-                  At Rinaura Fashion Private Limited, we respect your privacy and are committed to protecting your personal data. This privacy policy explains how we collect, use, and safeguard your information when you visit our website or use our services.
-                </p>
-              </div>
+        {/* Policy Content */}
+        <div className="space-y-12">
+          <section>
+            <div className="flex items-center mb-4">
+              <Database className="w-6 h-6 mr-3 text-gray-400" />
+              <h3 className="text-2xl font-medium">1. Information We Collect</h3>
             </div>
-
-            {/* Information We Collect */}
-            <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl border border-white/50 p-8">
-              <h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
-                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mr-3">
-                  <Database className="w-5 h-5 text-blue-600" />
-                </div>
-                Information We Collect
-              </h3>
-              
-              <div className="space-y-6">
-                <div className="border-l-4 border-blue-400 pl-6">
-                  <h4 className="font-semibold text-gray-900 mb-2">Personal Information</h4>
-                  <p className="text-gray-700">Name, email address, phone number, shipping address, and payment information when you make a purchase or create an account.</p>
-                </div>
-                
-                <div className="border-l-4 border-purple-400 pl-6">
-                  <h4 className="font-semibold text-gray-900 mb-2">Usage Information</h4>
-                  <p className="text-gray-700">Information about how you use our website, including pages visited, time spent, and interactions with our content.</p>
-                </div>
-                
-                <div className="border-l-4 border-green-400 pl-6">
-                  <h4 className="font-semibold text-gray-900 mb-2">Device Information</h4>
-                  <p className="text-gray-700">Technical information about your device, browser type, IP address, and operating system.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* How We Use Information */}
-            <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl border border-white/50 p-8">
-              <h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
-                <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center mr-3">
-                  <Eye className="w-5 h-5 text-purple-600" />
-                </div>
-                How We Use Your Information
-              </h3>
-              
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6">
-                  <h4 className="font-semibold text-gray-900 mb-3">Order Processing</h4>
-                  <p className="text-gray-700">To process your orders, arrange shipping, and provide customer support.</p>
-                </div>
-                
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6">
-                  <h4 className="font-semibold text-gray-900 mb-3">Communication</h4>
-                  <p className="text-gray-700">To send order updates, promotional offers, and important account notifications.</p>
-                </div>
-                
-                <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-6">
-                  <h4 className="font-semibold text-gray-900 mb-3">Improvement</h4>
-                  <p className="text-gray-700">To analyze usage patterns and improve our website and services.</p>
-                </div>
-                
-                <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl p-6">
-                  <h4 className="font-semibold text-gray-900 mb-3">Legal Compliance</h4>
-                  <p className="text-gray-700">To comply with legal obligations and protect our rights and interests.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Data Protection */}
-            <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl border border-white/50 p-8">
-              <h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
-                <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mr-3">
-                  <Lock className="w-5 h-5 text-green-600" />
-                </div>
-                Data Protection & Security
-              </h3>
-              
-              <p className="text-gray-700 leading-relaxed mb-6">
-                We implement appropriate technical and organizational measures to protect your personal data against unauthorized access, alteration, disclosure, or destruction. This includes:
+            <div className="prose prose-gray max-w-none text-gray-600">
+              <p>
+                When you visit our Site, we automatically collect certain information about your device, including information about your web browser, IP address, time zone, and some of the cookies that are installed on your device. Additionally, as you browse the Site, we collect information about the individual web pages or products that you view, what websites or search terms referred you to the Site, and information about how you interact with the Site.
               </p>
-              
-              <div className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                  <p className="text-gray-700">SSL encryption for all data transmission</p>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                  <p className="text-gray-700">Secure payment processing through trusted providers</p>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                  <p className="text-gray-700">Regular security audits and updates</p>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                  <p className="text-gray-700">Limited access to personal data on a need-to-know basis</p>
-                </div>
-              </div>
             </div>
-          </div>
+          </section>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Quick Links */}
-            <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl border border-white/50 p-6">
-              <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                <FileText className="w-5 h-5 text-purple-600 mr-2" />
-                Information
-              </h3>
-              <div className="space-y-3">
-                <Link href="/shipping-policy" className="block text-purple-600 hover:text-purple-500 transition-colors">
-                  Shipping Policy
-                </Link>
-                <Link href="/return-exchange-policy" className="block text-purple-600 hover:text-purple-500 transition-colors">
-                  Return & Exchange Policy
-                </Link>
-                <Link href="/terms-of-service" className="block text-purple-600 hover:text-purple-500 transition-colors">
-                  Terms of Service
-                </Link>
-                <Link href="/terms-of-use" className="block text-purple-600 hover:text-purple-500 transition-colors">
-                  Terms of Use
-                </Link>
-              </div>
+          <section>
+            <div className="flex items-center mb-4">
+              <Eye className="w-6 h-6 mr-3 text-gray-400" />
+              <h3 className="text-2xl font-medium">2. How We Use Your Information</h3>
             </div>
-
-            {/* Discover */}
-            <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl border border-white/50 p-6">
-              <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                <Users className="w-5 h-5 text-purple-600 mr-2" />
-                Discover
-              </h3>
-              <div className="space-y-3">
-                <Link href="/our-story" className="block text-purple-600 hover:text-purple-500 transition-colors">
-                  Our Story
-                </Link>
-                <Link href="/meet-the-founder" className="block text-purple-600 hover:text-purple-500 transition-colors">
-                  Meet The Founder
-                </Link>
-                <Link href="/faq" className="block text-purple-600 hover:text-purple-500 transition-colors">
-                  Frequently Asked Questions
-                </Link>
-              </div>
-            </div>
-
-            {/* Contact Support */}
-            <div className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl p-6 text-white">
-              <h3 className="font-semibold mb-4 flex items-center">
-                <Phone className="w-5 h-5 mr-2" />
-                Need Help?
-              </h3>
-              <p className="text-purple-100 mb-4">
-                Have questions about our privacy policy? Contact our support team.
+            <div className="prose prose-gray max-w-none text-gray-600">
+              <p>
+                We use the Order Information that we collect generally to fulfill any orders placed through the Site (including processing your payment information, arranging for shipping, and providing you with invoices and/or order confirmations). Additionally, we use this Order Information to:
               </p>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center">
-                  <Phone className="w-4 h-4 mr-2" />
-                  <span>+91 93517 74585</span>
-                </div>
-                <div className="flex items-center">
-                  <Mail className="w-4 h-4 mr-2" />
-                  <span>rinauraindia@gmail.com</span>
-                </div>
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li>Communicate with you;</li>
+                <li>Screen our orders for potential risk or fraud; and</li>
+                <li>When in line with the preferences you have shared with us, provide you with information or advertising relating to our products or services.</li>
+              </ul>
+            </div>
+          </section>
+
+          <section>
+            <div className="flex items-center mb-4">
+              <Lock className="w-6 h-6 mr-3 text-gray-400" />
+              <h3 className="text-2xl font-medium">3. Data Retention</h3>
+            </div>
+            <div className="prose prose-gray max-w-none text-gray-600">
+              <p>
+                When you place an order through the Site, we will maintain your Order Information for our records unless and until you ask us to delete this information.
+              </p>
+            </div>
+          </section>
+
+          <section>
+            <div className="flex items-center mb-4">
+              <Shield className="w-6 h-6 mr-3 text-gray-400" />
+              <h3 className="text-2xl font-medium">4. Contact Us</h3>
+            </div>
+            <div className="bg-gray-50 p-8 rounded-lg border border-gray-100">
+              <p className="text-gray-600 mb-4">
+                For more information about our privacy practices, if you have questions, or if you would like to make a complaint, please contact us by e-mail at myvesha2025@gmail.com or by mail using the details provided below:
+              </p>
+              <div className="space-y-2">
+                <p className="font-medium text-black">VESHA</p>
+                <p>H.I.G, Uttorayon</p>
+                <p>Siliguri, West Bengal 734010</p>
+                <p>Phone: +91 92390 00677</p>
               </div>
             </div>
-          </div>
+          </section>
         </div>
       </div>
     </div>
