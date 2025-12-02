@@ -18,11 +18,9 @@ const footerLinks = {
   ],
   policies: [
     { name: "Privacy Policy", href: "/privacy-policy" },
-    { name: "Terms of Service", href: "/terms-of-service" },
-    { name: "Terms of Use", href: "/terms-of-use" },
+    { name: "Terms & Conditions", href: "/termsandcondition" },
     { name: "Shipping Policy", href: "/shipping-policy" },
     { name: "Refund Policy", href: "/refund-policy" },
-    { name: "Cookie Policy", href: "/cookie-policy" },
   ],
 };
 
