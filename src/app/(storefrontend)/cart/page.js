@@ -6,12 +6,22 @@ import CartService from "@/services/cart-service";
 import { CartItemCard } from "@/components/storefront/cart/cart-item-card";
 import { CartSummary } from "@/components/storefront/cart/cart-summary";
 import { CartEmptyState } from "@/components/storefront/cart/cart-empty-state";
+import AuthGuard from "@/components/auth/auth-guard";
 
 /**
  * Cart Page
  * Main cart page with minimal, sophisticated design
+ * Protected by AuthGuard - requires authentication
  */
 export default function CartPage() {
+  return (
+    <AuthGuard>
+      <CartPageContent />
+    </AuthGuard>
+  );
+}
+
+function CartPageContent() {
   // Fetch cart with React Query
   const { data: cart, isLoading, error, refetch } = useQuery({
     queryKey: ['cart'],

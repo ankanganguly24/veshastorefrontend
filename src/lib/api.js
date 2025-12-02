@@ -114,29 +114,29 @@ api.interceptors.response.use(
 
       // Handle specific status codes
       switch (status) {
-        case 401:
-          // Unauthorized - authentication failed
-          console.error('401 Unauthorized - Cookie might not be sent properly');
-          toast.error('Authentication failed. Please log in again.');
+        // case 401:
+        //   // Unauthorized - authentication failed
+        //   console.error('401 Unauthorized - Cookie might not be sent properly');
+        //   toast.error('Authentication failed. Please log in again.');
           
-          // Only redirect if not already on login-related pages
-          if (typeof window !== 'undefined' && 
-              !window.location.pathname.includes('/login') && 
-              !window.location.pathname.includes('/register')) {
-            // Clear auth state
-            try {
-              const useAuthStore = require('@/stores/auth-store').default;
-              useAuthStore.getState().clearAuth();
-            } catch (e) {
-              console.debug('Could not clear auth store');
-            }
+        //   // Only redirect if not already on login-related pages
+        //   if (typeof window !== 'undefined' && 
+        //       !window.location.pathname.includes('/login') && 
+        //       !window.location.pathname.includes('/register')) {
+        //     // Clear auth state
+        //     try {
+        //       const useAuthStore = require('@/stores/auth-store').default;
+        //       useAuthStore.getState().clearAuth();
+        //     } catch (e) {
+        //       console.debug('Could not clear auth store');
+        //     }
             
-            // Redirect to login
-            setTimeout(() => {
-              window.location.href = '/login';
-            }, 1000);
-          }
-          break;
+        //     // Redirect to login
+        //     setTimeout(() => {
+        //       window.location.href = '/login';
+        //     }, 1000);
+        //   }
+        //   break;
 
         case 400:
           // Bad request
