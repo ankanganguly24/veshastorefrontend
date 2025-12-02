@@ -20,23 +20,6 @@ export const metadata = {
   authors: [{ name: 'Vesha' }],
   creator: 'Vesha',
   openGraph: {
-    type: 'website',
-    locale: 'en_IN',
-    url: 'https://myvesha.com',
-    title: 'Vesha | Premium Ethnic Wear for Women',
-    description: 'Discover the finest collection of Indian ethnic wear. Handcrafted sarees, kurtas, and lehengas.',
-    siteName: 'Vesha',
-    images: [
-      {
-        url: '/veshalogo.png',
-        width: 800,
-        height: 600,
-        alt: 'Vesha Logo',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
     title: 'Vesha | Premium Ethnic Wear',
     description: 'Discover the finest collection of Indian ethnic wear.',
     images: ['/veshalogo.png'],
@@ -51,6 +34,11 @@ export const metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
+  },
+  icons: {
+    icon: '/assessts/veshalogo.png',
+    shortcut: '/assessts/veshalogo.png',
+    apple: '/assessts/veshalogo.png',
   },
 };
 
