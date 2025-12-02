@@ -86,7 +86,7 @@ export default function StyleEditSection() {
               At Vesha, we believe in sustainable luxury that empowers your individuality.
             </p>
             <Button asChild className="bg-white text-black hover:bg-gray-100 px-8 py-6 text-lg rounded-full border-none">
-              <Link href="/about">Discover Our Story</Link>
+              <Link href="/our-story">Discover Our Story</Link>
             </Button>
           </div>
         </div>

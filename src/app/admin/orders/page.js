@@ -94,7 +94,7 @@ export default function AdminOrdersPage() {
         <Card className="p-4">
           <p className="text-sm text-gray-600">Total Revenue</p>
           <p className="text-2xl font-bold text-gray-900">
-            ₹{orders.reduce((sum, o) => sum + (o.total / 100), 0).toLocaleString()}
+            ₹{orders.reduce((sum, o) => sum + (o.total), 0).toLocaleString()}
           </p>
         </Card>
         <Card className="p-4">
@@ -199,7 +199,7 @@ export default function AdminOrdersPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-semibold text-gray-900">
-                      ₹{(order.total / 100).toLocaleString()}
+                      ₹{(order.total).toLocaleString()}
                     </p>
                     <p className="text-sm text-gray-600">
                       {order.items_count} item{order.items_count > 1 ? "s" : ""}
@@ -250,7 +250,7 @@ export default function AdminOrdersPage() {
                       ID: {order.payment.provider_payment_id}
                     </p>
                     <p className="text-xs text-gray-600">
-                      ₹{(order.payment.provider_amount / 100).toLocaleString()}
+                      ₹{(order.payment.provider_amount).toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -288,10 +288,10 @@ export default function AdminOrdersPage() {
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-gray-900 text-sm">
-                          ₹{(item.total_price_snapshot / 100).toLocaleString()}
+                          ₹{(item.total_price_snapshot).toLocaleString()}
                         </p>
                         <p className="text-xs text-gray-600">
-                          ₹{(item.price_snapshot / 100).toLocaleString()} each
+                          ₹{(item.price_snapshot).toLocaleString()} each
                         </p>
                       </div>
                     </div>
