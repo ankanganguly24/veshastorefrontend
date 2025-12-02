@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  metadataBase: new URL('https://vesha.in'),
+  metadataBase: new URL('https://myvesha.com'),
   title: {
     default: 'Vesha | Premium Ethnic Wear for Women',
     template: '%s | Vesha'
@@ -22,7 +22,7 @@ export const metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    url: 'https://vesha.in',
+    url: 'https://myvesha.com',
     title: 'Vesha | Premium Ethnic Wear for Women',
     description: 'Discover the finest collection of Indian ethnic wear. Handcrafted sarees, kurtas, and lehengas.',
     siteName: 'Vesha',
@@ -59,8 +59,8 @@ export default function RootLayout({ children }) {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Vesha',
-    url: 'https://vesha.in',
-    logo: 'https://vesha.in/veshalogo.png',
+    url: 'https://myvesha.com',
+    logo: 'https://myvesha.com/veshalogo.png',
     sameAs: [
       'https://facebook.com/vesha',
       'https://instagram.com/vesha',

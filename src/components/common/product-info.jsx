@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Star, Heart, Share2, Check, Minus, Plus, ShoppingBag, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import useAuthStore from "@/stores/auth-store";
+import useWishlistStore from "@/stores/wishlist-store";
+import ShareButton from "@/components/common/share-button";
 
 const ProductInfo = memo(({ product }) => {
   const [quantity, setQuantity] = useState(1);
@@ -17,6 +19,7 @@ const ProductInfo = memo(({ product }) => {
   const { toast } = useToast();
   const router = useRouter();
   const { isAuthenticated, user } = useAuthStore();
+  const { isInWishlist, toggleWishlist } = useWishlistStore();
 
   const {
     id: productId,
@@ -28,6 +31,8 @@ const ProductInfo = memo(({ product }) => {
     offers,
     variants = [],
   } = useMemo(() => product, [product]);
+
+  const isWishlisted = isInWishlist(productId);
 
   // Extract unique sizes and colors
   const { availableSizes, availableColors } = useMemo(() => {
@@ -104,10 +109,10 @@ const ProductInfo = memo(({ product }) => {
         quantity: quantity
       });
       toast.success(`${name} has been added to your cart.`);
-      setIsAddingToCart(false);
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast.error("Failed to add to cart");
+    } finally {
       setIsAddingToCart(false);
     }
   }, [selectedSize, selectedColor, quantity, productId, currentVariant, name, isAddingToCart, toast, isAuthenticated, user]);
@@ -115,6 +120,11 @@ const ProductInfo = memo(({ product }) => {
   const handleLoginRedirect = () => {
     setShowLoginModal(false);
     router.push("/login");
+  };
+
+  const handleWishlistToggle = () => {
+    const isAdded = toggleWishlist(product);
+    toast.success(isAdded ? "Added to wishlist" : "Removed from wishlist");
   };
 
   return (
@@ -125,11 +135,12 @@ const ProductInfo = memo(({ product }) => {
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-primary uppercase tracking-wider">{brand}</span>
             <div className="flex items-center gap-4">
-              <button className="text-gray-400 hover:text-gray-900 transition-colors">
-                <Share2 className="w-5 h-5" strokeWidth={1.5} />
-              </button>
-              <button className="text-gray-400 hover:text-red-500 transition-colors">
-                <Heart className="w-5 h-5" strokeWidth={1.5} />
+              <ShareButton title={name} text={`Check out ${name} on Vesha!`} />
+              <button 
+                onClick={handleWishlistToggle}
+                className={`transition-colors ${isWishlisted ? "text-red-500 hover:text-red-600" : "text-gray-400 hover:text-red-500"}`}
+              >
+                <Heart className={`w-5 h-5 ${isWishlisted ? "fill-current" : ""}`} strokeWidth={1.5} />
               </button>
             </div>
           </div>

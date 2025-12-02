@@ -1,39 +1,16 @@
 "use client";
 
-import { useState, useEffect, useMemo, memo } from "react";
+import { memo } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Check, Star, Shield, Truck, RefreshCw, Shirt, Sun, Wind, Droplets } from "lucide-react";
-import ReviewModal from "./review-modal";
+import { Check, Shield, Truck, RefreshCw, Shirt, Sun, Wind, Droplets } from "lucide-react";
 
 const ProductTabs = memo(({ description, washCare, features = [], productId, productName }) => {
-  const [reviews, setReviews] = useState([]);
-
-  useEffect(() => {
-    const loadReviews = () => {
-      const allReviews = JSON.parse(localStorage.getItem('productReviews') || '[]');
-      setReviews(allReviews.filter(review => review.productId === productId));
-    };
-    loadReviews();
-    window.addEventListener('storage', loadReviews);
-    return () => window.removeEventListener('storage', loadReviews);
-  }, [productId]);
-
-  const reviewStats = useMemo(() => {
-    if (!reviews.length) return { averageRating: 0, totalReviews: 0, distribution: {} };
-    const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
-    const dist = {};
-    [5, 4, 3, 2, 1].forEach(r => dist[r] = reviews.filter(rev => rev.rating === r).length);
-    return { averageRating: parseFloat(avg.toFixed(1)), totalReviews: reviews.length, distribution: dist };
-  }, [reviews]);
-
   return (
     <div className="mt-16">
       <Tabs defaultValue="description" className="w-full">
         <div className="border-b border-gray-100 mb-8">
           <TabsList className="flex w-full justify-start gap-8 bg-transparent p-0 h-auto">
-            {['Description', 'Features', 'Care', `Reviews (${reviewStats.totalReviews})`].map((tab) => {
+            {['Description', 'Features', 'Care'].map((tab) => {
               const value = tab.split(' ')[0].toLowerCase();
               return (
                 <TabsTrigger
@@ -130,56 +107,6 @@ const ProductTabs = memo(({ description, washCare, features = [], productId, pro
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="reviews" className="animate-in fade-in-50 duration-500">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            {/* Summary */}
-            <div className="space-y-6">
-              <div className="bg-gray-50 p-6 rounded-sm text-center">
-                <div className="text-5xl font-light text-gray-900 mb-2">{reviewStats.averageRating}</div>
-                <div className="flex justify-center gap-1 mb-2">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className={`w-4 h-4 ${i < Math.round(reviewStats.averageRating) ? "fill-gray-900 text-gray-900" : "text-gray-300"}`} />
-                  ))}
-                </div>
-                <p className="text-sm text-gray-500">{reviewStats.totalReviews} Reviews</p>
-              </div>
-              
-              <ReviewModal productId={productId} productName={productName}>
-                <Button className="w-full bg-gray-900 text-white hover:bg-gray-800 rounded-sm h-12">
-                  Write a Review
-                </Button>
-              </ReviewModal>
-            </div>
-
-            {/* List */}
-            <div className="lg:col-span-2 space-y-8">
-              {reviews.length > 0 ? reviews.map((review) => (
-                <div key={review.id} className="border-b border-gray-100 pb-8 last:border-0">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h4 className="font-medium text-gray-900">{review.title}</h4>
-                      <div className="flex items-center gap-2 mt-1">
-                        <div className="flex gap-0.5">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-3 h-3 ${i < review.rating ? "fill-gray-900 text-gray-900" : "text-gray-200"}`} />
-                          ))}
-                        </div>
-                        <span className="text-xs text-gray-400">• {new Date(review.date).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                    <span className="text-sm text-gray-500">{review.reviewerName}</span>
-                  </div>
-                  <p className="text-gray-600 text-sm leading-relaxed">{review.comment}</p>
-                </div>
-              )) : (
-                <div className="text-center py-12 text-gray-500">
-                  No reviews yet. Be the first to share your thoughts!
-                </div>
-              )}
             </div>
           </div>
         </TabsContent>
