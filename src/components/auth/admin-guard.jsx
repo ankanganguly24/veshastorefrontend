@@ -20,7 +20,7 @@ export default function AdminGuard({ children }) {
       if (!isAuthenticated || !user) {
         // Not authenticated - redirect to login
         router.push("/login");
-      } else if (user.email !== "Admin@example.com") {
+      } else if (user.email !== "admin@example.com") {
         // Authenticated but not admin - redirect to home
         router.push("/");
       }
@@ -42,7 +42,7 @@ export default function AdminGuard({ children }) {
   }
 
   // Check if user is admin
-  if (user.email !== "Admin@example.com") {
+  if (user.email !== "admin@example.com") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex items-center gap-3 text-gray-600">
