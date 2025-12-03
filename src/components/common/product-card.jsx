@@ -50,7 +50,7 @@ const OptimizedImage = memo(({ src, alt, className, currentIndex, isActive }) =>
         priority={currentIndex === 0} // Prioritize first image
         loading={currentIndex === 0 ? "eager" : "lazy"}
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        quality={85}
+        quality={80}
       />
     </>
   );
@@ -145,7 +145,7 @@ const ProductCard = memo(({ product, className = "" }) => {
   }, [id, router]);
 
   return (
-    <div 
+    <div
       className={`group relative bg-white cursor-pointer ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -162,7 +162,7 @@ const ProductCard = memo(({ product, className = "" }) => {
                 currentIndex={currentImageIndex}
                 isActive={true}
               />
-              
+
               {/* Navigation Arrows */}
               {hasMultipleImages && isHovered && (
                 <>
@@ -189,11 +189,10 @@ const ProductCard = memo(({ product, className = "" }) => {
                   {productImages.map((_, index) => (
                     <button
                       key={index}
-                      className={`h-1.5 rounded-full transition-all duration-300 ${
-                        index === currentImageIndex 
-                          ? 'bg-white w-4' 
-                          : 'bg-white/50 w-1.5 hover:bg-white/80'
-                      }`}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${index === currentImageIndex
+                        ? 'bg-white w-4'
+                        : 'bg-white/50 w-1.5 hover:bg-white/80'
+                        }`}
                       onClick={(e) => goToImage(index, e)}
                       onMouseDown={(e) => e.stopPropagation()}
                     />
@@ -207,7 +206,7 @@ const ProductCard = memo(({ product, className = "" }) => {
             </div>
           )}
         </div>
-        
+
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {discount && (
@@ -235,7 +234,7 @@ const ProductCard = memo(({ product, className = "" }) => {
 
         {/* Quick Add Button - Appears on Hover */}
         <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-          <Button 
+          <Button
             className="w-full bg-white text-gray-900 hover:bg-gray-900 hover:text-white border border-gray-200 shadow-sm transition-colors"
             onClick={(e) => {
               e.stopPropagation();
@@ -246,12 +245,12 @@ const ProductCard = memo(({ product, className = "" }) => {
           </Button>
         </div>
       </div>
-      
+
       <div className="space-y-1">
         <h3 className="text-sm font-medium text-gray-900 line-clamp-1 group-hover:text-primary transition-colors">
           {name}
         </h3>
-        
+
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-gray-900">
             ₹{price?.toLocaleString()}

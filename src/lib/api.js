@@ -32,14 +32,14 @@ api.interceptors.request.use(
   (config) => {
     // Ensure credentials are included with every request
     config.withCredentials = true;
-    
+
     // Try to get token from Zustand store (lazy import to avoid circular dependencies)
     if (typeof window !== 'undefined') {
       try {
         // Dynamic import to avoid issues during SSR
         const useAuthStore = require('@/stores/auth-store').default;
         const token = useAuthStore.getState().getToken();
-        
+
         if (token) {
           config.headers['Authorization'] = token;
         }
@@ -48,11 +48,11 @@ api.interceptors.request.use(
         console.debug('Auth store not available during request');
       }
     }
-    
+
     // Log request details in development
     if (process.env.NODE_ENV !== 'production') {
       console.debug(`API ${config.method?.toUpperCase() || 'REQUEST'} to: ${config.url}`);
-      
+
       // Log if cookies exist
       if (typeof document !== 'undefined') {
         const cookies = document.cookie;
@@ -61,7 +61,7 @@ api.interceptors.request.use(
         }
       }
     }
-    
+
     return config;
   },
   (error) => {
@@ -82,7 +82,7 @@ api.interceptors.response.use(
     if (response.config.url?.includes('/auth/login') && response.status === 200) {
       console.debug('Login successful with auth cookie set');
     }
-    
+
     // Log successful responses in development
     if (process.env.NODE_ENV !== 'production') {
       console.debug('API Response:', {
@@ -91,7 +91,7 @@ api.interceptors.response.use(
         data: response.data,
       });
     }
-    
+
     return response;
   },
   (error) => {
@@ -103,13 +103,18 @@ api.interceptors.response.use(
       const status = response.status;
       const message = response.data?.message;
 
-      // Log error in development
+      // Log error in development (skip 401 on cart endpoints - expected when not logged in)
       if (process.env.NODE_ENV !== 'production') {
-        console.error('API Error Response:', {
-          url: error.config?.url,
-          status: status,
-          data: response.data,
-        });
+        const isCartEndpoint = error.config?.url?.includes('/cart');
+        const is401 = status === 401;
+
+        if (!(isCartEndpoint && is401)) {
+          console.error('API Error Response:', {
+            url: error.config?.url,
+            status: status,
+            data: response.data,
+          });
+        }
       }
 
       // Handle specific status codes
@@ -118,7 +123,7 @@ api.interceptors.response.use(
         //   // Unauthorized - authentication failed
         //   console.error('401 Unauthorized - Cookie might not be sent properly');
         //   toast.error('Authentication failed. Please log in again.');
-          
+
         //   // Only redirect if not already on login-related pages
         //   if (typeof window !== 'undefined' && 
         //       !window.location.pathname.includes('/login') && 
@@ -130,7 +135,7 @@ api.interceptors.response.use(
         //     } catch (e) {
         //       console.debug('Could not clear auth store');
         //     }
-            
+
         //     // Redirect to login
         //     setTimeout(() => {
         //       window.location.href = '/login';

@@ -14,6 +14,11 @@ const CartService = {
       const response = await api.get("/cart");
       return response.data;
     } catch (error) {
+      // Handle 401 errors gracefully (user not authenticated)
+      if (error.response?.status === 401) {
+        // Return null for unauthenticated users instead of throwing
+        return null;
+      }
       console.error("Error fetching cart:", error);
       throw new Error(handleApiError(error, "Failed to fetch cart"));
     }
@@ -112,10 +117,16 @@ const CartService = {
   async getCartSummary() {
     try {
       const cartData = await this.getCart();
+
+      // If cart is null (user not authenticated), return empty cart
+      if (!cartData) {
+        return { itemCount: 0, total: 0, items: [] };
+      }
+
       // Handle different response structures
       const cart = cartData?.data?.cart || cartData?.data?.data?.cart || cartData?.cart;
       const items = cart?.items || [];
-      
+
       const itemCount = items.reduce((count, item) => count + (item.quantity || 0), 0);
       const total = items.reduce((sum, item) => {
         const price = item.price_snapshot || item.price || 0;
