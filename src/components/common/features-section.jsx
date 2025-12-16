@@ -14,7 +14,7 @@ export default function FeaturesSection() {
     },
     { 
       icon: RotateCcw, 
-      title: "Easy Returns", 
+      title: "Delivery Days", 
       description: "7-14 days business delivery"
     },
     { 
