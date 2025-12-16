@@ -6,10 +6,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-import header1 from "../../../public/assessts/header1.jpeg";
-import header2 from "../../../public/assessts/header2.jpeg";
-import header3 from "../../../public/assessts/header3.jpeg";
-import header4 from "../../../public/assessts/header4.jpeg";
+import header1 from "../../../public/assessts/header1.png";
+import header2 from "../../../public/assessts/header2.png";
+import header3 from "../../../public/assessts/header3.png";
+import header4 from "../../../public/assessts/header4.png";
 
 const banners = [header1, header2, header3, header4];
 
@@ -40,7 +40,7 @@ export default function HeroCarousel() {
 
   return (
     <section
-      className="relative w-full h-[30vh] sm:h-[40vh] md:h-[70vh] lg:h-[80vh] overflow-hidden"
+      className="relative w-full aspect-video max-h-[60vh] lg:max-h-[calc(100vh-80px)] overflow-hidden bg-black"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -60,7 +60,7 @@ export default function HeroCarousel() {
                 src={image}
                 alt={`Banner ${index + 1}`}
                 fill
-                className="object-contain"
+                className="object-cover object-top"
                 priority={index === 0}
                 quality={100}
                 unoptimized
