@@ -93,7 +93,7 @@ export default function ProductPage({ params }) {
           offers: [
             "Get 10% instant discount on all bank cards",
             "Free shipping on orders above ₹499",
-            "Easy 7-day return and exchange",
+            "7-14 days business delivery",
             "Cash on Delivery available"
           ],
           features: [

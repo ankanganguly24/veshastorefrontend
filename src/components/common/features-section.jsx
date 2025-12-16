@@ -15,7 +15,7 @@ export default function FeaturesSection() {
     { 
       icon: RotateCcw, 
       title: "Easy Returns", 
-      description: "7 days return policy"
+      description: "7-14 days business delivery"
     },
     { 
       icon: Award, 
