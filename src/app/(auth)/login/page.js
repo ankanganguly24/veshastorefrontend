@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import Link from "next/link";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import apiClient from "@/lib/api-client";
+import { useLogin } from "@/hooks/auth/use-auth";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,59 +28,74 @@ import {
   TabsContent,
 } from "@/components/ui/tabs";
 
-import { useLogin } from "@/hooks/auth/use-auth";
+/* ---------------- Schemas ---------------- */
 
-/* ---------------- Existing Password Schema (UNCHANGED) ---------------- */
-
-const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+const passwordSchema = z.object({
+  email: z.string().email("Enter a valid email"),
+  password: z.string().min(6, "Minimum 6 characters"),
   rememberMe: z.boolean().optional(),
 });
 
-/* ---------------- OTP Schemas (NEW) ---------------- */
-
 const otpEmailSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
+  email: z.string().email("Enter a valid email"),
 });
 
 const otpVerifySchema = z.object({
   otp: z.string().length(6, "OTP must be 6 digits"),
 });
 
-export default function Login() {
-  /* ---------------- Existing State (UNCHANGED) ---------------- */
+/* ---------------- Constants ---------------- */
 
-  const [showPassword, setShowPassword] = useState(false);
+const OTP_RESEND_TIME = 300; // 5 minutes
+
+/* ---------------- Spinner ---------------- */
+
+function Spinner() {
+  return (
+    <svg
+      className="h-5 w-5 animate-spin"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      />
+    </svg>
+  );
+}
+
+/* ---------------- Component ---------------- */
+
+export default function LoginPage() {
   const loginMutation = useLogin();
 
-  /* ---------------- OTP State (NEW) ---------------- */
-
+  const [showPassword, setShowPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpEmail, setOtpEmail] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
 
-  /* ---------------- Existing Password Form (UNCHANGED) ---------------- */
+  /* ---------- Forms ---------- */
 
-  const form = useForm({
-    resolver: zodResolver(loginSchema),
+  const passwordForm = useForm({
+    resolver: zodResolver(passwordSchema),
     defaultValues: {
       email: "",
       password: "",
       rememberMe: false,
     },
   });
-
-  const onSubmit = async (data) => {
-    console.log("Login attempt with:", data.email);
-
-    loginMutation.mutate({
-      email: data.email,
-      password: data.password,
-    });
-  };
-
-  /* ---------------- OTP Forms (NEW) ---------------- */
 
   const otpEmailForm = useForm({
     resolver: zodResolver(otpEmailSchema),
@@ -89,63 +107,109 @@ export default function Login() {
     defaultValues: { otp: "" },
   });
 
+  /* ---------- Password Login ---------- */
+
+  const handlePasswordLogin = (data) => {
+    loginMutation.mutate({
+      email: data.email,
+      password: data.password,
+      is_remember: data.rememberMe || false,
+      method: "PASSWORD",
+      type: "LOGIN",
+      channel: "EMAIL",
+    });
+  };
+
+  /* ---------- Send OTP ---------- */
+
   const handleSendOtp = async (data) => {
-    setOtpEmail(data.email);
-    setOtpSent(true);
-    setResendTimer(30);
+    try {
+      setSendingOtp(true);
 
-    // 👉 Call send OTP API here
-    // await sendOtp(data.email)
+      await apiClient.post("/auth/send-otp", {
+        email: data.email,
+        type: "LOGIN",
+        channel: "EMAIL",
+      });
+
+      setOtpEmail(data.email);
+      setOtpSent(true);
+      setResendTimer(OTP_RESEND_TIME);
+    } catch (err) {
+      console.error("Send OTP failed", err);
+    } finally {
+      setSendingOtp(false);
+    }
   };
 
-  const handleVerifyOtp = async (data) => {
-    console.log("Verify OTP:", otpEmail, data.otp);
+  /* ---------- Verify OTP ---------- */
 
-    // 👉 Call verify OTP API here
-    // await verifyOtp({ email: otpEmail, otp: data.otp })
+  const handleVerifyOtp = (data) => {
+    setVerifyingOtp(true);
+
+    loginMutation.mutate(
+      {
+        email: otpEmail,
+        otp: data.otp,
+        method: "OTP",
+        type: "LOGIN",
+        channel: "EMAIL",
+      },
+      {
+        onSettled: () => setVerifyingOtp(false),
+      }
+    );
   };
 
-  /* ---------------- OTP Resend Timer ---------------- */
+  /* ---------- Resend Timer ---------- */
 
   useEffect(() => {
-    if (resendTimer === 0) return;
-    const interval = setInterval(() => {
-      setResendTimer((prev) => prev - 1);
+    if (resendTimer <= 0) return;
+
+    const timer = setInterval(() => {
+      setResendTimer((t) => t - 1);
     }, 1000);
-    return () => clearInterval(interval);
+
+    return () => clearInterval(timer);
   }, [resendTimer]);
+
+  /* ---------------- UI ---------------- */
 
   return (
     <div className="space-y-6">
-      {/* Error Alert (UNCHANGED) */}
+
+      {/* Error */}
       {loginMutation.isError && (
         <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
-          <p className="font-medium">Login Failed</p>
+          <p className="font-medium">Login failed</p>
           <p className="text-sm mt-1">
-            {loginMutation.error?.response?.data?.message ||
-              loginMutation.error?.message ||
-              "Invalid email or password. Please try again."}
+            {loginMutation.error?.message || "Something went wrong"}
           </p>
         </div>
       )}
 
-      {/* ---------------- Tabs (NEW) ---------------- */}
       <Tabs defaultValue="password" className="space-y-6">
+
         <TabsList className="grid grid-cols-2">
           <TabsTrigger value="password">Password</TabsTrigger>
           <TabsTrigger value="otp">OTP</TabsTrigger>
         </TabsList>
 
-        {/* ================= PASSWORD LOGIN (UNCHANGED JSX) ================= */}
+        {/* ================= PASSWORD ================= */}
+
         <TabsContent value="password">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+          <Form {...passwordForm}>
+            <form
+              onSubmit={passwordForm.handleSubmit(handlePasswordLogin)}
+              className="space-y-5"
+            >
+
               <FormField
-                control={form.control}
+                control={passwordForm.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email Address</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Mail className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
@@ -158,7 +222,7 @@ export default function Login() {
               />
 
               <FormField
-                control={form.control}
+                control={passwordForm.control}
                 name="password"
                 render={({ field }) => (
                   <FormItem>
@@ -189,22 +253,19 @@ export default function Login() {
 
               <div className="flex items-center justify-between">
                 <FormField
-                  control={form.control}
+                  control={passwordForm.control}
                   name="rememberMe"
                   render={({ field }) => (
                     <div className="flex items-center space-x-2">
                       <Checkbox
-                        checked={field.value || false}
+                        checked={field.value}
                         onCheckedChange={field.onChange}
                       />
                       <span className="text-sm">Remember me</span>
                     </div>
                   )}
                 />
-                <Link
-                  href="/forgetpassword"
-                  className="text-sm text-primary"
-                >
+                <Link href="/forgetpassword" className="text-sm text-primary">
                   Forgot password?
                 </Link>
               </div>
@@ -216,11 +277,13 @@ export default function Login() {
               >
                 {loginMutation.isPending ? "Signing in..." : "Sign In"}
               </Button>
+
             </form>
           </Form>
         </TabsContent>
 
-        {/* ================= OTP LOGIN (NEW) ================= */}
+        {/* ================= OTP ================= */}
+
         <TabsContent value="otp">
           {!otpSent ? (
             <Form {...otpEmailForm}>
@@ -228,12 +291,13 @@ export default function Login() {
                 onSubmit={otpEmailForm.handleSubmit(handleSendOtp)}
                 className="space-y-5"
               >
+
                 <FormField
                   control={otpEmailForm.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email Address</FormLabel>
+                      <FormLabel>Email</FormLabel>
                       <FormControl>
                         <Input {...field} className="h-12" />
                       </FormControl>
@@ -242,9 +306,14 @@ export default function Login() {
                   )}
                 />
 
-                <Button type="submit" className="w-full h-12">
-                  Send OTP
+                <Button
+                  className="w-full h-12 flex items-center justify-center gap-2"
+                  disabled={sendingOtp}
+                >
+                  {sendingOtp && <Spinner />}
+                  {sendingOtp ? "Sending OTP..." : "Send OTP"}
                 </Button>
+
               </form>
             </Form>
           ) : (
@@ -253,6 +322,7 @@ export default function Login() {
                 onSubmit={otpVerifyForm.handleSubmit(handleVerifyOtp)}
                 className="space-y-5"
               >
+
                 <p className="text-sm text-muted-foreground">
                   OTP sent to <strong>{otpEmail}</strong>
                 </p>
@@ -262,37 +332,50 @@ export default function Login() {
                   name="otp"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Enter OTP</FormLabel>
+                      <FormLabel>OTP</FormLabel>
                       <FormControl>
-                        <Input {...field} maxLength={6} className="h-12" />
+                        <Input
+                          {...field}
+                          maxLength={6}
+                          inputMode="numeric"
+                          autoComplete="one-time-code"
+                          className="h-12 text-center tracking-widest"
+                          disabled={verifyingOtp}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <Button type="submit" className="w-full h-12">
-                  Verify & Sign In
+                <Button
+                  className="w-full h-12 flex items-center justify-center gap-2"
+                  disabled={verifyingOtp || loginMutation.isPending}
+                >
+                  {(verifyingOtp || loginMutation.isPending) && <Spinner />}
+                  {verifyingOtp || loginMutation.isPending
+                    ? "Verifying..."
+                    : "Verify & Sign In"}
                 </Button>
 
                 <Button
                   type="button"
                   variant="link"
                   disabled={resendTimer > 0}
-                  onClick={() => setResendTimer(30)}
+                  onClick={() => handleSendOtp({ email: otpEmail })}
                   className="w-full"
                 >
                   {resendTimer > 0
                     ? `Resend OTP in ${resendTimer}s`
                     : "Resend OTP"}
                 </Button>
+
               </form>
             </Form>
           )}
         </TabsContent>
       </Tabs>
 
-      {/* Register */}
       <Button variant="outline" className="w-full h-12" asChild>
         <Link href="/register">Create New Account</Link>
       </Button>
