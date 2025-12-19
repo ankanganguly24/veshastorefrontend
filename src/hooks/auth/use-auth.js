@@ -74,7 +74,7 @@ export const useRegister = () => {
     },
     onSuccess: (data) => {
       success('Account created successfully! Please login to continue.');
-      router.push('/login');
+      router.push('/');
     },
     onError: (err) => {
       console.error('Register error:', err);
