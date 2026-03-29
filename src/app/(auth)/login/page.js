@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import apiClient from "@/lib/api-client";
+import { useLogin } from "@/hooks/auth/use-auth";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -17,20 +21,75 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useLogin } from "@/hooks/auth/use-auth";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/components/ui/tabs";
 
-const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+/* ---------------- Schemas ---------------- */
+
+const passwordSchema = z.object({
+  email: z.string().email("Enter a valid email"),
+  password: z.string().min(6, "Minimum 6 characters"),
   rememberMe: z.boolean().optional(),
 });
 
-export default function Login() {
-  const [showPassword, setShowPassword] = useState(false);
+const otpEmailSchema = z.object({
+  email: z.string().email("Enter a valid email"),
+});
+
+const otpVerifySchema = z.object({
+  otp: z.string().length(6, "OTP must be 6 digits"),
+});
+
+/* ---------------- Constants ---------------- */
+
+const OTP_RESEND_TIME = 300; // 5 minutes
+
+/* ---------------- Spinner ---------------- */
+
+function Spinner() {
+  return (
+    <svg
+      className="h-5 w-5 animate-spin"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      />
+    </svg>
+  );
+}
+
+/* ---------------- Component ---------------- */
+
+export default function LoginPage() {
   const loginMutation = useLogin();
 
-  const form = useForm({
-    resolver: zodResolver(loginSchema),
+  const [showPassword, setShowPassword] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpEmail, setOtpEmail] = useState("");
+  const [resendTimer, setResendTimer] = useState(0);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+
+  /* ---------- Forms ---------- */
+
+  const passwordForm = useForm({
+    resolver: zodResolver(passwordSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -38,177 +97,285 @@ export default function Login() {
     },
   });
 
-  const onSubmit = async (data) => {
-    // Track the attempt for debugging
-    console.log("Login attempt with:", data.email);
+  const otpEmailForm = useForm({
+    resolver: zodResolver(otpEmailSchema),
+    defaultValues: { email: "" },
+  });
 
-    // Add withCredentials option to ensure cookies are included
+  const otpVerifyForm = useForm({
+    resolver: zodResolver(otpVerifySchema),
+    defaultValues: { otp: "" },
+  });
+
+  /* ---------- Password Login ---------- */
+
+  const handlePasswordLogin = (data) => {
     loginMutation.mutate({
       email: data.email,
       password: data.password,
+      is_remember: data.rememberMe || false,
+      method: "PASSWORD",
+      type: "LOGIN",
+      channel: "EMAIL",
     });
   };
 
+  /* ---------- Send OTP ---------- */
+
+  const handleSendOtp = async (data) => {
+    try {
+      setSendingOtp(true);
+
+      await apiClient.post("/auth/send-otp", {
+        email: data.email,
+        type: "LOGIN",
+        channel: "EMAIL",
+      });
+
+      setOtpEmail(data.email);
+      setOtpSent(true);
+      setResendTimer(OTP_RESEND_TIME);
+    } catch (err) {
+      console.error("Send OTP failed", err);
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  /* ---------- Verify OTP ---------- */
+
+  const handleVerifyOtp = (data) => {
+    setVerifyingOtp(true);
+
+    loginMutation.mutate(
+      {
+        email: otpEmail,
+        otp: data.otp,
+        method: "OTP",
+        type: "LOGIN",
+        channel: "EMAIL",
+      },
+      {
+        onSettled: () => setVerifyingOtp(false),
+      }
+    );
+  };
+
+  /* ---------- Resend Timer ---------- */
+
+  useEffect(() => {
+    if (resendTimer <= 0) return;
+
+    const timer = setInterval(() => {
+      setResendTimer((t) => t - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [resendTimer]);
+
+  /* ---------------- UI ---------------- */
+
   return (
     <div className="space-y-6">
-      {/* Error Alert */}
+
+      {/* Error */}
       {loginMutation.isError && (
         <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
-          <p className="font-medium">Login Failed</p>
+          <p className="font-medium">Login failed</p>
           <p className="text-sm mt-1">
-            {loginMutation.error?.response?.data?.message || 
-             loginMutation.error?.message || 
-             'Invalid email or password. Please try again.'}
+            {loginMutation.error?.message || "Something went wrong"}
           </p>
         </div>
       )}
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-          {/* Email Field */}
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-foreground">
-                  Email Address
-                </FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <Input
-                      {...field}
-                      type="email"
-                      placeholder="Enter your email"
-                      className="pl-10 h-12"
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <Tabs defaultValue="password" className="space-y-6">
 
-          {/* Password Field */}
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-foreground">Password</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <Input
-                      {...field}
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
-                      className="pl-10 pr-12 h-12"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center h-12 w-12"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </Button>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <TabsList className="grid grid-cols-2">
+          <TabsTrigger value="password">Password</TabsTrigger>
+          <TabsTrigger value="otp">OTP</TabsTrigger>
+        </TabsList>
 
-          {/* Remember Me & Forgot Password */}
-          <div className="flex items-center justify-between">
-            <FormField
-              control={form.control}
-              name="rememberMe"
-              render={({ field }) => (
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="rememberMe"
-                    checked={field.value || false}
-                    onCheckedChange={field.onChange}
-                  />
-                  <label
-                    htmlFor="rememberMe"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Remember me
-                  </label>
-                </div>
-              )}
-            />
-            <Link
-              href="/forgetpassword"
-              className="text-sm text-primary hover:text-primary/80 font-medium"
+        {/* ================= PASSWORD ================= */}
+
+        <TabsContent value="password">
+          <Form {...passwordForm}>
+            <form
+              onSubmit={passwordForm.handleSubmit(handlePasswordLogin)}
+              className="space-y-5"
             >
-              Forgot password?
-            </Link>
-          </div>
 
-          {/* Submit Button */}
-          <Button
-            type="submit"
-            disabled={loginMutation.isPending}
-            className="w-full h-12 bg-primary hover:bg-primary/90 text-white"
-          >
-            {loginMutation.isPending ? (
-              <div className="flex items-center">
-                <svg
-                  className="animate-spin -ml-1 mr-3 h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Signing in...
+              <FormField
+                control={passwordForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
+                        <Input {...field} className="pl-10 h-12" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={passwordForm.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          {...field}
+                          type={showPassword ? "text" : "password"}
+                          className="pl-10 pr-12 h-12"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-2 top-2"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff /> : <Eye />}
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex items-center justify-between">
+                <FormField
+                  control={passwordForm.control}
+                  name="rememberMe"
+                  render={({ field }) => (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                      <span className="text-sm">Remember me</span>
+                    </div>
+                  )}
+                />
+                <Link href="/forgetpassword" className="text-sm text-primary">
+                  Forgot password?
+                </Link>
               </div>
-            ) : (
-              "Sign In"
-            )}
-          </Button>
-        </form>
-      </Form>
 
-      {/* Divider */}
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border" />
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-card text-muted-foreground">
-            Don&apos;t have an account?
-          </span>
-        </div>
-      </div>
+              <Button
+                type="submit"
+                disabled={loginMutation.isPending}
+                className="w-full h-12"
+              >
+                {loginMutation.isPending ? "Signing in..." : "Sign In"}
+              </Button>
 
-      {/* Register Link */}
+            </form>
+          </Form>
+        </TabsContent>
+
+        {/* ================= OTP ================= */}
+
+        <TabsContent value="otp">
+          {!otpSent ? (
+            <Form {...otpEmailForm}>
+              <form
+                onSubmit={otpEmailForm.handleSubmit(handleSendOtp)}
+                className="space-y-5"
+              >
+
+                <FormField
+                  control={otpEmailForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="h-12" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  className="w-full h-12 flex items-center justify-center gap-2"
+                  disabled={sendingOtp}
+                >
+                  {sendingOtp && <Spinner />}
+                  {sendingOtp ? "Sending OTP..." : "Send OTP"}
+                </Button>
+
+              </form>
+            </Form>
+          ) : (
+            <Form {...otpVerifyForm}>
+              <form
+                onSubmit={otpVerifyForm.handleSubmit(handleVerifyOtp)}
+                className="space-y-5"
+              >
+
+                <p className="text-sm text-muted-foreground">
+                  OTP sent to <strong>{otpEmail}</strong>
+                </p>
+
+                <FormField
+                  control={otpVerifyForm.control}
+                  name="otp"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>OTP</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          maxLength={6}
+                          inputMode="numeric"
+                          autoComplete="one-time-code"
+                          className="h-12 text-center tracking-widest"
+                          disabled={verifyingOtp}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  className="w-full h-12 flex items-center justify-center gap-2"
+                  disabled={verifyingOtp || loginMutation.isPending}
+                >
+                  {(verifyingOtp || loginMutation.isPending) && <Spinner />}
+                  {verifyingOtp || loginMutation.isPending
+                    ? "Verifying..."
+                    : "Verify & Sign In"}
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="link"
+                  disabled={resendTimer > 0}
+                  onClick={() => handleSendOtp({ email: otpEmail })}
+                  className="w-full"
+                >
+                  {resendTimer > 0
+                    ? `Resend OTP in ${resendTimer}s`
+                    : "Resend OTP"}
+                </Button>
+
+              </form>
+            </Form>
+          )}
+        </TabsContent>
+      </Tabs>
+
       <Button variant="outline" className="w-full h-12" asChild>
         <Link href="/register">Create New Account</Link>
       </Button>
